@@ -1,7 +1,8 @@
+import { parseMarketSearchParams } from "@/application/sportsbook/market-query";
+import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { CategoryTabs } from "@/components/sportsbook/category-tabs";
 import { MarketGroup } from "@/components/sportsbook/market-group";
-import { parseMarketSearchParams } from "@/application/sportsbook/market-query";
-import { demoMarketRepository } from "@/fixtures/sportsbook/repositories";
+import { listSeasonMarkets } from "@/data/supabase/markets/market-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -10,31 +11,33 @@ interface MarketsPageProps {
 }
 
 export default async function MarketsPage({ searchParams }: MarketsPageProps) {
-  const filters = parseMarketSearchParams((await searchParams) ?? {});
-  const markets = await demoMarketRepository.listMarkets(filters);
+  const rawParams = (await searchParams) ?? {};
+  const filters = parseMarketSearchParams(rawParams);
+  const season = await requireSportsbookSeason(
+    typeof rawParams.season === "string" ? rawParams.season : null,
+  );
+  const markets = await listSeasonMarkets(season.id, filters);
 
   return (
     <div className="space-y-5">
       <header>
         <p className="text-xs font-black tracking-[0.14em] text-[var(--brand)] uppercase">
-          Marchés
+          Marchés réels
         </p>
         <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
           Tableau des cotes
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-          Données de démonstration. Le placement réel sera activé dans une étape
-          future.
+          Cotes officielles de {season.title}. Chaque confirmation crée d’abord
+          un devis autoritaire de 60 secondes.
         </p>
       </header>
-
       <CategoryTabs
         activeCategory={filters.category}
         q={filters.q}
         sort={filters.sort}
         status={filters.status}
       />
-
       <form
         action="/markets"
         className="grid gap-3 rounded-lg border border-[var(--border)] bg-white p-4 md:grid-cols-4"
@@ -46,7 +49,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
             className="mt-1 min-h-11 w-full rounded-md border border-[var(--border)] px-3"
             defaultValue={filters.q}
             name="q"
-            placeholder="bisou, statut, canapé..."
+            placeholder="bisou, statut..."
           />
         </label>
         <label className="text-sm font-bold">
@@ -69,10 +72,10 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
             defaultValue={filters.sort}
             name="sort"
           >
-            <option value="popular">Popularité</option>
+            <option value="popular">Par défaut</option>
             <option value="deadline">Échéance</option>
             <option value="odds">Cote</option>
-            <option value="movement">Mouvement</option>
+            <option value="movement">Version</option>
           </select>
         </label>
         <button
@@ -82,8 +85,11 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
           Filtrer
         </button>
       </form>
-
-      <MarketGroup markets={markets} title="Cotes disponibles" />
+      <MarketGroup
+        emptyDescription="Aucun marché ouvert. Le comité doit encore publier les premières cotes."
+        markets={markets}
+        title="Cotes disponibles"
+      />
     </div>
   );
 }

@@ -1,19 +1,14 @@
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 
 export const dynamic = "force-dynamic";
 
-const sections = [
-  "Saison",
-  "Membres",
-  "Invitations",
-  "Marchés",
-  "Lives",
-  "Actions à vérifier",
-  "Résultats",
-  "Audit",
-];
-
-export default function AdminPage() {
+export default async function AdminPage() {
+  const season = await requireSportsbookSeason();
+  if (!season.roles.includes("ADMIN") && !season.roles.includes("LIVE_HOST"))
+    notFound();
   return (
     <div className="space-y-5">
       <header>
@@ -21,28 +16,31 @@ export default function AdminPage() {
           Administration
         </p>
         <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
-          Console visuelle
+          Console MK Bet
         </h1>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
-          Les contrôles métier restent protégés par RLS/RPC. Cette étape ne crée
-          aucune mutation admin de marchés, lives ou résultats.
+          Les contrôles restent autorisés par les RPC PostgreSQL, indépendamment
+          de cette interface.
         </p>
       </header>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {sections.map((section) => (
-          <article
-            className="rounded-lg border border-[var(--border)] bg-white p-5"
-            key={section}
+      <div className="grid gap-4 md:grid-cols-2">
+        {season.roles.includes("ADMIN") ? (
+          <Link
+            className="rounded-lg border border-[var(--border)] bg-white p-5 hover:border-[var(--brand)]"
+            href="/admin/markets"
           >
-            <h2 className="text-xl font-black">{section}</h2>
+            <h2 className="text-xl font-black">Marchés</h2>
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              Bientôt disponible.
+              Créer depuis les templates, suspendre, rouvrir ou fermer.
             </p>
-            <Button className="mt-4" disabled type="button">
-              ACTION DÉSACTIVÉE
-            </Button>
-          </article>
-        ))}
+          </Link>
+        ) : null}
+        <article className="rounded-lg border border-[var(--border)] bg-white p-5">
+          <h2 className="text-xl font-black">Lives et résultats</h2>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Disponibles dans une étape future.
+          </p>
+        </article>
       </div>
     </div>
   );

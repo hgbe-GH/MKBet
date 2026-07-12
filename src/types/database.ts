@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accumulator_correlation_rules: {
+        Row: {
+          code: string;
+          correlation_adjustment: number;
+          created_at: string;
+          description: string;
+          event_codes: string[];
+          id: string;
+          is_active: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          code: string;
+          correlation_adjustment: number;
+          created_at?: string;
+          description: string;
+          event_codes: string[];
+          id?: string;
+          is_active?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          code?: string;
+          correlation_adjustment?: number;
+          created_at?: string;
+          description?: string;
+          event_codes?: string[];
+          id?: string;
+          is_active?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       action_confirmations: {
         Row: {
           action_id: string;
@@ -417,6 +450,130 @@ export type Database = {
           },
         ];
       };
+      bet_quote_legs: {
+        Row: {
+          created_at: string;
+          displayed_odds: number;
+          event_code: string;
+          fair_probability: number;
+          id: string;
+          market_id: string;
+          odds_version: number;
+          outcome_id: string;
+          quote_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          displayed_odds: number;
+          event_code: string;
+          fair_probability: number;
+          id?: string;
+          market_id: string;
+          odds_version: number;
+          outcome_id: string;
+          quote_id: string;
+        };
+        Update: {
+          created_at?: string;
+          displayed_odds?: number;
+          event_code?: string;
+          fair_probability?: number;
+          id?: string;
+          market_id?: string;
+          odds_version?: number;
+          outcome_id?: string;
+          quote_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bet_quote_legs_market_id_fkey";
+            columns: ["market_id"];
+            isOneToOne: false;
+            referencedRelation: "markets";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bet_quote_legs_outcome_market_fk";
+            columns: ["outcome_id", "market_id"];
+            isOneToOne: false;
+            referencedRelation: "market_outcomes";
+            referencedColumns: ["id", "market_id"];
+          },
+          {
+            foreignKeyName: "bet_quote_legs_quote_id_fkey";
+            columns: ["quote_id"];
+            isOneToOne: false;
+            referencedRelation: "bet_quotes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      bet_quotes: {
+        Row: {
+          bet_type: Database["public"]["Enums"]["bet_type"];
+          consumed_at: string | null;
+          correlation_adjustment: number | null;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          idempotency_key: string;
+          margin: number;
+          potential_return_mkb: number;
+          season_id: string;
+          stake_mkb: number;
+          status: Database["public"]["Enums"]["bet_quote_status"];
+          total_odds: number;
+          user_id: string;
+        };
+        Insert: {
+          bet_type: Database["public"]["Enums"]["bet_type"];
+          consumed_at?: string | null;
+          correlation_adjustment?: number | null;
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          idempotency_key: string;
+          margin: number;
+          potential_return_mkb: number;
+          season_id: string;
+          stake_mkb: number;
+          status?: Database["public"]["Enums"]["bet_quote_status"];
+          total_odds: number;
+          user_id: string;
+        };
+        Update: {
+          bet_type?: Database["public"]["Enums"]["bet_type"];
+          consumed_at?: string | null;
+          correlation_adjustment?: number | null;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          idempotency_key?: string;
+          margin?: number;
+          potential_return_mkb?: number;
+          season_id?: string;
+          stake_mkb?: number;
+          status?: Database["public"]["Enums"]["bet_quote_status"];
+          total_odds?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bet_quotes_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bet_quotes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       bets: {
         Row: {
           bet_type: Database["public"]["Enums"]["bet_type"];
@@ -425,6 +582,7 @@ export type Database = {
           idempotency_key: string;
           placed_at: string;
           potential_return_mkb: number;
+          quote_id: string;
           season_id: string;
           settled_at: string | null;
           stake_mkb: number;
@@ -439,6 +597,7 @@ export type Database = {
           idempotency_key: string;
           placed_at?: string;
           potential_return_mkb: number;
+          quote_id: string;
           season_id: string;
           settled_at?: string | null;
           stake_mkb: number;
@@ -453,6 +612,7 @@ export type Database = {
           idempotency_key?: string;
           placed_at?: string;
           potential_return_mkb?: number;
+          quote_id?: string;
           season_id?: string;
           settled_at?: string | null;
           stake_mkb?: number;
@@ -461,6 +621,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "bets_quote_id_fkey";
+            columns: ["quote_id"];
+            isOneToOne: false;
+            referencedRelation: "bet_quotes";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "bets_season_id_fkey";
             columns: ["season_id"];
@@ -773,6 +940,7 @@ export type Database = {
           season_id: string;
           settlement_rule: Json;
           status: Database["public"]["Enums"]["market_status"];
+          suspension_reason: string | null;
           template_id: string | null;
           title: string;
           trash_title: string;
@@ -797,6 +965,7 @@ export type Database = {
           season_id: string;
           settlement_rule?: Json;
           status?: Database["public"]["Enums"]["market_status"];
+          suspension_reason?: string | null;
           template_id?: string | null;
           title: string;
           trash_title: string;
@@ -821,6 +990,7 @@ export type Database = {
           season_id?: string;
           settlement_rule?: Json;
           status?: Database["public"]["Enums"]["market_status"];
+          suspension_reason?: string | null;
           template_id?: string | null;
           title?: string;
           trash_title?: string;
@@ -1561,6 +1731,19 @@ export type Database = {
           season_id: string;
         }[];
       };
+      close_market: {
+        Args: { p_market_id: string; p_reason?: string };
+        Returns: Json;
+      };
+      create_bet_quote: {
+        Args: {
+          p_idempotency_key: string;
+          p_outcome_ids: string[];
+          p_season_id: string;
+          p_stake_mkb: number;
+        };
+        Returns: Json;
+      };
       create_season: {
         Args: {
           p_breakup_date: string;
@@ -1590,6 +1773,7 @@ export type Database = {
         }[];
       };
       ensure_current_profile: { Args: never; Returns: string };
+      get_bet_ticket: { Args: { p_bet_id: string }; Returns: Json };
       get_dashboard_season: {
         Args: { p_season_id?: string };
         Returns: {
@@ -1598,6 +1782,14 @@ export type Database = {
           id: string;
           roles: Database["public"]["Enums"]["season_member_role"][];
           title: string;
+        }[];
+      };
+      get_default_market_schedule: {
+        Args: { p_season_id: string };
+        Returns: {
+          closes_at: string;
+          physical_deadline_at: string;
+          relationship_deadline_at: string;
         }[];
       };
       get_invitation_preview: {
@@ -1612,6 +1804,19 @@ export type Database = {
           seasonTitle: string;
         }[];
       };
+      get_season_leaderboard: {
+        Args: { p_season_id: string };
+        Returns: {
+          avatar_url: string;
+          balance_mkb: number;
+          display_name: string;
+          net_profit_mkb: number;
+          rank: number;
+          total_returned_mkb: number;
+          total_staked_mkb: number;
+          user_id: string;
+        }[];
+      };
       grant_season_member_role: {
         Args: {
           p_role: Database["public"]["Enums"]["season_member_role"];
@@ -1620,6 +1825,16 @@ export type Database = {
           p_user_id: string;
         };
         Returns: undefined;
+      };
+      initialize_default_season_markets: {
+        Args: {
+          p_closes_at: string;
+          p_idempotency_key: string;
+          p_physical_deadline_at: string;
+          p_relationship_deadline_at: string;
+          p_season_id: string;
+        };
+        Returns: Json;
       };
       list_my_seasons: {
         Args: never;
@@ -1645,6 +1860,25 @@ export type Database = {
           use_count: number;
         }[];
       };
+      open_template_binary_market: {
+        Args: {
+          p_closes_at: string;
+          p_deadline_at: string;
+          p_description: string;
+          p_idempotency_key: string;
+          p_opens_at: string;
+          p_season_id: string;
+          p_template_code: string;
+          p_title_override: string;
+          p_trash_title_override: string;
+        };
+        Returns: Json;
+      };
+      place_bet: {
+        Args: { p_idempotency_key: string; p_quote_id: string };
+        Returns: Json;
+      };
+      reopen_market: { Args: { p_market_id: string }; Returns: Json };
       revoke_season_invitation: {
         Args: { p_invitation_id: string };
         Returns: undefined;
@@ -1660,6 +1894,10 @@ export type Database = {
       set_season_member_active: {
         Args: { p_is_active: boolean; p_season_id: string; p_user_id: string };
         Returns: undefined;
+      };
+      suspend_market: {
+        Args: { p_market_id: string; p_reason: string };
+        Returns: Json;
       };
       write_audit_log: {
         Args: {
@@ -1695,6 +1933,7 @@ export type Database = {
         | "CORRECTED";
       attendance_status: "EXPECTED" | "PRESENT" | "ABSENT" | "LEFT" | "UNKNOWN";
       bet_leg_status: "OPEN" | "WON" | "LOST" | "VOID";
+      bet_quote_status: "OPEN" | "CONSUMED" | "EXPIRED" | "VOID";
       bet_status:
         | "PENDING"
         | "OPEN"
@@ -1930,6 +2169,7 @@ export const Constants = {
       ],
       attendance_status: ["EXPECTED", "PRESENT", "ABSENT", "LEFT", "UNKNOWN"],
       bet_leg_status: ["OPEN", "WON", "LOST", "VOID"],
+      bet_quote_status: ["OPEN", "CONSUMED", "EXPIRED", "VOID"],
       bet_status: [
         "PENDING",
         "OPEN",

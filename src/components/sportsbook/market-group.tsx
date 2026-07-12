@@ -5,17 +5,14 @@ import type { SportsbookMarket } from "@/fixtures/sportsbook/types";
 export function MarketGroup({
   title,
   markets,
+  emptyDescription = "Aucune cote ne correspond à ces filtres. Le chaos n’est pas toujours liquide.",
 }: {
   title: string;
   markets: SportsbookMarket[];
+  emptyDescription?: string;
 }) {
   if (markets.length === 0) {
-    return (
-      <EmptyState
-        description="Aucune cote ne correspond à ces filtres. Le chaos n’est pas toujours liquide."
-        title="Aucun marché"
-      />
-    );
+    return <EmptyState description={emptyDescription} title="Aucun marché" />;
   }
 
   return (

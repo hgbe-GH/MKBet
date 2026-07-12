@@ -126,11 +126,14 @@ export interface TimelineEvent {
 export interface LeaderboardRow {
   rank: number;
   playerName: string;
+  avatarUrl?: string | null;
   capitalMkb: number;
   netProfitMkb: number;
-  successRate: number;
-  averageOdds: number;
-  badge: string;
+  totalStakedMkb?: number;
+  totalReturnedMkb?: number;
+  successRate?: number;
+  averageOdds?: number;
+  badge?: string;
 }
 
 export interface BetSlipSelection {

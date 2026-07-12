@@ -2,7 +2,7 @@
 
 ## Principes
 
-PostgreSQL/Supabase est la source de vérité de MK Bet. Le schéma public contient 25 tables privées, protégées par Row Level Security métier. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
+PostgreSQL/Supabase est la source de vérité de MK Bet. Le schéma public contient 28 tables privées, protégées par Row Level Security métier. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
 
 Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Vercel ou une requête utilisateur. `supabase/seed.sql` ne contient que des données de référence réexécutables.
 
@@ -12,7 +12,8 @@ Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Verc
 - `live_sessions` et `live_attendees` décrivent les événements programmés ou instantanés et leur présence.
 - `action_types`, `action_type_confirmation_rules`, `actions`, `action_reports`, `action_confirmations` et `media_assets` portent les faits déclarés, preuves, décisions et références vers Supabase Storage.
 - `market_templates`, `markets`, `market_outcomes`, `odds_snapshots` et `market_action_rules` portent les marchés et l’historique explicable des cotes.
-- `wallets`, `bets`, `bet_legs`, `settlements` et `wallet_transactions` portent les mises fictives et leur règlement.
+- `accumulator_correlation_rules`, `bet_quotes` et `bet_quote_legs` portent les corrélations et devis courts.
+- `wallets`, `bets`, `bet_legs`, `settlements` et `wallet_transactions` portent les mises fictives et leur règlement futur.
 - `notifications`, `audit_logs` et `rechute_snapshots` portent les projections utilisateur, la traçabilité et le Rechutomètre.
 
 Les clés étrangères composites empêchent qu’un live, une action, un média ou une issue soit associé à une saison ou un marché incompatible. Des triggers ciblés complètent les règles qui traversent plusieurs tables.
@@ -38,9 +39,13 @@ erDiagram
   MARKET_TEMPLATES o|--o{ MARKETS : instantiates
   MARKETS ||--o{ MARKET_OUTCOMES : offers
   MARKET_OUTCOMES ||--o{ ODDS_SNAPSHOTS : prices
+  SEASONS ||--o{ BET_QUOTES : offers
+  BET_QUOTES ||--|{ BET_QUOTE_LEGS : freezes
+  MARKET_OUTCOMES ||--o{ BET_QUOTE_LEGS : quotes
   PROFILES ||--o{ WALLETS : owns
   SEASONS ||--o{ WALLETS : funds
   WALLETS ||--o{ BETS : backs
+  BET_QUOTES ||--o| BETS : becomes
   BETS ||--|{ BET_LEGS : contains
   MARKET_OUTCOMES ||--o{ BET_LEGS : freezes
   MARKETS ||--o{ SETTLEMENTS : resolves
@@ -74,13 +79,13 @@ Le moteur TypeScript construit désormais des drafts compatibles avec ces deux t
 
 ### Pari, portefeuille et règlement
 
-Un ticket simple possède une jambe; un combiné en possède plusieurs. Le nombre de jambes, le débit du portefeuille, le ticket et la transaction seront créés atomiquement par une future fonction PostgreSQL.
+Un ticket simple possède une jambe; un combiné en possède deux ou trois. `create_bet_quote` fige une proposition pendant 60 secondes. `place_bet` verrouille le devis, le portefeuille, les marchés et les issues, puis crée atomiquement le ticket, ses jambes, le débit et l’audit. `bets.quote_id` est obligatoire et unique : aucun pari ne peut exister sans devis.
 
 Un règlement produit une nouvelle ligne `settlements`. Une correction utilise `settlement_type = 'CORRECTION'` et référence le règlement précédent avec `supersedes_settlement_id`; l’historique n’est jamais écrasé.
 
 `wallet_transactions` est un journal immuable : aucun `UPDATE` ni `DELETE` n’est accepté. Chaque correction est une nouvelle transaction idempotente. `audit_logs` suit la même stratégie append-only pour les opérations importantes.
 
-L’interface sportsbook actuelle affiche un ticket local de démonstration. Elle ne crée aucune ligne `bets`, `bet_legs`, `wallet_transactions`, `settlements` ou `odds_snapshots`.
+Le journal financier interdit toujours `UPDATE` et `DELETE`. Une mise ajoute une transaction `BET_STAKE` négative dont `balance_after_mkb` correspond exactement au portefeuille verrouillé.
 
 ## RLS et sécurité
 

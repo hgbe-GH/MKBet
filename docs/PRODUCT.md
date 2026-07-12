@@ -36,9 +36,9 @@ Les classements compareront les performances amicales des participants. La chron
 
 ## Interface actuelle
 
-L’interface sportsbook privée existe sous forme de démonstration : dashboard, marchés, lives, tickets visuels, résultats, chronologie, classement et console admin visuelle. Les écrans montrent le comportement attendu, mais les données de marchés/lives/paris proviennent encore de fixtures locales marquées comme telles.
+Les marchés, cotes, devis, paris, portefeuilles et classements financiers sont réels dans Supabase local. Un joueur vérifie d’abord son ticket, reçoit un devis court, puis confirme explicitement le placement et le débit en MKB fictifs.
 
-Le bouton de placement reste désactivé. Aucun solde n’est débité, aucun ticket n’est écrit et aucun règlement n’est exécuté dans cette étape.
+Les lives, actions, résultats et chronologie détaillée restent des démonstrations clairement marquées. Aucun règlement ni paiement de gains n’est encore exécuté.
 
 ## Ton éditorial
 

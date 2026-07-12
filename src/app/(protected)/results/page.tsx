@@ -15,6 +15,9 @@ export default async function ResultsPage() {
         <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
           Vérifications et décisions
         </h1>
+        <p className="mt-2 text-sm font-bold text-amber-800">
+          Données de démonstration · aucun règlement réel.
+        </p>
       </header>
       <section className="rounded-lg border border-[var(--border)] bg-white p-5">
         <h2 className="text-xl font-black">À vérifier</h2>

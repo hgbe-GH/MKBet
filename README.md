@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, les invitations de saison, une page de pré-saison statique, un moteur déterministe de probabilités et de cotes, ainsi qu’un shell sportsbook privé alimenté par des données de démonstration.
+Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, le moteur déterministe de cotes et un sportsbook transactionnel : marchés réels, devis courts, paris simples/combinés, débit MKB, tickets, portefeuille et classement financier.
 
 ## Prérequis
 
@@ -58,6 +58,7 @@ pnpm odds:demo    # démonstration locale déterministe du moteur de cotes
 pnpm db:start     # démarre Supabase local avec Docker
 pnpm db:reset     # recrée la base depuis les migrations et le seed
 pnpm db:types     # régénère les types TypeScript depuis la base locale
+pnpm db:test:betting # valide marchés, devis, placements et idempotence
 pnpm db:stop      # arrête Supabase local sans conserver son état
 pnpm format       # mise en forme Prettier
 pnpm format:check # contrôle Prettier sans modification
@@ -69,7 +70,7 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 
 - `src/app` : routes et interfaces Next.js App Router ;
 - `src/components` : composants de mise en page et composants UI accessibles ;
-- `src/fixtures/sportsbook` : données de démonstration isolées pour l’interface sportsbook ;
+- `src/fixtures/sportsbook` : démonstration isolée des lives, résultats et chronologie seulement ;
 - `src/domain` : types métier et logique métier pure, dont le moteur de cotes ;
 - `src/application` : orchestration pure et adaptation des modèles persistants ;
 - `src/auth`, `src/data` et `src/lib/supabase` : sessions SSR, autorisations et accès persistant à Supabase ;
@@ -77,7 +78,7 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 - `supabase` : configuration locale, migrations, seed et validation SQL ;
 - `tests` : tests unitaires et préparation des tests end-to-end.
 
-Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées, [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel, [`docs/ODDS.md`](docs/ODDS.md) pour le modèle de cotes et [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) pour l’interface sportsbook.
+Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DATABASE.md`](docs/DATABASE.md), [`docs/ODDS.md`](docs/ODDS.md), [`docs/BETTING.md`](docs/BETTING.md) et [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
 
 ## Déploiement Vercel futur
 
@@ -87,4 +88,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page de pré-saison, la route `/api/health`, l’authentification privée, les invitations, la sélection de saison, le shell sportsbook, les pages privées de démonstration, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. Les opérations transactionnelles de paris et de règlements ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page publique et l’Auth restent indépendantes du build. Les marchés, devis, paris, portefeuilles, tickets et classements utilisent Supabase ; les lives, actions, résultats et chronologie détaillée restent démonstratifs. Le règlement et le paiement des gains ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

@@ -46,7 +46,9 @@ Les marchés multi-options normalisent des poids finis et positifs vers une somm
 
 Les over/under utilisent une approximation de Poisson à partir de `lambda`. Le MVP accepte uniquement les lignes en demi-point; une ligne entière est refusée avec `INTEGER_LINE_UNSUPPORTED`, car aucune logique `PUSH` ou remboursement n’est encore introduite.
 
-Les combinés acceptent deux ou trois jambes. Les probabilités indépendantes sont multipliées, puis une règle explicite applique un coefficient de corrélation (`1` indépendant, supérieur à `1` plus probable, inférieur à `1` moins probable). La probabilité finale est bornée entre `0,001` et `0,95`, et la marge n’est appliquée qu’une fois. Une dépendance forte sans règle est refusée.
+Les combinés acceptent deux ou trois jambes. Les probabilités indépendantes sont multipliées, puis une règle explicite applique un coefficient de corrélation (`1` indépendant, supérieur à `1` plus probable, inférieur à `1` moins probable). La probabilité finale est bornée entre `0,001` et `0,95`, et la marge n’est appliquée qu’une fois. En production, tout combiné exige désormais une règle exacte persistée ; aucune indépendance implicite n’est acceptée.
+
+PostgreSQL contient une duplication minimale volontaire de `elapsed_days`, cumulative, conditionnelle et pricing décimal. Elle sécurise l’ouverture des marchés et le placement dans une seule transaction. Des assertions SQL comparent ces résultats aux mêmes valeurs de référence que le moteur TypeScript.
 
 ## Version, snapshots et paris existants
 

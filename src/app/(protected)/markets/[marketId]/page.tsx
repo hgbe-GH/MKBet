@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { MarketCard } from "@/components/sportsbook/market-card";
-import { demoMarketRepository } from "@/fixtures/sportsbook/repositories";
+import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
+import { getSeasonMarket } from "@/data/supabase/markets/market-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,8 @@ export default async function MarketDetailPage({
   params,
 }: MarketDetailPageProps) {
   const { marketId } = await params;
-  const market = await demoMarketRepository.getMarket(marketId);
+  const season = await requireSportsbookSeason();
+  const market = await getSeasonMarket(season.id, marketId);
 
   if (!market) {
     notFound();

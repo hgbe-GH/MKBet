@@ -1,37 +1,111 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
+import { createBetQuoteAction } from "@/application/betting/create-bet-quote-action";
+import { placeBetAction } from "@/application/betting/place-bet-action";
+import type { BetQuoteResult } from "@/application/betting/types";
 import { BetSlipSelectionItem } from "@/components/sportsbook/bet-slip-selection";
-import { Button } from "@/components/ui/button";
 import { useBetSlip } from "@/components/sportsbook/bet-slip-context";
+import { Button } from "@/components/ui/button";
 
-export function BetSlip({ balanceMkb }: { balanceMkb: number }) {
+function remainingSeconds(expiresAt: string): number {
+  return Math.max(0, Math.ceil((Date.parse(expiresAt) - Date.now()) / 1000));
+}
+
+export function BetSlip({
+  balanceMkb,
+  seasonId,
+}: {
+  balanceMkb: number;
+  seasonId: string;
+}) {
   const betSlip = useBetSlip();
   const [stake, setStake] = useState("10");
+  const [quote, setQuote] = useState<BetQuoteResult | null>(null);
+  const [quoteBasis, setQuoteBasis] = useState("");
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [feedback, setFeedback] = useState("");
+  const [changedFromOdds, setChangedFromOdds] = useState<number | null>(null);
+  const [ticketNumber, setTicketNumber] = useState<string | null>(null);
+  const [displayedBalance, setDisplayedBalance] = useState(balanceMkb);
+  const [isPending, startTransition] = useTransition();
   const stakeNumber = Number(stake);
   const stakeValid =
     Number.isInteger(stakeNumber) &&
     Number.isFinite(stakeNumber) &&
     stakeNumber >= 5 &&
-    stakeNumber <= balanceMkb;
+    stakeNumber <= displayedBalance;
+  const selectionKey = useMemo(
+    () => betSlip.selections.map((selection) => selection.outcomeId).join(":"),
+    [betSlip.selections],
+  );
+  const currentBasis = `${selectionKey}|${stake}`;
+  const activeQuote = quoteBasis === currentBasis ? quote : null;
 
-  const totalOdds = useMemo(() => {
-    if (betSlip.selections.length === 0) {
-      return null;
-    }
-    if (betSlip.selections.length > 1) {
-      return null;
-    }
-    return betSlip.selections[0].odds;
-  }, [betSlip.selections]);
+  useEffect(() => {
+    if (!activeQuote) return;
+    const timer = window.setInterval(() => {
+      setSecondsLeft(remainingSeconds(activeQuote.expiresAt));
+    }, 1_000);
+    return () => window.clearInterval(timer);
+  }, [activeQuote]);
 
-  const potentialReturn =
-    totalOdds && stakeValid ? Math.floor(stakeNumber * totalOdds) : null;
+  const verifyTicket = () => {
+    if (!stakeValid || betSlip.selections.length === 0 || isPending) return;
+    startTransition(async () => {
+      const result = await createBetQuoteAction({
+        seasonId,
+        stakeMkb: stakeNumber,
+        outcomeIds: betSlip.selections.map((selection) => selection.outcomeId),
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (!result.ok) {
+        setFeedback(result.message);
+        return;
+      }
+      setQuote(result.quote);
+      setQuoteBasis(currentBasis);
+      setSecondsLeft(remainingSeconds(result.quote.expiresAt));
+      setFeedback(
+        "Devis confirmé par MK Bet. Vérifie les cotes avant de placer.",
+      );
+    });
+  };
+
+  const placeTicket = () => {
+    if (!activeQuote || secondsLeft <= 0 || isPending) return;
+    startTransition(async () => {
+      const result = await placeBetAction({
+        quoteId: activeQuote.quoteId,
+        idempotencyKey: crypto.randomUUID(),
+      });
+      if (!result.ok) {
+        setFeedback(result.message);
+        if (result.code === "ODDS_CHANGED" || result.code === "QUOTE_EXPIRED") {
+          if (result.code === "ODDS_CHANGED")
+            setChangedFromOdds(activeQuote.totalOdds);
+          setQuote(null);
+          setQuoteBasis("");
+          setSecondsLeft(0);
+        }
+        return;
+      }
+      setDisplayedBalance(result.bet.balanceMkb);
+      setTicketNumber(result.bet.ticketNumber);
+      setFeedback("Pronostic enregistré. Ta dignité est désormais engagée.");
+      setQuote(null);
+      setQuoteBasis("");
+      setChangedFromOdds(null);
+      setSecondsLeft(0);
+      betSlip.clearSelections();
+    });
+  };
 
   return (
     <aside
-      aria-label="Ticket de pari visuel"
+      aria-label="Ticket de pari"
       className="rounded-lg border border-[var(--border)] bg-[var(--surface-raised)] p-4 shadow-[0_12px_35px_rgba(28,25,23,0.08)]"
     >
       <div className="flex items-center justify-between gap-3">
@@ -53,12 +127,21 @@ export function BetSlip({ balanceMkb }: { balanceMkb: number }) {
         </button>
       </div>
 
-      <p className="sr-only" role="status">
-        {betSlip.message}
+      <p aria-live="polite" className="sr-only" role="status">
+        {feedback || betSlip.message}
       </p>
-      {betSlip.message ? (
+      {feedback || betSlip.message ? (
         <p className="mt-3 rounded-md bg-stone-100 p-2 text-sm text-[var(--text-secondary)]">
-          {betSlip.message}
+          {feedback || betSlip.message}
+        </p>
+      ) : null}
+
+      {ticketNumber ? (
+        <p className="mt-3 rounded-md bg-emerald-50 p-3 text-sm font-bold text-emerald-900">
+          Ticket #{ticketNumber}.{" "}
+          <Link className="underline" href="/bets">
+            Voir mes paris
+          </Link>
         </p>
       ) : null}
 
@@ -87,7 +170,7 @@ export function BetSlip({ balanceMkb }: { balanceMkb: number }) {
           id="stake-mkb"
           inputMode="numeric"
           min={5}
-          max={balanceMkb}
+          max={displayedBalance}
           onChange={(event) => setStake(event.target.value)}
           type="number"
           value={stake}
@@ -96,34 +179,87 @@ export function BetSlip({ balanceMkb }: { balanceMkb: number }) {
           <p className="text-sm text-[var(--negative)]">
             {stakeNumber < 5
               ? "Mise minimale : 5 MKB."
-              : `Mise maximale affichée : ${balanceMkb} MKB.`}
+              : `Solde disponible : ${displayedBalance} MKB.`}
           </p>
         ) : null}
       </div>
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div>
-          <dt className="text-[var(--text-muted)]">Cote finale</dt>
+          <dt className="text-[var(--text-muted)]">Cote définitive</dt>
           <dd className="font-black">
-            {totalOdds
-              ? totalOdds.toFixed(2).replace(".", ",")
-              : "Calculée lors de la validation"}
+            {activeQuote
+              ? activeQuote.totalOdds.toFixed(2).replace(".", ",")
+              : "À vérifier"}
           </dd>
         </div>
         <div>
           <dt className="text-[var(--text-muted)]">Retour potentiel</dt>
           <dd className="font-black">
-            {potentialReturn ? `${potentialReturn} MKB` : "—"}
+            {activeQuote ? `${activeQuote.potentialReturnMkb} MKB` : "—"}
           </dd>
         </div>
       </dl>
 
-      <Button className="mt-4 w-full" disabled type="button">
-        PLACEMENT DISPONIBLE À L’ÉTAPE SUIVANTE
-      </Button>
+      {activeQuote?.correlationAdjustment ? (
+        <p className="mt-3 text-xs text-[var(--warning)]">
+          Combiné corrélé : coefficient{" "}
+          {activeQuote.correlationAdjustment.toFixed(2)} appliqué aux
+          probabilités.
+        </p>
+      ) : null}
+      {changedFromOdds !== null && activeQuote ? (
+        <p className="mt-3 rounded-md bg-amber-50 p-2 text-xs text-amber-900">
+          Ancienne cote {changedFromOdds.toFixed(2)} · nouvelle cote{" "}
+          {activeQuote.totalOdds.toFixed(2)} · nouveau retour{" "}
+          {activeQuote.potentialReturnMkb} MKB. Une nouvelle confirmation est
+          obligatoire.
+        </p>
+      ) : null}
+      {activeQuote ? (
+        <p className="mt-3 text-center text-sm font-bold" aria-live="polite">
+          Devis valable encore {secondsLeft} s
+        </p>
+      ) : null}
+
+      {activeQuote ? (
+        secondsLeft > 0 ? (
+          <Button
+            className="mt-4 w-full"
+            disabled={isPending}
+            onClick={placeTicket}
+            type="button"
+          >
+            {isPending ? "ENREGISTREMENT…" : "PLACER MON PRONOSTIC"}
+          </Button>
+        ) : (
+          <Button
+            className="mt-4 w-full"
+            disabled={isPending}
+            onClick={verifyTicket}
+            type="button"
+          >
+            ACTUALISER LES COTES
+          </Button>
+        )
+      ) : (
+        <Button
+          className="mt-4 w-full"
+          disabled={isPending || !stakeValid || betSlip.selections.length === 0}
+          onClick={verifyTicket}
+          type="button"
+        >
+          {isPending
+            ? "VÉRIFICATION…"
+            : feedback.includes("évolué")
+              ? "ACCEPTER LES NOUVELLES COTES"
+              : "VÉRIFIER LE TICKET"}
+        </Button>
+      )}
       <p className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
-        Ticket visuel uniquement : aucun débit, aucun pari réel, aucun
-        règlement.
+        Le navigateur envoie seulement les issues, la mise et une clé
+        d’idempotence. PostgreSQL fixe les cotes et débite atomiquement les MKB
+        fictifs.
       </p>
     </aside>
   );

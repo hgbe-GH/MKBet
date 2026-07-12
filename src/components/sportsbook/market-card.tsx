@@ -56,7 +56,11 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
           ) : null}
         </div>
         <div className="text-right text-xs text-[var(--text-muted)]">
-          <p>{market.betCount} tickets fictifs</p>
+          <p>
+            {market.betCount > 0
+              ? `${market.betCount} tickets`
+              : "Volume privé"}
+          </p>
           <p>{new Date(market.deadline).toLocaleString("fr-FR")}</p>
         </div>
       </div>

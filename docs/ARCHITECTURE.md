@@ -47,9 +47,15 @@ Les changements utiles aux lives, marchés et chronologies seront publiés par P
 
 Le moteur est un noyau TypeScript pur et testable dans `src/domain/odds`. Il reçoit explicitement les dates UTC, modèles, signaux, marges, bornes, raisons et versions. Il couvre les marchés binaires, multi-options, périodes, dates exactes, prochaine action, over/under et les combinés corrélés.
 
-`src/application/odds` fournit un dispatcher typé, les adaptateurs des types PostgreSQL et la construction de drafts de snapshots. Cette couche n’importe aucun client Supabase et n’effectue aucune lecture ou écriture. Les futurs repositories persistants resteront séparés.
+`src/application/odds` fournit un dispatcher typé, les adaptateurs des types PostgreSQL et la construction de drafts de snapshots. Cette couche n’importe aucun client Supabase et n’effectue aucune lecture ou écriture. Les repositories persistants restent séparés dans `src/data/supabase`.
 
-Les entrées client ne seront jamais considérées comme autoritaires. Le serveur recalculera les cotes depuis l’état canonique, puis la cote acceptée sera figée avec le pari dans une future transaction PostgreSQL.
+Pour l’ouverture initiale des marchés binaires, PostgreSQL duplique volontairement les quatre primitives mathématiques minimales nécessaires à l’autorité transactionnelle. Le moteur TypeScript reste la référence explicable et des tests croisés garantissent leur cohérence.
+
+## Paris transactionnels
+
+Le parcours suit `sélection locale → Server Action → create_bet_quote → confirmation → place_bet`. Les Server Actions valident uniquement des identifiants, une mise et une clé d’idempotence. Les RPC `SECURITY DEFINER` relisent les valeurs autoritaires, vérifient Auth/rôles/saison et réalisent les mutations dans une transaction PostgreSQL unique.
+
+`src/data/supabase/markets`, `betting`, `wallets` et `leaderboard` assurent les lectures RLS. Les pages `/markets`, `/bets`, `/wallet`, `/leaderboard` et les surfaces financières du dashboard ne chargent plus de fixtures. Le compte à rebours du devis est seulement visuel ; PostgreSQL reste l’autorité sur l’expiration.
 
 ## Migrations et types
 

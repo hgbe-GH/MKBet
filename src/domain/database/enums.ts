@@ -94,6 +94,7 @@ export const DATABASE_ENUM_VALUES = {
   ],
   outcome_result_status: ["PENDING", "WINNER", "LOSER", "VOID"],
   bet_type: ["SINGLE", "ACCUMULATOR"],
+  bet_quote_status: ["OPEN", "CONSUMED", "EXPIRED", "VOID"],
   bet_status: [
     "PENDING",
     "OPEN",
@@ -151,5 +152,6 @@ export type MarketStatus = Database["public"]["Enums"]["market_status"];
 export type OutcomeResultStatus =
   Database["public"]["Enums"]["outcome_result_status"];
 export type BetType = Database["public"]["Enums"]["bet_type"];
+export type BetQuoteStatus = Database["public"]["Enums"]["bet_quote_status"];
 export type BetStatus = Database["public"]["Enums"]["bet_status"];
 export type BetLegStatus = Database["public"]["Enums"]["bet_leg_status"];

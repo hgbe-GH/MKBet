@@ -81,7 +81,7 @@ describe("sportsbook UI components", () => {
     render(
       <BetSlipProvider>
         <MarketCard market={demoMarkets[0]} />
-        <BetSlip balanceMkb={1200} />
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
       </BetSlipProvider>,
     );
 
@@ -94,7 +94,7 @@ describe("sportsbook UI components", () => {
     fireEvent.click(screen.getByRole("button", { name: /Oui, cote/i }));
     expect(screen.getByText("1 sélection")).toBeInTheDocument();
     expect(
-      screen.getByText("PLACEMENT DISPONIBLE À L’ÉTAPE SUIVANTE"),
+      screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Non, cote/i }));

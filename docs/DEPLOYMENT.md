@@ -57,7 +57,9 @@ Le build Vercel doit réussir sans connexion active à PostgreSQL. Les URL et cl
 4. Après configuration Supabase, vérifier que `/login`, `/dashboard` et `/markets` chargent sans exposer de jeton dans le HTML.
 5. Consulter les logs de build sans y copier de variable sensible.
 
-Les pages sportsbook privées peuvent être buildées sans base active. Leur contenu de marchés/lives/tickets reste démonstratif tant que les repositories persistants correspondants ne sont pas développés.
+Les pages sportsbook privées peuvent être buildées sans base active : leurs Server Components ne contactent Supabase qu’à la requête authentifiée. Marchés, devis, tickets, portefeuille et classement nécessitent les migrations appliquées avant la promotion applicative. Vercel ne lance jamais ces migrations.
+
+Le parcours normal n’utilise pas `SUPABASE_SERVICE_ROLE_KEY`. Les Server Actions utilisent la session SSR de l’utilisateur et les RPC contrôlent `auth.uid()` ainsi que les rôles. Aucun timer serveur n’assure l’expiration des devis : PostgreSQL valide `expires_at` lors du placement.
 
 ## Rollback
 

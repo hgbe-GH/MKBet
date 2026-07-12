@@ -71,3 +71,9 @@
 **Décision :** livrer le shell sportsbook et les écrans privés avec des fixtures locales isolées, en gardant le placement de pari, les lives réels, le règlement et le realtime désactivés.
 
 **Motif :** valider l’ergonomie, l’accessibilité et les surfaces produit sans introduire de mutations financières ou de couplage prématuré aux tables métier.
+
+## ADR-013 — Devis courts et transaction PostgreSQL autoritaire
+
+**Décision :** séparer sélection, devis de 60 secondes et placement. PostgreSQL relit toutes les valeurs de cote, applique les corrélations explicites et réalise ticket, débit, journal et audit dans une seule RPC.
+
+**Motif :** empêcher le client d’imposer une valeur financière, garantir l’idempotence en environnement serverless et éviter toute transaction répartie entre plusieurs requêtes Vercel.

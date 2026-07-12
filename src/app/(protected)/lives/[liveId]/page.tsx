@@ -1,13 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { EventScoreboard } from "@/components/sportsbook/event-scoreboard";
-import { MarketCard } from "@/components/sportsbook/market-card";
 import { RechuteMeter } from "@/components/sportsbook/rechute-meter";
 import { Button } from "@/components/ui/button";
-import {
-  demoMarkets,
-  demoSeasonContext,
-} from "@/fixtures/sportsbook/demo-data";
+import { demoSeasonContext } from "@/fixtures/sportsbook/demo-data";
 import { demoLiveRepository } from "@/fixtures/sportsbook/repositories";
 
 export const dynamic = "force-dynamic";
@@ -44,13 +40,10 @@ export default async function LiveDetailPage({ params }: LiveDetailPageProps) {
       </div>
       <section className="space-y-3">
         <h2 className="text-xl font-black">Marchés live</h2>
-        <div className="grid gap-4">
-          {demoMarkets
-            .filter((market) => market.isLive)
-            .map((market) => (
-              <MarketCard key={market.id} market={market} />
-            ))}
-        </div>
+        <p className="rounded-lg border border-[var(--border)] bg-white p-5 text-sm text-[var(--text-secondary)]">
+          Aucun marché fictif n’est injecté ici. Les futurs marchés live réels
+          seront chargés depuis Supabase.
+        </p>
       </section>
     </div>
   );

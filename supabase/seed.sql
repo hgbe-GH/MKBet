@@ -158,4 +158,23 @@ on conflict (source_action_type_id, target_event_code, effect_type) do update se
   is_active = excluded.is_active,
   metadata = excluded.metadata;
 
+insert into public.accumulator_correlation_rules (
+  code,
+  event_codes,
+  correlation_adjustment,
+  description,
+  is_active
+)
+values
+  ('KISS_LEAVE_TOGETHER', array['KISS', 'LEAVE_TOGETHER']::text[], 1.20, 'Bisou et départ ensemble', true),
+  ('KISS_SLEEP_SAME_BED', array['KISS', 'SLEEP_SAME_BED']::text[], 1.30, 'Bisou et nuit ensemble', true),
+  ('KISS_SEX_SLEEP_SAME_BED', array['KISS', 'SEX', 'SLEEP_SAME_BED']::text[], 1.45, 'Bisou, nuit ensemble et rapport', true),
+  ('SEX_SEX_FRIENDS', array['SEX', 'SEX_FRIENDS']::text[], 1.35, 'Rapport et relation sex-friends', true),
+  ('OFFICIAL_COUPLE_SEX', array['OFFICIAL_COUPLE', 'SEX']::text[], 1.08, 'Rapport et couple officiel faiblement corrélés', true)
+on conflict (code) do update set
+  event_codes = excluded.event_codes,
+  correlation_adjustment = excluded.correlation_adjustment,
+  description = excluded.description,
+  is_active = excluded.is_active;
+
 commit;

@@ -26,6 +26,10 @@ export default async function TimelinePage() {
         <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
           Journal de saison
         </h1>
+        <p className="mt-2 text-sm font-bold text-amber-800">
+          Données de démonstration · actions et chronologie détaillée restent
+          futures.
+        </p>
       </header>
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
         {filters.map((filter) => (

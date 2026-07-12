@@ -35,7 +35,10 @@ export function AppShell({ children, season }: AppShellProps) {
               </main>
               <div className="hidden xl:block">
                 <div className="sticky top-20">
-                  <BetSlip balanceMkb={season.balanceMkb} />
+                  <BetSlip
+                    balanceMkb={season.balanceMkb}
+                    seasonId={season.id}
+                  />
                 </div>
               </div>
             </div>
@@ -47,7 +50,7 @@ export function AppShell({ children, season }: AppShellProps) {
               Ouvrir le ticket
             </summary>
             <div className="border-t border-[var(--border)]">
-              <BetSlip balanceMkb={season.balanceMkb} />
+              <BetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />
             </div>
           </details>
         </div>

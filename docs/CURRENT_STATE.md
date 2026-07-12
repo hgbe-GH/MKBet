@@ -2,90 +2,63 @@
 
 Dernière mise à jour : 12 juillet 2026.
 
-## Ce qui existe
+## Réel
 
-- Application Next.js App Router avec React, TypeScript strict et Tailwind CSS.
-- Page d’accueil de pré-saison responsive et accessible.
-- Pages de chargement, erreur, erreur globale et contenu introuvable.
-- Route publique `GET /api/health` sans information sensible.
-- Validation paresseuse des variables d’environnement avec Zod.
-- Authentification privée Supabase SSR avec magic link, callback, logout et helpers de session.
-- Fondations Supabase sans clé réelle committée.
-- Huit migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers, RPC Auth/invitations et RLS métier.
-- Création automatique/rattrapage des profils, invitations hashées, rôles cumulables et sélection de saison.
-- Premières pages protégées : `/seasons`, `/seasons/new`, `/dashboard`, `/settings/account` et `/invite/[token]`.
-- Shell sportsbook privé responsive avec sidebar desktop, header compact, navigation mobile, ticket visuel et lien d’évitement.
-- Pages sportsbook de démonstration : `/markets`, `/markets/[marketId]`, `/lives`, `/lives/[liveId]`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin`.
-- Design system clair documenté dans `docs/DESIGN_SYSTEM.md`, avec tokens de marque, surfaces, états et composants accessibles.
-- Seed idempotent avec 19 types d’actions, 7 templates et 15 règles d’impact.
-- Types Supabase générés et interfaces de domaine ciblées.
-- Moteur déterministe de probabilités et de cotes indépendant de React, Next.js et Supabase.
-- Pricing binaire, multi-options, périodes, date exacte, prochaine action, over/under et combinés corrélés.
-- Adaptateurs purs des modèles SQL, drafts de snapshots et service abstrait de repricing sans accès distant.
-- Fixtures locales conformes au seed et démonstration reproductible avec `pnpm odds:demo`.
-- ESLint, Prettier, Vitest, Testing Library et configuration Playwright.
-- Documentation produit, architecture, décisions, roadmap et déploiement futur.
+- Authentification Supabase SSR, profils, saisons, invitations et rôles RLS.
+- Marchés binaires créés par un administrateur depuis les sept templates, avec cotes calculées côté PostgreSQL, issues, snapshots et audit.
+- Suspension, réouverture et fermeture administratives des marchés.
+- Lecture Supabase des marchés, issues, historique de cotes et règles de règlement.
+- Devis de pari autoritaires valables 60 secondes, simples ou combinés de deux à trois jambes.
+- Cinq règles exactes de corrélation persistées et cohérentes avec le moteur TypeScript.
+- Placement atomique : ticket, jambes, cotes figées, débit MKB, transaction immuable, consommation du devis et audit.
+- Protection contre double clic/répétition réseau par verrous et clés d’idempotence.
+- Gestion de l’expiration et de `ODDS_CHANGED` sans placement automatique.
+- Pages réelles `/markets`, `/markets/[marketId]`, `/bets`, `/wallet`, `/leaderboard`, surfaces financières du dashboard et `/admin/markets`.
+- Classement limité au nom/avatar et agrégats de portefeuille, sans transactions détaillées d’un autre joueur.
 
-## Ce qui n’est pas développé
+## Démonstration restante
 
-- Repositories persistants pour marchés, lives, tickets et classements.
-- Placement transactionnel, écriture réelle des snapshots et règlement financier.
-- Lives fonctionnels, déclaration d’actions, validation et règlement transactionnel.
-- Supabase Realtime et administration métier active.
-- Déploiements Vercel Preview et Production.
+- Lives et participants.
+- Actions et signaux.
+- Résultats visuels.
+- Chronologie détaillée.
+- Rechutomètre lorsqu’aucun snapshot réel n’existe.
 
-## Commandes disponibles
+Ces surfaces affichent un badge ou un texte explicite. Aucune fixture de marché ou de pari n’est rendue dans les pages de production.
 
-- `pnpm dev`
-- `pnpm build`
-- `pnpm start`
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm test:watch`
-- `pnpm test:e2e`
-- `pnpm odds:demo`
-- `pnpm db:start`
-- `pnpm db:reset`
-- `pnpm db:types`
-- `pnpm db:stop`
-- `pnpm format`
-- `pnpm format:check`
+## Pas encore développé
 
-## Prochaines tâches
+- Règlement des marchés et corrections.
+- Crédit des gains, remboursements et cash-out.
+- Déclaration/confirmation des actions et repricing après action.
+- Transitions complètes des lives.
+- Supabase Realtime et notifications push.
+- Déploiement Vercel Preview ou Production.
 
-La prochaine étape prévue est le branchement progressif des marchés persistants et du ticket transactionnel. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
+## Base et migrations
 
-## Problèmes connus
+La migration forward-only `20260712120000_transactional_betting.sql` ajoute l’enum `bet_quote_status`, les tables `accumulator_correlation_rules`, `bet_quotes`, `bet_quote_legs`, les contraintes de devis obligatoire, les primitives mathématiques privées, les RPC de marchés/devis/placement/classement et leurs policies RLS.
 
-- Les navigateurs Playwright ne sont pas installés dans cette étape ; la configuration et les smoke tests existent, mais le parcours end-to-end n’a pas été exécuté.
-- Aucune variable Supabase réelle n’est configurée. Le build reste volontairement indépendant de cette configuration.
-- L’interface Chrome de contrôle du workspace n’était pas disponible pendant cette tâche. Le rendu a été vérifié par les tests de composants et par le HTML du serveur de production, mais pas par une inspection visuelle automatisée du navigateur.
-- Les écrans sportsbook utilisent des données de démonstration locales. Les boutons de placement, déclaration live et administration métier restent désactivés.
+Les migrations historiques et le moteur TypeScript de cotes n’ont pas été modifiés. `src/types/database.ts` a été régénéré depuis PostgreSQL local.
+
+## Validation locale
+
+Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés, vérifie les cotes, crée un devis simple, place un pari réel, répète le placement avec la même clé, vérifie l’unique débit, crée un combiné corrélé, provoque un changement de cote et confirme `ODDS_CHANGED` sans débit. Les verrous de devis/portefeuille/marchés et les contraintes uniques empêchent le double débit et le solde négatif.
 
 ## Dernières validations
 
-Exécutées le 12 juillet 2026 après l’ajout de l’interface sportsbook :
+- `pnpm format`, `pnpm lint` et `pnpm typecheck` : succès.
+- `pnpm test` : 93 tests réussis dans 20 fichiers.
+- `pnpm db:reset` : succès avec les neuf migrations et le seed.
+- Seconde exécution de `seed.sql` : décomptes inchangés, dont 5 corrélations.
+- `supabase db lint` : aucune erreur ni aucun avertissement.
+- `pnpm db:test:rls` : 7 blocs SQL RLS historiques réussis.
+- `pnpm db:test:betting` : 11 blocs SQL transactionnels réussis, couvrant aussi un scénario d’intégration complet.
+- `pnpm odds:demo` : résultats déterministes inchangés.
+- `pnpm build` : succès après arrêt de Supabase, sans variable Supabase ni accès base au build.
+- `pnpm install --frozen-lockfile` : succès.
+- Serveur de production local : `/` répond et `/api/health` retourne exactement `{"status":"ok","application":"mk-bet"}`.
+- Scan de secrets : aucun secret suivi ; seule la variable vide attendue de `.env.example` correspond au motif.
+- Migrations historiques et répertoires `src/domain/odds`, `src/application/odds` : aucun diff.
 
-- `pnpm format` : succès ;
-- `pnpm lint` : succès ;
-- `pnpm typecheck` : succès ;
-- `pnpm test` : 84 tests réussis dans 16 fichiers, incluant Auth, env, schéma, RPC Supabase, moteur de cotes et interface sportsbook ;
-- `pnpm build` : succès sans base active requise au build ;
-- `pnpm install --frozen-lockfile` : succès ;
-- `pnpm test:e2e` : non exécuté jusqu’au bout, Chromium Playwright absent du cache local (`pnpm exec playwright install` requis, non lancé dans cette étape) ;
-- smoke Playwright public ajouté pour `/` et `/api/health` ;
-- recherche de secrets Supabase/JWT : aucun secret réel détecté, seulement noms de variables documentés/testés ;
-- migrations Supabase existantes et moteur de cotes : aucune modification ;
-- build : aucune migration ni accès Supabase obligatoire à la compilation.
-
-## Validation locale du schéma
-
-Supabase CLI 2.109.1 et Docker ont réellement été exécutés le 12 juillet 2026 :
-
-- démarrage du stack local ;
-- reset complet et application des cinq migrations ;
-- exécution automatique du seed puis réexécution sur la même base ;
-- validation SQL des 25 tables, de la RLS, des contraintes et des décomptes de référence ;
-- génération officielle de `src/types/database.ts` ;
-- arrêt propre des services sans conservation de l’état local.
+Playwright Chromium n’est toujours pas installé ; aucun navigateur n’a été téléchargé automatiquement.

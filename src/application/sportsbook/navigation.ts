@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   Trophy,
+  WalletCards,
 } from "lucide-react";
 
 import type { SeasonMemberRole } from "@/domain/database/enums";
@@ -27,6 +28,7 @@ export const sportsbookNavigation: NavigationItem[] = [
   { href: "/markets", label: "Marchés", icon: BarChart3, mobile: true },
   { href: "/lives", label: "Live", icon: Radio, mobile: true },
   { href: "/bets", label: "Mes paris", icon: ClipboardList, mobile: true },
+  { href: "/wallet", label: "Portefeuille", icon: WalletCards, mobile: false },
   { href: "/results", label: "Résultats", icon: Crown, mobile: false },
   { href: "/timeline", label: "Chronologie", icon: Activity, mobile: false },
   { href: "/leaderboard", label: "Classement", icon: Trophy, mobile: false },

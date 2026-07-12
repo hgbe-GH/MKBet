@@ -18,6 +18,10 @@ export default async function LivesPage() {
         <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
           Sessions en cours
         </h1>
+        <p className="mt-2 text-sm font-bold text-amber-800">
+          Données de démonstration · les lives réels ne sont pas encore
+          développés.
+        </p>
       </header>
       <section className="space-y-3">
         <h2 className="text-xl font-black">En direct</h2>
