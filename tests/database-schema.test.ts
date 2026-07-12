@@ -13,6 +13,9 @@ const migrationNames = [
   "20260712100002_markets_betting.sql",
   "20260712100003_observability.sql",
   "20260712100004_integrity_indexes_rls.sql",
+  "20260712110000_auth_profiles_rpc.sql",
+  "20260712110001_business_rls.sql",
+  "20260712110002_storage_policies.sql",
 ] as const;
 
 const enumValues = {
@@ -192,7 +195,7 @@ function markedBlock(source: string, name: string): string {
 
 describe("Supabase schema source", () => {
   it("contains the five ordered migrations", () => {
-    expect(migrationNames).toHaveLength(5);
+    expect(migrationNames).toHaveLength(8);
     for (const migrationName of migrationNames) {
       expect(existsSync(path.join(migrationDirectory, migrationName))).toBe(
         true,
@@ -223,6 +226,23 @@ describe("Supabase schema source", () => {
     const sql = migrationSql();
     expect(sql.match(/create table public\./gi)).toHaveLength(25);
     expect(sql.match(/enable row level security/gi)).toHaveLength(25);
+  });
+
+  it("adds auth RPC, member feed, storage policies and business RLS", () => {
+    const sql = migrationSql();
+    expect(sql).toContain("create schema if not exists private");
+    expect(sql).toContain("on auth.users");
+    expect(sql).toContain("create or replace function public.create_season");
+    expect(sql).toContain(
+      "create or replace function public.accept_season_invitation",
+    );
+    expect(sql).toContain("create or replace view public.member_action_feed");
+    expect(sql).toContain("security_invoker = true");
+    expect(sql).toContain("insert into storage.buckets");
+    expect(sql).toContain("season-media");
+    expect(sql.match(/create policy /gi)?.length ?? 0).toBeGreaterThanOrEqual(
+      45,
+    );
   });
 
   it("contains immutable ledgers and cross-entity integrity checks", () => {

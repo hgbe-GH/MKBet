@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient les fondations techniques, le schéma Supabase, une page de pré-saison statique et un moteur déterministe de probabilités et de cotes.
+Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, les invitations de saison, une page de pré-saison statique et un moteur déterministe de probabilités et de cotes.
 
 ## Prérequis
 
@@ -33,12 +33,13 @@ L’application est alors disponible sur `http://localhost:3000`. La route de sa
 
 ## Variables d’environnement
 
-| Variable                        | Portée             | Utilisation                                     |
-| ------------------------------- | ------------------ | ----------------------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`          | Publique           | URL absolue propre à l’environnement courant    |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Publique           | URL du futur projet Supabase                    |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publique           | Clé anonyme publique Supabase                   |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Serveur uniquement | Futures opérations administratives de confiance |
+| Variable                               | Portée             | Utilisation                                                          |
+| -------------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                 | Publique           | URL absolue propre à l’environnement courant                         |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Publique           | URL du projet Supabase                                               |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publique           | Clé publishable publique Supabase                                    |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`        | Publique           | Compatibilité locale temporaire dépréciée                            |
+| `SUPABASE_SERVICE_ROLE_KEY`            | Serveur uniquement | À ajouter seulement lorsqu’une fonctionnalité serveur future l’exige |
 
 Ne jamais committer `.env.local`. La clé de service Supabase ne doit jamais être importée dans un Client Component ni exposée dans les logs.
 
@@ -70,7 +71,7 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 - `src/components` : composants de mise en page et composants UI accessibles ;
 - `src/domain` : types métier et logique métier pure, dont le moteur de cotes ;
 - `src/application` : orchestration pure et adaptation des modèles persistants ;
-- `src/data` et `src/lib/supabase` : futur accès persistant à Supabase ;
+- `src/auth`, `src/data` et `src/lib/supabase` : sessions SSR, autorisations et accès persistant à Supabase ;
 - `src/config` : validation paresseuse de l’environnement avec Zod ;
 - `supabase` : configuration locale, migrations, seed et validation SQL ;
 - `tests` : tests unitaires et préparation des tests end-to-end.
@@ -85,4 +86,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page de pré-saison, la route `/api/health`, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. L’authentification, les pages métier et les opérations transactionnelles ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page de pré-saison, la route `/api/health`, l’authentification privée, les invitations, la sélection de saison, les premières pages protégées, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. Les opérations transactionnelles de paris et de règlements ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

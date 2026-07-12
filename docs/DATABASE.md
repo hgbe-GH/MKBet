@@ -2,7 +2,7 @@
 
 ## Principes
 
-PostgreSQL/Supabase est la source de vérité de MK Bet. Le schéma public contient 25 tables privées, protégées par Row Level Security sans politique permissive à cette étape. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
+PostgreSQL/Supabase est la source de vérité de MK Bet. Le schéma public contient 25 tables privées, protégées par Row Level Security métier. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
 
 Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Vercel ou une requête utilisateur. `supabase/seed.sql` ne contient que des données de référence réexécutables.
 
@@ -80,11 +80,13 @@ Un règlement produit une nouvelle ligne `settlements`. Une correction utilise `
 
 `wallet_transactions` est un journal immuable : aucun `UPDATE` ni `DELETE` n’est accepté. Chaque correction est une nouvelle transaction idempotente. `audit_logs` suit la même stratégie append-only pour les opérations importantes.
 
-## RLS et sécurité future
+## RLS et sécurité
 
-La RLS est active sans politiques, ce qui refuse l’accès direct des rôles client par défaut. L’étape Auth et Permissions ajoutera des politiques fondées sur `auth.uid()`, les membres actifs, leurs rôles, la confidentialité des actions et la saison concernée. Les fonctions transactionnelles sensibles devront valider le rôle serveur et ne jamais faire confiance aux montants, cotes ou identifiants transmis par le client.
+La RLS utilise `auth.uid()`, les membres actifs, leurs rôles, la confidentialité des actions et la saison concernée. Les helpers `private.*` évitent les récursions de policies. Les fonctions transactionnelles sensibles valident le rôle serveur et ne font pas confiance aux montants, cotes ou identifiants transmis par le client.
 
 La fonction `write_audit_log` est interne, `SECURITY DEFINER`, avec un `search_path` vide et sans droit d’exécution pour `public`, `anon` ou `authenticated`.
+
+Les invitations de saison sont acceptées par RPC. Le token clair n’est pas stocké; seul un hash SHA-256 est conservé. La vue `member_action_feed` masque `private_note` et sert de surface de lecture pour les membres ordinaires.
 
 ## Développement et migrations
 

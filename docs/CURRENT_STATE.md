@@ -9,8 +9,11 @@ Dernière mise à jour : 12 juillet 2026.
 - Pages de chargement, erreur, erreur globale et contenu introuvable.
 - Route publique `GET /api/health` sans information sensible.
 - Validation paresseuse des variables d’environnement avec Zod.
-- Fondations Supabase sans connexion ni clé réelle.
-- Cinq migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers et RLS.
+- Authentification privée Supabase SSR avec magic link, callback, logout et helpers de session.
+- Fondations Supabase sans clé réelle committée.
+- Huit migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers, RPC Auth/invitations et RLS métier.
+- Création automatique/rattrapage des profils, invitations hashées, rôles cumulables et sélection de saison.
+- Premières pages protégées : `/seasons`, `/seasons/new`, `/dashboard`, `/settings/account` et `/invite/[token]`.
 - Seed idempotent avec 19 types d’actions, 7 templates et 15 règles d’impact.
 - Types Supabase générés et interfaces de domaine ciblées.
 - Moteur déterministe de probabilités et de cotes indépendant de React, Next.js et Supabase.
@@ -22,7 +25,6 @@ Dernière mise à jour : 12 juillet 2026.
 
 ## Ce qui n’est pas développé
 
-- Authentification, invitations et autorisations RLS.
 - Pages et opérations persistantes pour marchés, tickets et portefeuilles MKB.
 - Placement transactionnel, écriture réelle des snapshots et règlement financier.
 - Lives fonctionnels, déclaration d’actions, validation et règlement transactionnel.
@@ -49,7 +51,7 @@ Dernière mise à jour : 12 juillet 2026.
 
 ## Prochaines tâches
 
-La prochaine étape prévue est l’authentification et les invitations, puis les politiques RLS métier. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
+La prochaine étape prévue est l’identité visuelle puis les marchés. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
 
 ## Problèmes connus
 
@@ -59,18 +61,21 @@ La prochaine étape prévue est l’authentification et les invitations, puis le
 
 ## Dernières validations
 
-Exécutées le 12 juillet 2026 après l’ajout du moteur de cotes :
+Exécutées le 12 juillet 2026 après l’ajout de l’authentification, des invitations et de la RLS :
 
 - `pnpm format` : succès ;
 - `pnpm lint` : succès ;
 - `pnpm typecheck` : succès ;
-- `pnpm test` : 58 tests réussis dans 9 fichiers, incluant les propriétés génératives à graine fixe ;
-- `pnpm odds:demo` : succès sans Supabase, secret ni accès réseau ;
-- `pnpm build` : succès, avec `/`, `/_not-found`, `/api/health` et `/icon.svg` dans la table des routes ;
+- `pnpm test` : 72 tests réussis dans 13 fichiers, incluant Auth, env, UI, schéma, RPC Supabase et moteur de cotes ;
+- `supabase db reset` : succès avec huit migrations et seed ;
+- `supabase db lint` : succès sans erreur de schéma ;
+- `supabase/tests/auth_rls_validation.sql` : 1 script SQL réussi en rollback avec 7 identités fictives, invitation et RLS ;
+- politiques RLS : 74 policies applicatives et Storage ;
+- `pnpm build` : succès sans base active requise au build ;
 - `pnpm install --frozen-lockfile` : succès ;
 - recherche de secrets Supabase/JWT : aucun secret détecté ;
-- migrations Supabase existantes : aucune modification ;
-- build : aucune lecture Supabase, variable d’environnement ou exécution automatique du moteur.
+- migrations Supabase existantes : aucune modification rétroactive ;
+- build : aucune migration ni accès Supabase obligatoire à la compilation.
 
 ## Validation locale du schéma
 

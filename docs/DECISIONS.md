@@ -59,3 +59,9 @@
 **Décision :** le moteur de cotes est un noyau fonctionnel pur. Les lectures et écritures Supabase seront ajoutées dans une couche d’application distincte.
 
 **Motif :** garantir le déterminisme, l’explicabilité, les tests en mémoire et la compatibilité serverless, sans coupler les calculs à React, Next.js ou au cycle de vie d’une connexion distante.
+
+## ADR-011 — Auth SSR Supabase et RLS métier
+
+**Décision :** utiliser `@supabase/ssr`, `getClaims()` et des RPC SQL contrôlées pour l’authentification privée, les invitations et les autorisations.
+
+**Motif :** conserver une application compatible Vercel sans session globale, faire appliquer les droits par PostgreSQL et éviter l’usage de la service role dans les parcours utilisateur.

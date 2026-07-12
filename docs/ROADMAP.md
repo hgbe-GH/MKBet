@@ -3,7 +3,7 @@
 - [x] 1. Fondations
 - [x] 2. Schéma Supabase
 - [x] 3. Moteur de probabilités et de cotes
-- [ ] 4. Authentification et invitations
+- [x] 4. Authentification et invitations
 - [ ] 5. Identité visuelle
 - [ ] 6. Marchés
 - [ ] 7. Ticket et portefeuille

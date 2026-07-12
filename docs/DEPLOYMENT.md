@@ -17,16 +17,23 @@ Configurer séparément les variables suivantes dans **Development**, **Preview*
 
 - `NEXT_PUBLIC_SITE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_URL` ;
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` ;
-- `SUPABASE_SERVICE_ROLE_KEY`.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-Chaque déploiement qui nécessite une URL publique absolue doit utiliser `NEXT_PUBLIC_SITE_URL`. En Preview, cette valeur doit correspondre à l’URL de Preview retenue par le projet plutôt qu’à une URL localhost.
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. `SUPABASE_SERVICE_ROLE_KEY` ne doit être ajoutée dans Vercel que lorsqu’une future fonctionnalité serveur l’exige réellement.
+
+Chaque déploiement qui nécessite une URL publique absolue doit utiliser `NEXT_PUBLIC_SITE_URL`. En Preview, le callback Auth peut utiliser l’origine validée de la requête pour fonctionner avec les URLs générées par Vercel.
 
 Les secrets ne doivent jamais être committés. `.env.local` reste local et la clé de service ne doit être disponible que dans le runtime serveur.
 
 ## Redirections Supabase futures
 
-Lorsque Supabase Auth sera ajouté, déclarer dans Supabase l’URL de Production et les motifs de redirection autorisés pour le développement et les Previews Vercel. Les destinations reçues du client devront être comparées à une liste d’origines autorisées avant toute redirection.
+Déclarer dans Supabase Auth les URLs de redirection autorisées pour :
+
+- local : `http://localhost:3000/auth/callback` et `http://127.0.0.1:3000/auth/callback` ;
+- Preview : les domaines Preview utilisés par le projet, sans coder de domaine inventé ;
+- Production : le domaine canonique pointé par `NEXT_PUBLIC_SITE_URL`, avec `/auth/callback`.
+
+Les paramètres `next` reçus du client sont limités à des chemins internes.
 
 ## Migrations Supabase
 

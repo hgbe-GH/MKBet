@@ -1,27 +1,47 @@
-import "server-only";
-
 import { z } from "zod";
 
 const siteUrlSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.string().url(),
 });
 
-const publicSupabaseSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-});
-
-const serverSupabaseSchema = publicSupabaseSchema.extend({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-});
+const publicSupabaseSchema = z
+  .object({
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(1).optional(),
+    ),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(1).optional(),
+    ),
+  })
+  .superRefine((value, context) => {
+    if (
+      !value.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
+      !value.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"],
+        message: "Required",
+      });
+    }
+  });
 
 export interface PublicSupabaseEnv {
   url: string;
-  anonKey: string;
+  publishableKey: string;
 }
 
-export interface ServerSupabaseEnv extends PublicSupabaseEnv {
-  serviceRoleKey: string;
+export function formatConfigurationError(
+  context: string,
+  variables: readonly string[],
+): Error {
+  return new Error(
+    `${context}: ${variables.join(", ")} is missing or invalid. ` +
+      "Configure it locally in .env.local and separately in Vercel.",
+  );
 }
 
 function parseEnvironment<T>(
@@ -43,10 +63,7 @@ function parseEnvironment<T>(
     ),
   );
 
-  throw new Error(
-    `${context}: ${invalidVariables.join(", ")} is missing or invalid. ` +
-      "Configure it locally in .env.local and separately in Vercel.",
-  );
+  throw formatConfigurationError(context, invalidVariables);
 }
 
 export function getSiteUrl(): string {
@@ -64,6 +81,8 @@ export function getPublicSupabaseEnv(): PublicSupabaseEnv {
     publicSupabaseSchema,
     {
       NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     },
     "Supabase public configuration error",
@@ -71,24 +90,9 @@ export function getPublicSupabaseEnv(): PublicSupabaseEnv {
 
   return {
     url: env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  };
-}
-
-export function getServerSupabaseEnv(): ServerSupabaseEnv {
-  const env = parseEnvironment(
-    serverSupabaseSchema,
-    {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    },
-    "Supabase server configuration error",
-  );
-
-  return {
-    url: env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+    publishableKey:
+      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+      "",
   };
 }

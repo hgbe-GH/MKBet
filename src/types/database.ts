@@ -49,6 +49,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "action_confirmations_action_id_fkey";
+            columns: ["action_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "action_confirmations_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
@@ -91,6 +98,13 @@ export type Database = {
             columns: ["action_id"];
             isOneToOne: false;
             referencedRelation: "actions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_reports_action_id_fkey";
+            columns: ["action_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
             referencedColumns: ["id"];
           },
           {
@@ -280,6 +294,13 @@ export type Database = {
             columns: ["supersedes_action_id"];
             isOneToOne: false;
             referencedRelation: "actions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "actions_supersedes_action_id_fkey";
+            columns: ["supersedes_action_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
             referencedColumns: ["id"];
           },
         ];
@@ -885,6 +906,13 @@ export type Database = {
             referencedColumns: ["id", "season_id"];
           },
           {
+            foreignKeyName: "media_assets_action_season_fk";
+            columns: ["action_id", "season_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
+            referencedColumns: ["id", "season_id"];
+          },
+          {
             foreignKeyName: "media_assets_live_season_fk";
             columns: ["live_id", "season_id"];
             isOneToOne: false;
@@ -1076,6 +1104,13 @@ export type Database = {
             columns: ["action_id"];
             isOneToOne: false;
             referencedRelation: "actions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "rechute_snapshots_action_id_fkey";
+            columns: ["action_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
             referencedColumns: ["id"];
           },
           {
@@ -1311,6 +1346,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "settlements_official_action_id_fkey";
+            columns: ["official_action_id"];
+            isOneToOne: false;
+            referencedRelation: "member_action_feed";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "settlements_result_market_fk";
             columns: ["result_outcome_id", "market_id"];
             isOneToOne: false;
@@ -1458,9 +1500,167 @@ export type Database = {
       };
     };
     Views: {
-      [_ in never]: never;
+      member_action_feed: {
+        Row: {
+          action_type_code: string | null;
+          action_type_id: string | null;
+          certainty: Database["public"]["Enums"]["action_certainty"] | null;
+          classified: boolean | null;
+          created_at: string | null;
+          declared_at: string | null;
+          declared_by: string | null;
+          id: string | null;
+          live_id: string | null;
+          occurred_at: string | null;
+          official_occurred_at: string | null;
+          privacy_level: Database["public"]["Enums"]["privacy_level"] | null;
+          public_description: string | null;
+          public_label: string | null;
+          season_id: string | null;
+          status: Database["public"]["Enums"]["action_status"] | null;
+          trash_label: string | null;
+          updated_at: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "actions_action_type_id_fkey";
+            columns: ["action_type_id"];
+            isOneToOne: false;
+            referencedRelation: "action_types";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "actions_declared_by_fkey";
+            columns: ["declared_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "actions_live_season_fk";
+            columns: ["live_id", "season_id"];
+            isOneToOne: false;
+            referencedRelation: "live_sessions";
+            referencedColumns: ["id", "season_id"];
+          },
+          {
+            foreignKeyName: "actions_season_id_fkey";
+            columns: ["season_id"];
+            isOneToOne: false;
+            referencedRelation: "seasons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Functions: {
+      accept_season_invitation: {
+        Args: { p_token: string };
+        Returns: {
+          roles: Database["public"]["Enums"]["season_member_role"][];
+          season_id: string;
+        }[];
+      };
+      create_season: {
+        Args: {
+          p_breakup_date: string;
+          p_description: string;
+          p_idempotency_key: string;
+          p_secret_bets_until_close: boolean;
+          p_started_at: string;
+          p_starting_balance_mkb: number;
+          p_title: string;
+        };
+        Returns: {
+          season_id: string;
+        }[];
+      };
+      create_season_invitation: {
+        Args: {
+          p_email: string;
+          p_expires_at: string;
+          p_max_uses?: number;
+          p_proposed_role: Database["public"]["Enums"]["season_member_role"];
+          p_proposed_subject_key: Database["public"]["Enums"]["subject_key"];
+          p_season_id: string;
+        };
+        Returns: {
+          invitation_id: string;
+          token: string;
+        }[];
+      };
+      ensure_current_profile: { Args: never; Returns: string };
+      get_dashboard_season: {
+        Args: { p_season_id?: string };
+        Returns: {
+          balanceMkb: number;
+          breakupDate: string;
+          id: string;
+          roles: Database["public"]["Enums"]["season_member_role"][];
+          title: string;
+        }[];
+      };
+      get_invitation_preview: {
+        Args: { p_token: string };
+        Returns: {
+          expiresAt: string;
+          isValid: boolean;
+          maskedEmail: string;
+          proposedRole: Database["public"]["Enums"]["season_member_role"];
+          proposedSubjectKey: Database["public"]["Enums"]["subject_key"];
+          reason: string;
+          seasonTitle: string;
+        }[];
+      };
+      grant_season_member_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["season_member_role"];
+          p_season_id: string;
+          p_subject_key?: Database["public"]["Enums"]["subject_key"];
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
+      list_my_seasons: {
+        Args: never;
+        Returns: {
+          balanceMkb: number;
+          id: string;
+          roles: Database["public"]["Enums"]["season_member_role"][];
+          status: string;
+          title: string;
+        }[];
+      };
+      list_season_invitations: {
+        Args: { p_season_id: string };
+        Returns: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          masked_email: string;
+          max_uses: number;
+          proposed_role: Database["public"]["Enums"]["season_member_role"];
+          proposed_subject_key: Database["public"]["Enums"]["subject_key"];
+          status: Database["public"]["Enums"]["invitation_status"];
+          use_count: number;
+        }[];
+      };
+      revoke_season_invitation: {
+        Args: { p_invitation_id: string };
+        Returns: undefined;
+      };
+      revoke_season_member_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["season_member_role"];
+          p_season_id: string;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
+      set_season_member_active: {
+        Args: { p_is_active: boolean; p_season_id: string; p_user_id: string };
+        Returns: undefined;
+      };
       write_audit_log: {
         Args: {
           p_action: string;

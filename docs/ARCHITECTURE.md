@@ -13,6 +13,7 @@ Le runtime Node.js par défaut est conservé. Le runtime Edge ne sera ajouté qu
 - `src/data` et `src/lib/supabase` contiendront l’accès à la persistance ;
 - `src/components` contiendra l’interface générique et la mise en page ;
 - `src/app` composera les routes et orchestrera les cas d’usage côté serveur ;
+- `src/auth` contiendra les helpers de session et d’autorisation côté serveur ;
 - `src/config` validera l’environnement à la frontière du système.
 
 Les composants React ne seront jamais la seule source d’un calcul de cote ou d’une règle de règlement.
@@ -21,9 +22,9 @@ Les composants React ne seront jamais la seule source d’un calcul de cote ou d
 
 Supabase fournira PostgreSQL, Auth, Realtime et Storage. PostgreSQL sera la source de vérité persistante. Les opérations sensibles de portefeuille et de règlement seront atomiques côté base, et les tables privées utiliseront Row Level Security.
 
-Le schéma public est défini par cinq migrations forward-only et contient les domaines saisons, lives, actions, marchés, paris, portefeuilles, audit et Rechutomètre. Les contraintes relationnelles restent dans PostgreSQL; la RLS est active et deny-by-default jusqu’à l’étape Auth et Permissions.
+Le schéma public est défini par des migrations forward-only et contient les domaines saisons, lives, actions, marchés, paris, portefeuilles, audit et Rechutomètre. Les contraintes relationnelles restent dans PostgreSQL. Les policies RLS métier utilisent `auth.uid()` et des helpers SQL dans le schéma `private`.
 
-La clé de service restera confinée aux modules serveur. Le build ne crée aucun client Supabase, n’exécute aucune migration et ne dépend d’aucune variable Supabase ; les validateurs ne s’exécutent que lorsqu’une future fonctionnalité en a besoin.
+Supabase Auth est intégré avec `@supabase/ssr`, un client par requête, `proxy.ts` pour rafraîchir les cookies et `getClaims()` pour vérifier les JWT. La clé de service reste confinée aux modules serveur et n’est pas utilisée dans les parcours utilisateur ordinaires. Le build ne crée aucun client Supabase, n’exécute aucune migration et ne dépend d’aucune variable Supabase.
 
 ## Compatibilité Vercel
 
