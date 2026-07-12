@@ -2,7 +2,7 @@
 
 - [x] 1. Fondations
 - [x] 2. Schéma Supabase
-- [ ] 3. Moteur de probabilités et de cotes
+- [x] 3. Moteur de probabilités et de cotes
 - [ ] 4. Authentification et invitations
 - [ ] 5. Identité visuelle
 - [ ] 6. Marchés

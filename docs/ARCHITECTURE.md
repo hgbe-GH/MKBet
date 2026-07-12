@@ -8,7 +8,8 @@ Le runtime Node.js par défaut est conservé. Le runtime Edge ne sera ajouté qu
 
 ## Séparation des responsabilités
 
-- `src/domain` contiendra la logique métier pure : probabilités, cotes, règles de marché et règlement ;
+- `src/domain` contient la logique métier pure : probabilités, cotes et règles de marché ;
+- `src/application` orchestre le domaine et adapte les formes persistantes sans effectuer d’accès réseau ;
 - `src/data` et `src/lib/supabase` contiendront l’accès à la persistance ;
 - `src/components` contiendra l’interface générique et la mise en page ;
 - `src/app` composera les routes et orchestrera les cas d’usage côté serveur ;
@@ -34,11 +35,13 @@ Les URL publiques absolues utiliseront `NEXT_PUBLIC_SITE_URL`, configurée pour 
 
 Les changements utiles aux lives, marchés et chronologies seront publiés par PostgreSQL/Supabase Realtime. Les clients s’abonneront uniquement aux canaux nécessaires, autorisés par RLS. Une reconnexion déclenchera une relecture de l’état canonique côté serveur afin de ne pas traiter Realtime comme une source de vérité.
 
-## Stratégie du moteur de cotes prévue
+## Moteur de cotes
 
-Le moteur sera un module TypeScript pur et testable dans `src/domain`. Il transformera des probabilités validées et l’état d’un marché en cotes selon des règles explicites. Les entrées client ne seront jamais considérées comme autoritaires, les cotes seront recalculées côté serveur, puis la cote acceptée sera figée avec le pari dans une transaction PostgreSQL.
+Le moteur est un noyau TypeScript pur et testable dans `src/domain/odds`. Il reçoit explicitement les dates UTC, modèles, signaux, marges, bornes, raisons et versions. Il couvre les marchés binaires, multi-options, périodes, dates exactes, prochaine action, over/under et les combinés corrélés.
 
-Aucun algorithme de cote n’est implémenté. Le schéma conserve uniquement les paramètres, versions, snapshots et règles d’impact nécessaires à sa future exécution.
+`src/application/odds` fournit un dispatcher typé, les adaptateurs des types PostgreSQL et la construction de drafts de snapshots. Cette couche n’importe aucun client Supabase et n’effectue aucune lecture ou écriture. Les futurs repositories persistants resteront séparés.
+
+Les entrées client ne seront jamais considérées comme autoritaires. Le serveur recalculera les cotes depuis l’état canonique, puis la cote acceptée sera figée avec le pari dans une future transaction PostgreSQL.
 
 ## Migrations et types
 

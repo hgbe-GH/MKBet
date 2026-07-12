@@ -70,6 +70,8 @@ Un template initialise un marché, ses paramètres de probabilité et sa règle 
 
 `market_outcomes.displayed_odds` est la cote courante. Chaque recalcul crée un `odds_snapshot`. Lors d’un pari, `bet_legs.odds_at_bet`, `fair_probability_at_bet` et `odds_version_at_bet` figent la proposition acceptée : un recalcul futur ne modifie jamais un ticket existant.
 
+Le moteur TypeScript construit désormais des drafts compatibles avec ces deux tables, mais ne les insère pas. Les identifiants, l’instant de calcul et la prochaine version sont fournis explicitement. La future couche de persistance sera responsable de l’écriture atomique et de la concurrence optimiste ; Vercel n’exécute jamais de migration au démarrage.
+
 ### Pari, portefeuille et règlement
 
 Un ticket simple possède une jambe; un combiné en possède plusieurs. Le nombre de jambes, le débit du portefeuille, le ticket et la transaction seront créés atomiquement par une future fonction PostgreSQL.

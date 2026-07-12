@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient uniquement les fondations techniques et une page de pré-saison statique.
+Cette version contient les fondations techniques, le schéma Supabase, une page de pré-saison statique et un moteur déterministe de probabilités et de cotes.
 
 ## Prérequis
 
@@ -53,6 +53,7 @@ pnpm typecheck    # vérification TypeScript stricte
 pnpm test         # tests unitaires Vitest
 pnpm test:watch   # tests unitaires en mode interactif
 pnpm test:e2e     # futurs parcours Playwright
+pnpm odds:demo    # démonstration locale déterministe du moteur de cotes
 pnpm db:start     # démarre Supabase local avec Docker
 pnpm db:reset     # recrée la base depuis les migrations et le seed
 pnpm db:types     # régénère les types TypeScript depuis la base locale
@@ -67,13 +68,14 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 
 - `src/app` : routes et interfaces Next.js App Router ;
 - `src/components` : composants de mise en page et composants UI accessibles ;
-- `src/domain` : types métier et future logique métier pure ;
+- `src/domain` : types métier et logique métier pure, dont le moteur de cotes ;
+- `src/application` : orchestration pure et adaptation des modèles persistants ;
 - `src/data` et `src/lib/supabase` : futur accès persistant à Supabase ;
 - `src/config` : validation paresseuse de l’environnement avec Zod ;
 - `supabase` : configuration locale, migrations, seed et validation SQL ;
 - `tests` : tests unitaires et préparation des tests end-to-end.
 
-Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées et [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel.
+Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées, [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel et [`docs/ODDS.md`](docs/ODDS.md) pour le modèle de cotes.
 
 ## Déploiement Vercel futur
 
@@ -83,4 +85,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page de pré-saison, la route `/api/health`, le schéma Supabase versionné, les types de base et les outils de validation existent. L’authentification, les pages métier, les opérations transactionnelles et le moteur de cotes TypeScript ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page de pré-saison, la route `/api/health`, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. L’authentification, les pages métier et les opérations transactionnelles ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

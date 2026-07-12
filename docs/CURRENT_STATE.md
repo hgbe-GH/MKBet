@@ -13,13 +13,18 @@ Dernière mise à jour : 12 juillet 2026.
 - Cinq migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers et RLS.
 - Seed idempotent avec 19 types d’actions, 7 templates et 15 règles d’impact.
 - Types Supabase générés et interfaces de domaine ciblées.
+- Moteur déterministe de probabilités et de cotes indépendant de React, Next.js et Supabase.
+- Pricing binaire, multi-options, périodes, date exacte, prochaine action, over/under et combinés corrélés.
+- Adaptateurs purs des modèles SQL, drafts de snapshots et service abstrait de repricing sans accès distant.
+- Fixtures locales conformes au seed et démonstration reproductible avec `pnpm odds:demo`.
 - ESLint, Prettier, Vitest, Testing Library et configuration Playwright.
 - Documentation produit, architecture, décisions, roadmap et déploiement futur.
 
 ## Ce qui n’est pas développé
 
 - Authentification, invitations et autorisations RLS.
-- Pages et opérations applicatives pour marchés, cotes, tickets et portefeuilles MKB.
+- Pages et opérations persistantes pour marchés, tickets et portefeuilles MKB.
+- Placement transactionnel, écriture réelle des snapshots et règlement financier.
 - Lives fonctionnels, déclaration d’actions, validation et règlement transactionnel.
 - Supabase Realtime, chronologie, classement et administration.
 - Déploiements Vercel Preview et Production.
@@ -34,6 +39,7 @@ Dernière mise à jour : 12 juillet 2026.
 - `pnpm test`
 - `pnpm test:watch`
 - `pnpm test:e2e`
+- `pnpm odds:demo`
 - `pnpm db:start`
 - `pnpm db:reset`
 - `pnpm db:types`
@@ -43,7 +49,7 @@ Dernière mise à jour : 12 juillet 2026.
 
 ## Prochaines tâches
 
-La prochaine étape prévue est le moteur TypeScript pur de probabilités et de cotes. Il devra consommer les paramètres du schéma sans se connecter à Supabase dans ses tests unitaires.
+La prochaine étape prévue est l’authentification et les invitations, puis les politiques RLS métier. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
 
 ## Problèmes connus
 
@@ -53,18 +59,18 @@ La prochaine étape prévue est le moteur TypeScript pur de probabilités et de 
 
 ## Dernières validations
 
-Exécutées le 12 juillet 2026 après l’ajout du schéma Supabase :
+Exécutées le 12 juillet 2026 après l’ajout du moteur de cotes :
 
 - `pnpm format` : succès ;
 - `pnpm lint` : succès ;
 - `pnpm typecheck` : succès ;
-- `pnpm test` : 16 tests réussis, dont 8 contrôles statiques du schéma ;
+- `pnpm test` : 58 tests réussis dans 9 fichiers, incluant les propriétés génératives à graine fixe ;
+- `pnpm odds:demo` : succès sans Supabase, secret ni accès réseau ;
 - `pnpm build` : succès, avec `/`, `/_not-found`, `/api/health` et `/icon.svg` dans la table des routes ;
 - `pnpm install --frozen-lockfile` : succès ;
-- serveur de production : `/` répond et `/api/health` renvoie HTTP 200 avec le contrat attendu ;
-- recherche de secrets Supabase/JWT : aucun secret détecté.
-- `supabase db lint --local --level warning` : aucune erreur de schéma ;
-- validation SQL locale : succès après deux exécutions consécutives du seed.
+- recherche de secrets Supabase/JWT : aucun secret détecté ;
+- migrations Supabase existantes : aucune modification ;
+- build : aucune lecture Supabase, variable d’environnement ou exécution automatique du moteur.
 
 ## Validation locale du schéma
 

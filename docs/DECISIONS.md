@@ -53,3 +53,9 @@
 **Décision :** appliquer les migrations Supabase hors de Next.js et ne jamais modifier silencieusement un fichier déjà déployé.
 
 **Motif :** dissocier les changements persistants du cycle éphémère de Vercel et préserver un historique reproductible entre Preview et Production.
+
+## ADR-010 — Noyau fonctionnel pur pour les cotes
+
+**Décision :** le moteur de cotes est un noyau fonctionnel pur. Les lectures et écritures Supabase seront ajoutées dans une couche d’application distincte.
+
+**Motif :** garantir le déterminisme, l’explicabilité, les tests en mémoire et la compatibilité serverless, sans coupler les calculs à React, Next.js ou au cycle de vie d’une connexion distante.
