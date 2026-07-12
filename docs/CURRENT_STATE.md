@@ -14,6 +14,9 @@ Dernière mise à jour : 12 juillet 2026.
 - Huit migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers, RPC Auth/invitations et RLS métier.
 - Création automatique/rattrapage des profils, invitations hashées, rôles cumulables et sélection de saison.
 - Premières pages protégées : `/seasons`, `/seasons/new`, `/dashboard`, `/settings/account` et `/invite/[token]`.
+- Shell sportsbook privé responsive avec sidebar desktop, header compact, navigation mobile, ticket visuel et lien d’évitement.
+- Pages sportsbook de démonstration : `/markets`, `/markets/[marketId]`, `/lives`, `/lives/[liveId]`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin`.
+- Design system clair documenté dans `docs/DESIGN_SYSTEM.md`, avec tokens de marque, surfaces, états et composants accessibles.
 - Seed idempotent avec 19 types d’actions, 7 templates et 15 règles d’impact.
 - Types Supabase générés et interfaces de domaine ciblées.
 - Moteur déterministe de probabilités et de cotes indépendant de React, Next.js et Supabase.
@@ -25,10 +28,10 @@ Dernière mise à jour : 12 juillet 2026.
 
 ## Ce qui n’est pas développé
 
-- Pages et opérations persistantes pour marchés, tickets et portefeuilles MKB.
+- Repositories persistants pour marchés, lives, tickets et classements.
 - Placement transactionnel, écriture réelle des snapshots et règlement financier.
 - Lives fonctionnels, déclaration d’actions, validation et règlement transactionnel.
-- Supabase Realtime, chronologie, classement et administration.
+- Supabase Realtime et administration métier active.
 - Déploiements Vercel Preview et Production.
 
 ## Commandes disponibles
@@ -51,30 +54,29 @@ Dernière mise à jour : 12 juillet 2026.
 
 ## Prochaines tâches
 
-La prochaine étape prévue est l’identité visuelle puis les marchés. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
+La prochaine étape prévue est le branchement progressif des marchés persistants et du ticket transactionnel. Le moteur de cotes restera un noyau pur ; sa future persistance passera par une couche distincte.
 
 ## Problèmes connus
 
-- Les navigateurs Playwright ne sont pas installés dans cette étape ; la configuration et un smoke test futur sont présents, mais le parcours end-to-end n’a pas été exécuté.
+- Les navigateurs Playwright ne sont pas installés dans cette étape ; la configuration et les smoke tests existent, mais le parcours end-to-end n’a pas été exécuté.
 - Aucune variable Supabase réelle n’est configurée. Le build reste volontairement indépendant de cette configuration.
 - L’interface Chrome de contrôle du workspace n’était pas disponible pendant cette tâche. Le rendu a été vérifié par les tests de composants et par le HTML du serveur de production, mais pas par une inspection visuelle automatisée du navigateur.
+- Les écrans sportsbook utilisent des données de démonstration locales. Les boutons de placement, déclaration live et administration métier restent désactivés.
 
 ## Dernières validations
 
-Exécutées le 12 juillet 2026 après l’ajout de l’authentification, des invitations et de la RLS :
+Exécutées le 12 juillet 2026 après l’ajout de l’interface sportsbook :
 
 - `pnpm format` : succès ;
 - `pnpm lint` : succès ;
 - `pnpm typecheck` : succès ;
-- `pnpm test` : 72 tests réussis dans 13 fichiers, incluant Auth, env, UI, schéma, RPC Supabase et moteur de cotes ;
-- `supabase db reset` : succès avec huit migrations et seed ;
-- `supabase db lint` : succès sans erreur de schéma ;
-- `supabase/tests/auth_rls_validation.sql` : 1 script SQL réussi en rollback avec 7 identités fictives, invitation et RLS ;
-- politiques RLS : 74 policies applicatives et Storage ;
+- `pnpm test` : 84 tests réussis dans 16 fichiers, incluant Auth, env, schéma, RPC Supabase, moteur de cotes et interface sportsbook ;
 - `pnpm build` : succès sans base active requise au build ;
 - `pnpm install --frozen-lockfile` : succès ;
-- recherche de secrets Supabase/JWT : aucun secret détecté ;
-- migrations Supabase existantes : aucune modification rétroactive ;
+- `pnpm test:e2e` : non exécuté jusqu’au bout, Chromium Playwright absent du cache local (`pnpm exec playwright install` requis, non lancé dans cette étape) ;
+- smoke Playwright public ajouté pour `/` et `/api/health` ;
+- recherche de secrets Supabase/JWT : aucun secret réel détecté, seulement noms de variables documentés/testés ;
+- migrations Supabase existantes et moteur de cotes : aucune modification ;
 - build : aucune migration ni accès Supabase obligatoire à la compilation.
 
 ## Validation locale du schéma

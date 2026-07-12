@@ -46,6 +46,12 @@ Les 25 tables privées restent sous RLS. Les politiques métier remplacent le de
 
 `member_action_feed` est la vue prévue pour le futur fil membre. Elle ne contient pas `private_note` et repose sur `security_invoker = true`.
 
+## Interface privée
+
+Le shell sportsbook reste derrière le layout protégé et `requireAuth()`. Les données de démonstration n’accordent aucun accès persistant et ne contournent pas RLS. Le lien d’administration est masqué pour les rôles ordinaires, mais la sécurité réelle continuera de reposer sur les RPC et policies PostgreSQL.
+
+Le ticket visuel conserve son état uniquement en mémoire React. Il n’utilise pas `localStorage`, ne stocke aucun jeton et ne déclenche aucune mutation de portefeuille ou de pari.
+
 ## Limites restantes
 
-Le placement des paris, le règlement financier, les transitions de lives, les uploads média dans l'interface et le realtime ne sont pas encore implémentés. Les policies préparent ces usages mais les mutations sensibles futures devront rester atomiques côté PostgreSQL.
+Le placement des paris, le règlement financier, les transitions de lives, les uploads média dans l'interface et le realtime ne sont pas encore implémentés. Les pages actuelles affichent des données de démonstration pour ces domaines. Les policies préparent ces usages mais les mutations sensibles futures devront rester atomiques côté PostgreSQL.

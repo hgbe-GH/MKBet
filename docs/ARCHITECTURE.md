@@ -14,9 +14,16 @@ Le runtime Node.js par défaut est conservé. Le runtime Edge ne sera ajouté qu
 - `src/components` contiendra l’interface générique et la mise en page ;
 - `src/app` composera les routes et orchestrera les cas d’usage côté serveur ;
 - `src/auth` contiendra les helpers de session et d’autorisation côté serveur ;
-- `src/config` validera l’environnement à la frontière du système.
+- `src/config` validera l’environnement à la frontière du système ;
+- `src/fixtures/sportsbook` contient uniquement les données de démonstration utilisées par l’interface sportsbook tant que les repositories de marchés/lives réels ne sont pas branchés.
 
 Les composants React ne seront jamais la seule source d’un calcul de cote ou d’une règle de règlement.
+
+## Interface sportsbook
+
+Le shell privé est mobile-first : sidebar desktop, header compact, bottom navigation mobile, ticket visuel et lien d’évitement. Les pages `/dashboard`, `/markets`, `/lives`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin` présentent les surfaces sportsbook sans créer de mutation persistante.
+
+Les cotes affichées dans cette étape proviennent de fixtures marquées “Données de démonstration”. Elles ne remplacent pas `market_templates`, `market_outcomes` ou `odds_snapshots`, et aucun placement de pari n’est possible depuis l’interface.
 
 ## Supabase
 

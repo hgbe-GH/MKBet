@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, les invitations de saison, une page de pré-saison statique et un moteur déterministe de probabilités et de cotes.
+Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, les invitations de saison, une page de pré-saison statique, un moteur déterministe de probabilités et de cotes, ainsi qu’un shell sportsbook privé alimenté par des données de démonstration.
 
 ## Prérequis
 
@@ -69,6 +69,7 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 
 - `src/app` : routes et interfaces Next.js App Router ;
 - `src/components` : composants de mise en page et composants UI accessibles ;
+- `src/fixtures/sportsbook` : données de démonstration isolées pour l’interface sportsbook ;
 - `src/domain` : types métier et logique métier pure, dont le moteur de cotes ;
 - `src/application` : orchestration pure et adaptation des modèles persistants ;
 - `src/auth`, `src/data` et `src/lib/supabase` : sessions SSR, autorisations et accès persistant à Supabase ;
@@ -76,7 +77,7 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 - `supabase` : configuration locale, migrations, seed et validation SQL ;
 - `tests` : tests unitaires et préparation des tests end-to-end.
 
-Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées, [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel et [`docs/ODDS.md`](docs/ODDS.md) pour le modèle de cotes.
+Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées, [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel, [`docs/ODDS.md`](docs/ODDS.md) pour le modèle de cotes et [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) pour l’interface sportsbook.
 
 ## Déploiement Vercel futur
 
@@ -86,4 +87,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page de pré-saison, la route `/api/health`, l’authentification privée, les invitations, la sélection de saison, les premières pages protégées, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. Les opérations transactionnelles de paris et de règlements ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page de pré-saison, la route `/api/health`, l’authentification privée, les invitations, la sélection de saison, le shell sportsbook, les pages privées de démonstration, le schéma Supabase versionné, les types de base, le moteur de cotes pur et les outils de validation existent. Les opérations transactionnelles de paris et de règlements ne sont pas encore développées. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

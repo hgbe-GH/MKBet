@@ -4,7 +4,7 @@
 - [x] 2. Schéma Supabase
 - [x] 3. Moteur de probabilités et de cotes
 - [x] 4. Authentification et invitations
-- [ ] 5. Identité visuelle
+- [x] 5. Identité visuelle et shell sportsbook
 - [ ] 6. Marchés
 - [ ] 7. Ticket et portefeuille
 - [ ] 8. Création des lives

@@ -80,6 +80,8 @@ Un règlement produit une nouvelle ligne `settlements`. Une correction utilise `
 
 `wallet_transactions` est un journal immuable : aucun `UPDATE` ni `DELETE` n’est accepté. Chaque correction est une nouvelle transaction idempotente. `audit_logs` suit la même stratégie append-only pour les opérations importantes.
 
+L’interface sportsbook actuelle affiche un ticket local de démonstration. Elle ne crée aucune ligne `bets`, `bet_legs`, `wallet_transactions`, `settlements` ou `odds_snapshots`.
+
 ## RLS et sécurité
 
 La RLS utilise `auth.uid()`, les membres actifs, leurs rôles, la confidentialité des actions et la saison concernée. Les helpers `private.*` évitent les récursions de policies. Les fonctions transactionnelles sensibles valident le rôle serveur et ne font pas confiance aux montants, cotes ou identifiants transmis par le client.

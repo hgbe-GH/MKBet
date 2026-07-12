@@ -54,7 +54,10 @@ Le build Vercel doit réussir sans connexion active à PostgreSQL. Les URL et cl
 1. Ouvrir la page `/` et contrôler son rendu responsive.
 2. Appeler `/api/health`.
 3. Vérifier la réponse HTTP 200 et le JSON `{ "status": "ok", "application": "mk-bet" }`.
-4. Consulter les logs de build sans y copier de variable sensible.
+4. Après configuration Supabase, vérifier que `/login`, `/dashboard` et `/markets` chargent sans exposer de jeton dans le HTML.
+5. Consulter les logs de build sans y copier de variable sensible.
+
+Les pages sportsbook privées peuvent être buildées sans base active. Leur contenu de marchés/lives/tickets reste démonstratif tant que les repositories persistants correspondants ne sont pas développés.
 
 ## Rollback
 

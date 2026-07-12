@@ -65,3 +65,9 @@
 **Décision :** utiliser `@supabase/ssr`, `getClaims()` et des RPC SQL contrôlées pour l’authentification privée, les invitations et les autorisations.
 
 **Motif :** conserver une application compatible Vercel sans session globale, faire appliquer les droits par PostgreSQL et éviter l’usage de la service role dans les parcours utilisateur.
+
+## ADR-012 — Interface sportsbook démonstrative avant persistance métier
+
+**Décision :** livrer le shell sportsbook et les écrans privés avec des fixtures locales isolées, en gardant le placement de pari, les lives réels, le règlement et le realtime désactivés.
+
+**Motif :** valider l’ergonomie, l’accessibilité et les surfaces produit sans introduire de mutations financières ou de couplage prématuré aux tables métier.

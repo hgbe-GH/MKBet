@@ -34,6 +34,12 @@ Le ticket de pari regroupera les sélections, les mises en MKB et les cotes fig�
 
 Les classements compareront les performances amicales des participants. La chronologie rassemblera les événements, déclarations, changements de marché et résultats validés pour raconter la saison de façon compréhensible.
 
+## Interface actuelle
+
+L’interface sportsbook privée existe sous forme de démonstration : dashboard, marchés, lives, tickets visuels, résultats, chronologie, classement et console admin visuelle. Les écrans montrent le comportement attendu, mais les données de marchés/lives/paris proviennent encore de fixtures locales marquées comme telles.
+
+Le bouton de placement reste désactivé. Aucun solde n’est débité, aucun ticket n’est écrit et aucun règlement n’est exécuté dans cette étape.
+
 ## Ton éditorial
 
 Le produit adopte un ton de salle de marchés et de retransmission sportive volontairement dramatique : alertes de séance, marchés suspendus, cote sous tension et incidents diplomatiques. L’humour doit rester lisible, bienveillant et clairement séparé de toute activité de jeu d’argent réel.

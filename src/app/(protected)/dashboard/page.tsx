@@ -1,72 +1,54 @@
 import Link from "next/link";
 
+import { ActivityFeed } from "@/components/sportsbook/activity-feed";
+import { LeaderboardPreview } from "@/components/sportsbook/leaderboard-preview";
+import { MarketCard } from "@/components/sportsbook/market-card";
+import { RechuteMeter } from "@/components/sportsbook/rechute-meter";
+import { WalletSummary } from "@/components/sportsbook/wallet-summary";
 import { Button } from "@/components/ui/button";
-import { getCurrentUserDashboardSeason } from "@/data/supabase/seasons/repository";
+import {
+  demoLeaderboard,
+  demoMarkets,
+  demoSeasonContext,
+  demoTimeline,
+} from "@/fixtures/sportsbook/demo-data";
 
 export const dynamic = "force-dynamic";
 
-interface DashboardPageProps {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
-
-export default async function DashboardPage({
-  searchParams,
-}: DashboardPageProps) {
-  const params = await searchParams;
-  const seasonParam = params?.season;
-  const seasonId = typeof seasonParam === "string" ? seasonParam : null;
-  const season = await getCurrentUserDashboardSeason(seasonId);
-
-  if (!season) {
-    return (
-      <div className="space-y-4">
-        <h1 className="text-3xl font-black">Aucune saison sélectionnée</h1>
-        <Button asChild>
-          <Link href="/seasons">Choisir une saison</Link>
-        </Button>
-      </div>
-    );
-  }
-
+export default async function DashboardPage() {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm font-black tracking-[0.14em] text-red-800 uppercase">
-          Tableau de bord
+      <section className="rounded-xl bg-[var(--brand-active)] p-6 text-white shadow-[0_18px_50px_rgba(95,17,17,0.2)]">
+        <p className="text-xs font-black tracking-[0.14em] text-red-200 uppercase">
+          Données de démonstration
         </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.035em]">
-          {season.title}
+        <h1 className="mt-2 text-4xl font-black tracking-[-0.055em]">
+          {demoSeasonContext.matchup}
         </h1>
-      </div>
-      <section className="grid gap-4 rounded-md border border-stone-200 bg-white p-6 sm:grid-cols-2">
-        <p>
-          <span className="block text-sm font-bold text-stone-500">
-            Date de rupture
-          </span>
-          {season.breakupDate}
-        </p>
-        <p>
-          <span className="block text-sm font-bold text-stone-500">Rôles</span>
-          {season.roles.join(", ")}
-        </p>
-        <p>
-          <span className="block text-sm font-bold text-stone-500">
-            Capital MKB
-          </span>
-          {season.balanceMkb ?? "non initialisé"}
-        </p>
-        <p>
-          <span className="block text-sm font-bold text-stone-500">État</span>
-          Authentification et permissions opérationnelles
+        <p className="mt-3 max-w-2xl text-red-100">
+          J+{demoSeasonContext.daysSinceBreakup} depuis la rupture. Les marchés
+          observent une zone diplomatique instable, sans argent réel.
         </p>
       </section>
-      <div className="flex gap-3">
-        <Button asChild variant="outline">
-          <Link href="/seasons">Saisons</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/settings/account">Compte</Link>
-        </Button>
+
+      <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-5">
+          <RechuteMeter snapshot={demoSeasonContext.rechute} />
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-xl font-black">Marché à la une</h2>
+              <Button asChild variant="outline">
+                <Link href="/markets">Tous les marchés</Link>
+              </Button>
+            </div>
+            <MarketCard market={demoMarkets[0]} />
+          </section>
+        </div>
+        <div className="space-y-5">
+          <WalletSummary balanceMkb={demoSeasonContext.balanceMkb} />
+          <ActivityFeed events={demoTimeline.slice(0, 3)} />
+          <LeaderboardPreview rows={demoLeaderboard} />
+        </div>
       </div>
     </div>
   );
