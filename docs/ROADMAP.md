@@ -1,0 +1,22 @@
+# Roadmap
+
+- [x] 1. Fondations
+- [ ] 2. Schéma Supabase
+- [ ] 3. Moteur de probabilités et de cotes
+- [ ] 4. Authentification et invitations
+- [ ] 5. Identité visuelle
+- [ ] 6. Marchés
+- [ ] 7. Ticket et portefeuille
+- [ ] 8. Création des lives
+- [ ] 9. Lancement et arrêt des lives
+- [ ] 10. Déclaration des actions
+- [ ] 11. Suspension et recalcul des marchés
+- [ ] 12. Validation des résultats
+- [ ] 13. Règlement des paris
+- [ ] 14. Temps réel
+- [ ] 15. Chronologie et classement
+- [ ] 16. Administration
+- [ ] 17. Tests end-to-end
+- [ ] 18. Préparation Vercel
+- [ ] 19. Déploiement Preview
+- [ ] 20. Déploiement Production
