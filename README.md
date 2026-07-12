@@ -53,6 +53,10 @@ pnpm typecheck    # vérification TypeScript stricte
 pnpm test         # tests unitaires Vitest
 pnpm test:watch   # tests unitaires en mode interactif
 pnpm test:e2e     # futurs parcours Playwright
+pnpm db:start     # démarre Supabase local avec Docker
+pnpm db:reset     # recrée la base depuis les migrations et le seed
+pnpm db:types     # régénère les types TypeScript depuis la base locale
+pnpm db:stop      # arrête Supabase local sans conserver son état
 pnpm format       # mise en forme Prettier
 pnpm format:check # contrôle Prettier sans modification
 ```
@@ -63,13 +67,13 @@ Les navigateurs Playwright ne sont pas installés ni lancés par l’installatio
 
 - `src/app` : routes et interfaces Next.js App Router ;
 - `src/components` : composants de mise en page et composants UI accessibles ;
-- `src/domain` : future logique métier pure ;
+- `src/domain` : types métier et future logique métier pure ;
 - `src/data` et `src/lib/supabase` : futur accès persistant à Supabase ;
 - `src/config` : validation paresseuse de l’environnement avec Zod ;
-- `supabase` : futures migrations et données de développement ;
+- `supabase` : configuration locale, migrations, seed et validation SQL ;
 - `tests` : tests unitaires et préparation des tests end-to-end.
 
-Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées.
+Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) pour les décisions détaillées et [`docs/DATABASE.md`](docs/DATABASE.md) pour le schéma relationnel.
 
 ## Déploiement Vercel futur
 
@@ -79,4 +83,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page de pré-saison, les écrans techniques, la route `/api/health`, les outils de validation et la documentation existent. Supabase, l’authentification, les marchés, les lives, le portefeuille et le moteur de cotes ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page de pré-saison, la route `/api/health`, le schéma Supabase versionné, les types de base et les outils de validation existent. L’authentification, les pages métier, les opérations transactionnelles et le moteur de cotes TypeScript ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

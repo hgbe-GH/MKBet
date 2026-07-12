@@ -10,15 +10,17 @@ Dernière mise à jour : 12 juillet 2026.
 - Route publique `GET /api/health` sans information sensible.
 - Validation paresseuse des variables d’environnement avec Zod.
 - Fondations Supabase sans connexion ni clé réelle.
+- Cinq migrations PostgreSQL couvrant 25 tables, 24 enums, contraintes, index, triggers et RLS.
+- Seed idempotent avec 19 types d’actions, 7 templates et 15 règles d’impact.
+- Types Supabase générés et interfaces de domaine ciblées.
 - ESLint, Prettier, Vitest, Testing Library et configuration Playwright.
 - Documentation produit, architecture, décisions, roadmap et déploiement futur.
 
 ## Ce qui n’est pas développé
 
-- Schéma PostgreSQL et migrations métier.
 - Authentification, invitations et autorisations RLS.
-- Marchés, cotes, ticket de pari et portefeuille MKB.
-- Lives, actions déclarées, validation et règlement.
+- Pages et opérations applicatives pour marchés, cotes, tickets et portefeuilles MKB.
+- Lives fonctionnels, déclaration d’actions, validation et règlement transactionnel.
 - Supabase Realtime, chronologie, classement et administration.
 - Déploiements Vercel Preview et Production.
 
@@ -32,12 +34,16 @@ Dernière mise à jour : 12 juillet 2026.
 - `pnpm test`
 - `pnpm test:watch`
 - `pnpm test:e2e`
+- `pnpm db:start`
+- `pnpm db:reset`
+- `pnpm db:types`
+- `pnpm db:stop`
 - `pnpm format`
 - `pnpm format:check`
 
 ## Prochaines tâches
 
-La prochaine étape prévue est la conception du schéma Supabase. Elle devra commencer par une spécification des tables, contraintes, transactions, politiques RLS et données de développement avant toute migration.
+La prochaine étape prévue est le moteur TypeScript pur de probabilités et de cotes. Il devra consommer les paramètres du schéma sans se connecter à Supabase dans ses tests unitaires.
 
 ## Problèmes connus
 
@@ -47,13 +53,26 @@ La prochaine étape prévue est la conception du schéma Supabase. Elle devra co
 
 ## Dernières validations
 
-Exécutées le 12 juillet 2026 après l’initialisation :
+Exécutées le 12 juillet 2026 après l’ajout du schéma Supabase :
 
 - `pnpm format` : succès ;
 - `pnpm lint` : succès ;
 - `pnpm typecheck` : succès ;
-- `pnpm test` : 8 tests réussis ;
+- `pnpm test` : 16 tests réussis, dont 8 contrôles statiques du schéma ;
 - `pnpm build` : succès, avec `/`, `/_not-found`, `/api/health` et `/icon.svg` dans la table des routes ;
 - `pnpm install --frozen-lockfile` : succès ;
 - serveur de production : `/` répond et `/api/health` renvoie HTTP 200 avec le contrat attendu ;
 - recherche de secrets Supabase/JWT : aucun secret détecté.
+- `supabase db lint --local --level warning` : aucune erreur de schéma ;
+- validation SQL locale : succès après deux exécutions consécutives du seed.
+
+## Validation locale du schéma
+
+Supabase CLI 2.109.1 et Docker ont réellement été exécutés le 12 juillet 2026 :
+
+- démarrage du stack local ;
+- reset complet et application des cinq migrations ;
+- exécution automatique du seed puis réexécution sur la même base ;
+- validation SQL des 25 tables, de la RLS, des contraintes et des décomptes de référence ;
+- génération officielle de `src/types/database.ts` ;
+- arrêt propre des services sans conservation de l’état local.

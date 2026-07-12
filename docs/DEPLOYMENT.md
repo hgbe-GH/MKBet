@@ -28,6 +28,20 @@ Les secrets ne doivent jamais être committés. `.env.local` reste local et la c
 
 Lorsque Supabase Auth sera ajouté, déclarer dans Supabase l’URL de Production et les motifs de redirection autorisés pour le développement et les Previews Vercel. Les destinations reçues du client devront être comparées à une liste d’origines autorisées avant toute redirection.
 
+## Migrations Supabase
+
+Vercel ne lance jamais les migrations. `pnpm build`, `pnpm start`, les fonctions Vercel et les requêtes utilisateur ne doivent appeler aucune commande Supabase CLI ni modifier le schéma.
+
+Avant de déployer une version qui dépend d’une nouvelle migration :
+
+1. reconstruire et tester la base locale depuis zéro ;
+2. appliquer les migrations à une base Supabase Preview ou staging ;
+3. exécuter le seed de référence et les validations adaptées ;
+4. appliquer les mêmes migrations versionnées à Production ;
+5. seulement ensuite promouvoir la version applicative dépendante.
+
+Le build Vercel doit réussir sans connexion active à PostgreSQL. Les URL et clés Supabase seront configurées ultérieurement, séparément pour Development, Preview et Production.
+
 ## Vérification après déploiement
 
 1. Ouvrir la page `/` et contrôler son rendu responsive.
@@ -38,3 +52,5 @@ Lorsque Supabase Auth sera ajouté, déclarer dans Supabase l’URL de Productio
 ## Rollback
 
 En cas de régression, ouvrir la liste des déploiements du projet Vercel, sélectionner le dernier déploiement sain, puis utiliser l’action de promotion ou de rollback proposée par Vercel. Vérifier ensuite `/` et `/api/health`. Un rollback applicatif ne remplace pas une stratégie séparée de retour arrière pour les futures migrations PostgreSQL.
+
+Les migrations suivent une stratégie forward-only : une correction de schéma nécessite une nouvelle migration compatible. Restaurer des données ou annuler une migration destructive exige une procédure PostgreSQL préparée et testée séparément.

@@ -35,3 +35,21 @@
 **Décision :** toutes les mises et tous les règlements utilisent uniquement la monnaie fictive MKB.
 
 **Motif :** MK Bet est un jeu privé humoristique et ne doit proposer aucun pari en argent réel.
+
+## ADR-007 — Intégrité relationnelle dans PostgreSQL
+
+**Décision :** utiliser en priorité les contraintes, clés composites et checks PostgreSQL, puis des triggers ciblés pour les invariants transversaux.
+
+**Motif :** empêcher qu’une incohérence de saison, live, marché, issue ou règlement puisse contourner le futur code TypeScript.
+
+## ADR-008 — RLS deny-by-default
+
+**Décision :** activer la RLS sur toutes les tables privées sans politique permissive avant l’étape Auth et Permissions.
+
+**Motif :** rendre tout accès client impossible par défaut tant que les règles de rôle ne sont pas complètement définies et testées.
+
+## ADR-009 — Migrations explicites et forward-only
+
+**Décision :** appliquer les migrations Supabase hors de Next.js et ne jamais modifier silencieusement un fichier déjà déployé.
+
+**Motif :** dissocier les changements persistants du cycle éphémère de Vercel et préserver un historique reproductible entre Preview et Production.

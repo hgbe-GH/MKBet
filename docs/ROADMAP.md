@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] 1. Fondations
-- [ ] 2. Schéma Supabase
+- [x] 2. Schéma Supabase
 - [ ] 3. Moteur de probabilités et de cotes
 - [ ] 4. Authentification et invitations
 - [ ] 5. Identité visuelle
