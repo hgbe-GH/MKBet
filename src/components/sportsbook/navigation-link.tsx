@@ -26,11 +26,14 @@ export function NavigationLink({
     <Link
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-bold transition",
+        "relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold transition duration-200",
         active
-          ? "bg-[var(--brand-muted)] text-[var(--brand-active)] ring-1 ring-[var(--brand)]"
-          : "text-[var(--text-secondary)] hover:bg-stone-100 hover:text-[var(--text-primary)]",
+          ? "border border-white/10 bg-white/[0.09] text-white shadow-[inset_0_1px_rgba(255,255,255,0.1)] before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-[var(--brand)]"
+          : "text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--text-primary)]",
         compact && "min-h-12 flex-col gap-1 px-2 py-1 text-[0.68rem]",
+        compact &&
+          active &&
+          "border-transparent bg-transparent text-[var(--brand-hover)] before:hidden",
       )}
       href={href}
     >

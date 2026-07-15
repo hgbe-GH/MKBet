@@ -16,29 +16,29 @@ interface AppShellProps {
 export function AppShell({ children, season }: AppShellProps) {
   return (
     <BetSlipProvider>
-      <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+      <div className="mk-app-background min-h-dvh text-[var(--text-primary)]">
         <a
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:font-bold"
           href="#main-content"
         >
           Aller au contenu principal
         </a>
-        <div className="flex">
+        <div className="lg:grid lg:grid-cols-[13rem_minmax(0,1fr)]">
           <DesktopSidebar />
-          <div className="min-w-0 flex-1 pb-28 lg:pb-0">
+          <div className="min-w-0 pb-36 lg:pb-8">
             <TopHeader season={season} />
-            <div className="grid gap-5 px-4 py-5 sm:px-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+            <div className="mx-auto grid w-full max-w-[96rem] gap-6 px-4 py-5 sm:px-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
               <main className="min-w-0" id="main-content" tabIndex={-1}>
                 {children}
               </main>
-              <div className="hidden xl:block">
-                <div className="sticky top-20">
+              <aside className="hidden xl:block">
+                <div className="sticky top-24">
                   <BetSlip
                     balanceMkb={season.balanceMkb}
                     seasonId={season.id}
                   />
                 </div>
-              </div>
+              </aside>
             </div>
           </div>
         </div>

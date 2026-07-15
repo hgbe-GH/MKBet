@@ -39,6 +39,20 @@ describe("protected layout", () => {
 
     expect(screen.getByText("Fil privé")).toBeInTheDocument();
     expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: "Navigation principale" }),
+    ).toHaveClass("mk-sidebar");
+    expect(
+      screen.getByRole("navigation", { name: "Navigation mobile" }),
+    ).toHaveClass("mk-mobile-nav");
+    expect(screen.getByText("1 000 MKB disponibles")).toHaveClass(
+      "tabular-nums",
+    );
+    expect(
+      screen.queryByText(
+        "Deux votes concordants suffisent pour trancher un fait.",
+      ),
+    ).not.toBeInTheDocument();
     expect(redirect).not.toHaveBeenCalled();
   });
 });
