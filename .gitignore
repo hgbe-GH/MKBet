@@ -45,3 +45,6 @@
 
 # Local brainstorming companion
 /.superpowers/
+
+# Isolated feature worktrees
+/.worktrees/
