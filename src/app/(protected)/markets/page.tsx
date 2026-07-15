@@ -3,6 +3,7 @@ import { requireSportsbookSeason } from "@/application/sportsbook/require-season
 import { CategoryTabs } from "@/components/sportsbook/category-tabs";
 import { MarketGroup } from "@/components/sportsbook/market-group";
 import { listSeasonMarkets } from "@/data/supabase/markets/market-repository";
+import { PageIntro } from "@/components/ui/page-intro";
 
 export const dynamic = "force-dynamic";
 
@@ -18,18 +19,11 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
 
   return (
     <div className="space-y-5">
-      <header>
-        <p className="text-xs font-black tracking-[0.14em] text-[var(--brand)] uppercase">
-          Marchés réels
-        </p>
-        <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
-          Tableau des cotes
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--text-secondary)]">
-          Cotes officielles de {season.title}. Chaque confirmation crée d’abord
-          un devis autoritaire de 60 secondes.
-        </p>
-      </header>
+      <PageIntro
+        eyebrow="Marchés réels"
+        title="Tableau des cotes"
+        description={`Cotes officielles de ${season.title}. Vérifie ton devis avant de confirmer.`}
+      />
       <CategoryTabs
         activeCategory={filters.category}
         q={filters.q}
@@ -38,13 +32,13 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
       />
       <form
         action="/markets"
-        className="grid gap-3 rounded-lg border border-[var(--border)] bg-white p-4 md:grid-cols-4"
+        className="mk-glass-subtle grid gap-3 rounded-2xl p-4 md:grid-cols-4"
       >
         <input name="category" type="hidden" value={filters.category} />
         <label className="text-sm font-bold md:col-span-2">
           Rechercher
           <input
-            className="mt-1 min-h-11 w-full rounded-md border border-[var(--border)] px-3"
+            className="mt-1 min-h-11 w-full rounded-lg border border-[var(--border)] bg-white/[0.07] px-3 text-white"
             defaultValue={filters.q}
             name="q"
             placeholder="bisou, statut..."
@@ -53,7 +47,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
         <label className="text-sm font-bold">
           Statut
           <select
-            className="mt-1 min-h-11 w-full rounded-md border border-[var(--border)] px-3"
+            className="mt-1 min-h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-raised)] px-3 text-white"
             defaultValue={filters.status}
             name="status"
           >
@@ -66,7 +60,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
         <label className="text-sm font-bold">
           Tri
           <select
-            className="mt-1 min-h-11 w-full rounded-md border border-[var(--border)] px-3"
+            className="mt-1 min-h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-raised)] px-3 text-white"
             defaultValue={filters.sort}
             name="sort"
           >
@@ -76,10 +70,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
             <option value="movement">Version</option>
           </select>
         </label>
-        <button
-          className="min-h-11 rounded-md bg-[var(--brand)] px-4 text-sm font-black text-white md:col-start-4"
-          type="submit"
-        >
+        <button className="mk-primary-action md:col-start-4" type="submit">
           Filtrer
         </button>
       </form>

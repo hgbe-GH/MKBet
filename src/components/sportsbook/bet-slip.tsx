@@ -44,6 +44,11 @@ export function BetSlip({
   );
   const currentBasis = `${betSlip.revision}|${stakeRevision}|${selectionKey}|${stake}`;
   const activeQuote = quoteBasis === currentBasis ? quote : null;
+  const ticketStep = activeQuote
+    ? "quote"
+    : betSlip.selections.length > 0
+      ? "selection"
+      : "empty";
 
   useEffect(() => {
     if (!activeQuote) return;
@@ -107,7 +112,8 @@ export function BetSlip({
   return (
     <aside
       aria-label="Ticket de pari"
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface-raised)] p-4 shadow-[0_12px_35px_rgba(28,25,23,0.08)]"
+      className="mk-glass-subtle rounded-2xl p-4"
+      data-ticket-step={ticketStep}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -120,7 +126,7 @@ export function BetSlip({
           </h2>
         </div>
         <button
-          className="min-h-11 rounded-md px-2 text-xs font-bold text-[var(--text-muted)] underline-offset-4 hover:bg-stone-100 hover:underline"
+          className="min-h-11 rounded-md px-2 text-xs font-bold text-[var(--text-muted)] underline-offset-4 hover:bg-white/[0.07] hover:text-white hover:underline"
           onClick={betSlip.clearSelections}
           type="button"
         >
@@ -132,7 +138,7 @@ export function BetSlip({
         {feedback || betSlip.message}
       </p>
       {feedback || betSlip.message ? (
-        <p className="mt-3 rounded-md bg-stone-100 p-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-3 rounded-lg bg-white/[0.07] p-2 text-sm text-[var(--text-secondary)]">
           {feedback || betSlip.message}
         </p>
       ) : null}
@@ -167,7 +173,7 @@ export function BetSlip({
           Mise en MKB
         </label>
         <input
-          className="min-h-11 w-full rounded-md border border-[var(--border)] bg-white px-3 text-base tabular-nums"
+          className="min-h-11 w-full rounded-lg border border-[var(--border)] bg-white/[0.07] px-3 text-base text-white tabular-nums"
           id="stake-mkb"
           inputMode="numeric"
           min={5}
@@ -260,11 +266,16 @@ export function BetSlip({
               : "VÉRIFIER LE TICKET"}
         </Button>
       )}
-      <p className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
-        Le navigateur envoie seulement les issues, la mise et une clé
-        d’idempotence. PostgreSQL fixe les cotes et débite atomiquement les MKB
-        fictifs.
-      </p>
+      <details className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
+        <summary className="cursor-pointer font-bold">
+          Comment le ticket est sécurisé
+        </summary>
+        <p className="mt-2">
+          Le navigateur envoie seulement les issues, la mise et une clé
+          d’idempotence. PostgreSQL fixe les cotes et débite atomiquement les
+          MKB fictifs.
+        </p>
+      </details>
     </aside>
   );
 }

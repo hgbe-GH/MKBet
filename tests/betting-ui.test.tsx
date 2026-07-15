@@ -67,12 +67,18 @@ describe("transactional bet slip", () => {
       </BetSlipProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: /Oui, cote/i }));
+    expect(
+      screen.getByRole("complementary", { name: "Ticket de pari" }),
+    ).toHaveAttribute("data-ticket-step", "selection");
     fireEvent.click(screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }));
 
     await waitFor(() => expect(createQuoteMock).toHaveBeenCalledTimes(1));
     expect(
       await screen.findByRole("button", { name: "PLACER MON PRONOSTIC" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("complementary", { name: "Ticket de pari" }),
+    ).toHaveAttribute("data-ticket-step", "quote");
     expect(screen.getByText("Retour potentiel").nextSibling).toHaveTextContent(
       "18 MKB",
     );

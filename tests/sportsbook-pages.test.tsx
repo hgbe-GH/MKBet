@@ -36,11 +36,12 @@ describe("sportsbook pages", () => {
   it("renders the permanent direct room without demonstration content", async () => {
     render(await DirectPage({ searchParams: Promise.resolve({}) }));
     expect(
-      screen.getByRole("heading", { name: "Margot × Kévin - Direct" }),
+      screen.getByRole("heading", { name: "Le groupe fait le marché." }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Déclarer un événement" }),
-    ).toHaveAttribute("href", "/report");
+    expect(screen.getByRole("link", { name: "+ Déclarer" })).toHaveAttribute(
+      "href",
+      "/report",
+    );
     expect(screen.queryByText(/données de démonstration/i)).toBeNull();
     expect(screen.queryByText(/service_role/i)).not.toBeInTheDocument();
   });

@@ -48,7 +48,7 @@ export default async function MarketDetailPage({
         </h1>
       </header>
       <MarketCard market={market} />
-      <section className="rounded-lg border border-[var(--border)] bg-white p-5">
+      <section className="mk-surface-opaque rounded-2xl p-5">
         <h2 className="text-xl font-black">Historique de cote</h2>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Graphique SVG local, sans librairie externe. Les variations sont aussi
@@ -93,7 +93,7 @@ export default async function MarketDetailPage({
         </svg>
         <dl className="mt-3 grid gap-2 sm:grid-cols-3">
           {market.history.map((point) => (
-            <div className="rounded-md bg-stone-50 p-3" key={point.label}>
+            <div className="rounded-lg bg-white/[0.06] p-3" key={point.label}>
               <dt className="text-xs font-bold text-[var(--text-muted)]">
                 {point.label}
               </dt>
@@ -102,7 +102,7 @@ export default async function MarketDetailPage({
           ))}
         </dl>
       </section>
-      <section className="rounded-lg border border-[var(--border)] bg-white p-5">
+      <section className="mk-surface-opaque rounded-2xl p-5">
         <h2 className="text-xl font-black">Règle de règlement</h2>
         <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">
           {market.settlementRule}
