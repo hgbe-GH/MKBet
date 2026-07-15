@@ -3,6 +3,10 @@ import path from "node:path";
 
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
 
+import { e2eAuthState } from "./support/auth-state";
+
+test.use({ storageState: e2eAuthState.visual });
+
 async function capture(
   page: Page,
   testInfo: TestInfo,
@@ -60,7 +64,10 @@ test("captures and snapshots deterministic public and sportsbook screens", async
   if (testInfo.project.name === "chromium-desktop") {
     await expect(page).toHaveScreenshot("dashboard-desktop.png", {
       animations: "disabled",
-      mask: [page.locator("header").first(), page.getByText(/J\+\d+/).first()],
+      mask: [
+        page.locator("header").first(),
+        page.locator("#main-content > div > section > p").first(),
+      ],
     });
   }
 

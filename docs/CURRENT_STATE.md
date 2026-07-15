@@ -1,6 +1,6 @@
 # État actuel
 
-Dernière mise à jour : 12 juillet 2026.
+Dernière mise à jour : 15 juillet 2026.
 
 ## Réel
 
@@ -48,7 +48,7 @@ Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés,
 ## Dernières validations
 
 - `pnpm format`, `pnpm lint` et `pnpm typecheck` : succès.
-- `pnpm test` : 93 tests réussis dans 20 fichiers.
+- `pnpm test` : 96 tests réussis dans 21 fichiers.
 - `pnpm db:reset` : succès avec les neuf migrations et le seed.
 - Seconde exécution de `seed.sql` : décomptes inchangés, dont 5 corrélations.
 - `supabase db lint` : aucune erreur ni aucun avertissement.
@@ -71,7 +71,9 @@ Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés,
 - Matrice responsive contrôlée : 360 × 800, 390 × 844, 768 × 1024, 1024 × 900 et 1440 × 1000, sans débordement horizontal majeur.
 - Axe exécuté sur accueil, login, dashboard, marchés, détail marché, ticket ouvert et classement : aucune violation sérieuse ou critique restante.
 - Cinq snapshots visuels stables : login desktop, dashboard desktop, marchés desktop/mobile et ticket mobile ouvert.
+- Le dashboard et les écrans marchés/ticket de l’audit visuel utilisent une session PLAYER et une saison propres, distinctes des parcours transactionnels. Les cotes visibles de cette saison sont stabilisées par le harness E2E ; deux captures consécutives identiques ont été vérifiées avant régénération des références.
+- `pnpm test:e2e` : 39/39 parcours réussis ; `playwright test --repeat-each=2` : 78/78 ; projets séparés : 22/22 desktop et 17/17 mobile.
 
-Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin.
+Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright.
 
 Limites : les tests utilisent uniquement Supabase/Chromium locaux et ne valident aucun domaine Vercel distant. Les lives fonctionnels, règlements, paiements de gains, repricing automatique, Realtime et déploiements restent hors périmètre.

@@ -6,6 +6,7 @@ export const e2eAuthState = {
   admin: path.join(authDirectory, "admin.json"),
   playerDesktop: path.join(authDirectory, "player-desktop.json"),
   playerMobile: path.join(authDirectory, "player-mobile.json"),
+  visual: path.join(authDirectory, "visual.json"),
 } as const;
 
 export const e2eBaseUrl = "http://localhost:3100";

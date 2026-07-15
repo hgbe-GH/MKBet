@@ -171,6 +171,40 @@ async function invitePlayer(
   assertNoError(accepted.error, `Unable to accept player invitation`);
 }
 
+function stabilizeVisualMarketOdds(
+  databaseUrl: string,
+  seasonId: string,
+): void {
+  // Opening odds are intentionally time-sensitive in production; screenshot
+  // fixtures need an explicit value to remain comparable across calendar days.
+  const validatedSeasonId = z.string().uuid().parse(seasonId);
+  execFileSync(
+    "psql",
+    [
+      databaseUrl,
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-v",
+      `season_id=${validatedSeasonId}`,
+    ],
+    {
+      input: [
+        "update public.market_outcomes as outcome",
+        "set displayed_odds = case outcome.code",
+        "  when 'YES' then 1.15",
+        "  when 'NO' then 4.80",
+        "  else outcome.displayed_odds",
+        "end",
+        "from public.markets as market",
+        "where outcome.market_id = market.id",
+        "  and market.season_id = :'season_id'::uuid",
+        "  and market.event_code = 'KISS';",
+      ].join("\n"),
+      stdio: ["pipe", "ignore", "ignore"],
+    },
+  );
+}
+
 async function waitForMagicLink(email: string): Promise<string> {
   for (let attempt = 0; attempt < 50; attempt += 1) {
     const response = await fetch("http://127.0.0.1:54324/api/v1/messages");
@@ -244,36 +278,44 @@ export default async function globalSetup() {
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
   const suffix = randomUUID();
-  const [admin, bootstrap, playerDesktop, playerMobile] = await Promise.all([
-    createIdentity(
-      serviceClient,
-      environment.url,
-      environment.publishableKey,
-      `admin-${suffix}@example.test`,
-      "Camille Admin",
-    ),
-    createIdentity(
-      serviceClient,
-      environment.url,
-      environment.publishableKey,
-      `committee-${suffix}@example.test`,
-      "Comité E2E",
-    ),
-    createIdentity(
-      serviceClient,
-      environment.url,
-      environment.publishableKey,
-      `player-desktop-${suffix}@example.test`,
-      "Noé Desktop",
-    ),
-    createIdentity(
-      serviceClient,
-      environment.url,
-      environment.publishableKey,
-      `player-mobile-${suffix}@example.test`,
-      "Lina Mobile",
-    ),
-  ]);
+  const [admin, bootstrap, playerDesktop, playerMobile, visual] =
+    await Promise.all([
+      createIdentity(
+        serviceClient,
+        environment.url,
+        environment.publishableKey,
+        `admin-${suffix}@example.test`,
+        "Camille Admin",
+      ),
+      createIdentity(
+        serviceClient,
+        environment.url,
+        environment.publishableKey,
+        `committee-${suffix}@example.test`,
+        "Comité E2E",
+      ),
+      createIdentity(
+        serviceClient,
+        environment.url,
+        environment.publishableKey,
+        `player-desktop-${suffix}@example.test`,
+        "Noé Desktop",
+      ),
+      createIdentity(
+        serviceClient,
+        environment.url,
+        environment.publishableKey,
+        `player-mobile-${suffix}@example.test`,
+        "Lina Mobile",
+      ),
+      createIdentity(
+        serviceClient,
+        environment.url,
+        environment.publishableKey,
+        `visual-${suffix}@example.test`,
+        "Noé Desktop",
+      ),
+    ]);
 
   await createSeason(admin, environment.dbUrl, "Administration E2E");
   const desktopSeason = await createSeason(
@@ -282,6 +324,13 @@ export default async function globalSetup() {
     "Margot × Kévin — Desktop",
   );
   await invitePlayer(bootstrap, playerDesktop, desktopSeason);
+  const visualSeason = await createSeason(
+    bootstrap,
+    environment.dbUrl,
+    "Margot × Kévin — Desktop",
+  );
+  await invitePlayer(bootstrap, visual, visualSeason);
+  stabilizeVisualMarketOdds(environment.dbUrl, visualSeason);
   const mobileSeason = await createSeason(
     bootstrap,
     environment.dbUrl,
@@ -300,5 +349,10 @@ export default async function globalSetup() {
     playerMobile.email,
     playerMobile.displayName,
     e2eAuthState.playerMobile,
+  );
+  await saveBrowserSession(
+    visual.email,
+    visual.displayName,
+    e2eAuthState.visual,
   );
 }

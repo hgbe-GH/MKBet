@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type TestInfo } from "@playwright/test";
 
 import { e2eAuthState } from "./support/auth-state";
 
@@ -6,7 +6,8 @@ test.use({ storageState: e2eAuthState.admin });
 
 test("admin navigation and market lifecycle use real RPC controls", async ({
   page,
-}) => {
+}, testInfo: TestInfo) => {
+  const marketTitle = `Marché audit visuel ${testInfo.repeatEachIndex + 1}`;
   await page.goto("/dashboard");
   await expect(
     page.getByRole("link", { name: "Administration" }),
@@ -25,7 +26,7 @@ test("admin navigation and market lifecycle use real RPC controls", async ({
   await page.getByLabel("Ouverture").fill("2026-07-01T12:00");
   await page.getByLabel("Clôture").fill("2030-04-01T12:00");
   await page.getByLabel("Échéance").fill("2030-04-02T12:00");
-  await page.getByLabel("Titre facultatif").fill("Marché audit visuel");
+  await page.getByLabel("Titre facultatif").fill(marketTitle);
   await page
     .getByLabel("Description")
     .fill("Marché créé par le parcours Playwright.");
@@ -35,9 +36,7 @@ test("admin navigation and market lifecycle use real RPC controls", async ({
   });
 
   await page.goto("/admin/markets");
-  const market = page
-    .getByRole("article")
-    .filter({ hasText: "Marché audit visuel" });
+  const market = page.getByRole("article").filter({ hasText: marketTitle });
   await expect(market).toContainText("OPEN");
   page.on("dialog", (dialog) => dialog.accept());
   await market.getByRole("button", { name: "Suspendre" }).click();

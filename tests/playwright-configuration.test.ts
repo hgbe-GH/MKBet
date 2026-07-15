@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import playwrightConfig from "../playwright.config";
+import { e2eAuthState } from "./e2e/support/auth-state";
 
 describe("Playwright configuration", () => {
   it("defines dedicated desktop and mobile Chromium projects", () => {
@@ -24,5 +25,9 @@ describe("Playwright configuration", () => {
       command: "pnpm e2e:server",
       reuseExistingServer: true,
     });
+  });
+
+  it("reserves an isolated browser session for visual snapshots", () => {
+    expect(e2eAuthState.visual).toMatch(/tests\/e2e\/\.auth\/visual\.json$/);
   });
 });
