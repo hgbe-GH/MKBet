@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-import { canSeeAdminNavigation } from "@/application/sportsbook/navigation";
 import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import { DesktopSidebar } from "@/components/sportsbook/desktop-sidebar";
@@ -15,8 +14,6 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, season }: AppShellProps) {
-  const showAdmin = canSeeAdminNavigation(season.roles);
-
   return (
     <BetSlipProvider>
       <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
@@ -27,7 +24,7 @@ export function AppShell({ children, season }: AppShellProps) {
           Aller au contenu principal
         </a>
         <div className="flex">
-          <DesktopSidebar season={season} showAdmin={showAdmin} />
+          <DesktopSidebar />
           <div className="min-w-0 flex-1 pb-28 lg:pb-0">
             <TopHeader season={season} />
             <div className="grid gap-5 px-4 py-5 sm:px-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -46,7 +43,7 @@ export function AppShell({ children, season }: AppShellProps) {
           </div>
         </div>
         <MobileBetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />
-        <MobileBottomNavigation showAdmin={showAdmin} />
+        <MobileBottomNavigation />
       </div>
     </BetSlipProvider>
   );

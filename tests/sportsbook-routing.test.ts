@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseMarketSearchParams } from "@/application/sportsbook/market-query";
-import { canSeeAdminNavigation } from "@/application/sportsbook/navigation";
+import { sportsbookNavigation } from "@/application/sportsbook/navigation";
 
 describe("sportsbook routing and permissions", () => {
   it("sanitizes market query parameters to safe defaults", () => {
@@ -34,10 +34,17 @@ describe("sportsbook routing and permissions", () => {
     });
   });
 
-  it("shows admin navigation only to authorized season roles", () => {
-    expect(canSeeAdminNavigation(["PLAYER"])).toBe(false);
-    expect(canSeeAdminNavigation(["REPORTER"])).toBe(false);
-    expect(canSeeAdminNavigation(["ADMIN"])).toBe(true);
-    expect(canSeeAdminNavigation(["LIVE_HOST", "PLAYER"])).toBe(true);
+  it("keeps navigation focused on the permanent Margot and Kévin room", () => {
+    expect(sportsbookNavigation.map((item) => item.href)).toEqual([
+      "/direct",
+      "/markets",
+      "/report",
+      "/bets",
+      "/leaderboard",
+      "/settings/account",
+    ]);
+    expect(
+      sportsbookNavigation.filter((item) => item.mobile).map((item) => item.href),
+    ).toEqual(["/direct", "/markets", "/report", "/bets", "/leaderboard"]);
   });
 });

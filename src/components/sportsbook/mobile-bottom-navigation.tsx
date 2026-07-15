@@ -3,16 +3,16 @@
 import { sportsbookNavigation } from "@/application/sportsbook/navigation";
 import { NavigationLink } from "@/components/sportsbook/navigation-link";
 
-export function MobileBottomNavigation({ showAdmin }: { showAdmin: boolean }) {
+export function MobileBottomNavigation() {
   const mobileOrder = [
-    "/dashboard",
-    "/lives",
+    "/direct",
     "/markets",
+    "/report",
     "/bets",
-    "/settings/account",
+    "/leaderboard",
   ];
   const items = sportsbookNavigation
-    .filter((item) => item.mobile && (!item.adminOnly || showAdmin))
+    .filter((item) => item.mobile)
     .toSorted(
       (a, b) => mobileOrder.indexOf(a.href) - mobileOrder.indexOf(b.href),
     );
