@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 
+import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { EventScoreboard } from "@/components/sportsbook/event-scoreboard";
 import { RechuteMeter } from "@/components/sportsbook/rechute-meter";
 import { Button } from "@/components/ui/button";
-import { demoSeasonContext } from "@/fixtures/sportsbook/demo-data";
-import { demoLiveRepository } from "@/fixtures/sportsbook/repositories";
+import { getSeasonLive } from "@/data/supabase/lives/repository";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,8 @@ interface LiveDetailPageProps {
 
 export default async function LiveDetailPage({ params }: LiveDetailPageProps) {
   const { liveId } = await params;
-  const live = await demoLiveRepository.getLive(liveId);
+  const season = await requireSportsbookSeason();
+  const live = await getSeasonLive(season.id, liveId);
 
   if (!live) {
     notFound();
@@ -24,7 +25,7 @@ export default async function LiveDetailPage({ params }: LiveDetailPageProps) {
     <div className="space-y-5">
       <EventScoreboard live={live} />
       <div className="grid gap-5 xl:grid-cols-2">
-        <RechuteMeter snapshot={demoSeasonContext.rechute} />
+        <RechuteMeter snapshot={season.rechute} />
         <section className="rounded-lg border border-[var(--border)] bg-white p-5">
           <h2 className="text-xl font-black">Participants</h2>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
@@ -41,8 +42,8 @@ export default async function LiveDetailPage({ params }: LiveDetailPageProps) {
       <section className="space-y-3">
         <h2 className="text-xl font-black">Marchés live</h2>
         <p className="rounded-lg border border-[var(--border)] bg-white p-5 text-sm text-[var(--text-secondary)]">
-          Aucun marché fictif n’est injecté ici. Les futurs marchés live réels
-          seront chargés depuis Supabase.
+          Aucun marché n’est encore associé à cette session. Leur création et
+          leur ouverture seront ajoutées à une étape ultérieure.
         </p>
       </section>
     </div>

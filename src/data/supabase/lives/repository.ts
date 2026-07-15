@@ -25,17 +25,22 @@ async function mapSeasonLives(
   const supabase = await createServerSupabaseClient();
   const liveIds = rows.map((row) => row.id);
   const profileIds = [
-    ...new Set(rows.flatMap((row) => (row.host_user_id ? [row.host_user_id] : []))),
+    ...new Set(
+      rows.flatMap((row) => (row.host_user_id ? [row.host_user_id] : [])),
+    ),
   ];
-  const [{ data: attendees, error: attendeesError }, { data: markets, error: marketsError }] =
-    await Promise.all([
-      supabase
-        .from("live_attendees")
-        .select("live_id,user_id,live_role")
-        .in("live_id", liveIds),
-      supabase.from("markets").select("live_id").in("live_id", liveIds),
-    ]);
-  if (attendeesError || marketsError) throw new Error("DATABASE_OPERATION_FAILED");
+  const [
+    { data: attendees, error: attendeesError },
+    { data: markets, error: marketsError },
+  ] = await Promise.all([
+    supabase
+      .from("live_attendees")
+      .select("live_id,user_id,live_role")
+      .in("live_id", liveIds),
+    supabase.from("markets").select("live_id").in("live_id", liveIds),
+  ]);
+  if (attendeesError || marketsError)
+    throw new Error("DATABASE_OPERATION_FAILED");
 
   const attendeeRows = (attendees ?? []) as LiveAttendeeRow[];
   for (const attendee of attendeeRows) profileIds.push(attendee.user_id);

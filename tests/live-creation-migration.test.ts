@@ -20,12 +20,16 @@ describe("live creation PostgreSQL contract", () => {
     const sql = readMigration();
 
     expect(sql).toContain("create table private.live_creation_requests");
-    expect(sql).toContain("create or replace function public.create_live_session");
+    expect(sql).toContain(
+      "create or replace function public.create_live_session",
+    );
     expect(sql).toContain("security definer");
     expect(sql).toContain("set search_path = ''");
     expect(sql).toContain("pg_advisory_xact_lock");
     expect(sql).toContain("public.write_audit_log");
-    expect(sql).toContain("grant execute on function public.create_live_session");
+    expect(sql).toContain(
+      "grant execute on function public.create_live_session",
+    );
   });
 
   it("keeps host authority individual and validates participants server-side", () => {

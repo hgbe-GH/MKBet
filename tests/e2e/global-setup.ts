@@ -146,26 +146,27 @@ async function createSeason(
   return seasonId;
 }
 
-async function invitePlayer(
+async function inviteSeasonMember(
   owner: TestIdentity,
-  player: TestIdentity,
+  member: TestIdentity,
   seasonId: string,
+  role: "LIVE_HOST" | "PLAYER",
 ): Promise<void> {
   const invitation = await asRpcClient(owner.client).rpc<
     Array<{ token: string }>
   >("create_season_invitation", {
     p_season_id: seasonId,
-    p_proposed_role: "PLAYER",
+    p_proposed_role: role,
     p_proposed_subject_key: null,
-    p_email: player.email,
+    p_email: member.email,
     p_expires_at: new Date(Date.now() + 7 * 86_400_000).toISOString(),
     p_max_uses: 1,
   });
-  assertNoError(invitation.error, `Unable to invite ${player.displayName}`);
+  assertNoError(invitation.error, `Unable to invite ${member.displayName}`);
   const token = invitation.data?.[0]?.token;
   if (!token) throw new Error(`Unable to resolve invitation token.`);
 
-  const accepted = await player.client.rpc("accept_season_invitation", {
+  const accepted = await member.client.rpc("accept_season_invitation", {
     p_token: token,
   });
   assertNoError(accepted.error, `Unable to accept player invitation`);
@@ -278,68 +279,105 @@ export default async function globalSetup() {
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
   const suffix = randomUUID();
-  const [admin, bootstrap, playerDesktop, playerMobile, visual] =
-    await Promise.all([
-      createIdentity(
-        serviceClient,
-        environment.url,
-        environment.publishableKey,
-        `admin-${suffix}@example.test`,
-        "Camille Admin",
-      ),
-      createIdentity(
-        serviceClient,
-        environment.url,
-        environment.publishableKey,
-        `committee-${suffix}@example.test`,
-        "Comité E2E",
-      ),
-      createIdentity(
-        serviceClient,
-        environment.url,
-        environment.publishableKey,
-        `player-desktop-${suffix}@example.test`,
-        "Noé Desktop",
-      ),
-      createIdentity(
-        serviceClient,
-        environment.url,
-        environment.publishableKey,
-        `player-mobile-${suffix}@example.test`,
-        "Lina Mobile",
-      ),
-      createIdentity(
-        serviceClient,
-        environment.url,
-        environment.publishableKey,
-        `visual-${suffix}@example.test`,
-        "Noé Desktop",
-      ),
-    ]);
+  const [
+    admin,
+    bootstrap,
+    playerDesktop,
+    playerMobile,
+    visual,
+    liveHost,
+    liveReader,
+  ] = await Promise.all([
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `admin-${suffix}@example.test`,
+      "Camille Admin",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `committee-${suffix}@example.test`,
+      "Comité E2E",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `player-desktop-${suffix}@example.test`,
+      "Noé Desktop",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `player-mobile-${suffix}@example.test`,
+      "Lina Mobile",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `visual-${suffix}@example.test`,
+      "Noé Desktop",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `live-host-${suffix}@example.test`,
+      "Hôte Live E2E",
+    ),
+    createIdentity(
+      serviceClient,
+      environment.url,
+      environment.publishableKey,
+      `live-reader-${suffix}@example.test`,
+      "Lecteur Live E2E",
+    ),
+  ]);
 
-  await createSeason(admin, environment.dbUrl, "Administration E2E");
+  const adminSeason = await createSeason(
+    admin,
+    environment.dbUrl,
+    "Administration E2E",
+  );
+  await inviteSeasonMember(admin, liveHost, adminSeason, "LIVE_HOST");
+  await inviteSeasonMember(admin, liveReader, adminSeason, "PLAYER");
   const desktopSeason = await createSeason(
     bootstrap,
     environment.dbUrl,
     "Margot × Kévin — Desktop",
   );
-  await invitePlayer(bootstrap, playerDesktop, desktopSeason);
+  await inviteSeasonMember(bootstrap, playerDesktop, desktopSeason, "PLAYER");
   const visualSeason = await createSeason(
     bootstrap,
     environment.dbUrl,
     "Margot × Kévin — Desktop",
   );
-  await invitePlayer(bootstrap, visual, visualSeason);
+  await inviteSeasonMember(bootstrap, visual, visualSeason, "PLAYER");
   stabilizeVisualMarketOdds(environment.dbUrl, visualSeason);
   const mobileSeason = await createSeason(
     bootstrap,
     environment.dbUrl,
     "Margot × Kévin — Mobile",
   );
-  await invitePlayer(bootstrap, playerMobile, mobileSeason);
+  await inviteSeasonMember(bootstrap, playerMobile, mobileSeason, "PLAYER");
 
   await mkdir(path.dirname(e2eAuthState.admin), { recursive: true });
   await saveBrowserSession(admin.email, admin.displayName, e2eAuthState.admin);
+  await saveBrowserSession(
+    liveHost.email,
+    liveHost.displayName,
+    e2eAuthState.liveHost,
+  );
+  await saveBrowserSession(
+    liveReader.email,
+    liveReader.displayName,
+    e2eAuthState.liveReader,
+  );
   await saveBrowserSession(
     playerDesktop.email,
     playerDesktop.displayName,

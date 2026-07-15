@@ -56,7 +56,9 @@ export const createLiveSessionSchema = z
         path: ["scheduledEnd"],
       });
     }
-    if (value.attendees.some((attendee) => attendee.userId === value.hostUserId)) {
+    if (
+      value.attendees.some((attendee) => attendee.userId === value.hostUserId)
+    ) {
       context.addIssue({
         code: "custom",
         message: "L’hôte est ajouté automatiquement.",

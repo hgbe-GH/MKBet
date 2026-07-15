@@ -63,6 +63,8 @@ Une saison commence en `DRAFT`, devient `ACTIVE`, peut être `PAUSED`, puis se t
 
 Un live passe de la proposition/planification à l’ouverture des paris, puis aux états armé et live. Il peut être suspendu, terminé, vérifié, réglé, archivé ou annulé. Les heures planifiées restent distinctes des heures réelles.
 
+`create_live_session` est l’unique point de création applicatif : la RPC vérifie l’utilisateur, la saison, les rôles et le planning, puis insère le live, l’attendee `HOST`, les `REPORTER`/`VIEWER`, la demande idempotente privée et l’audit dans une transaction. Les types `PROGRAMMED` et `TIME_WINDOW` commencent `SCHEDULED`; `INSTANT` commence `PROPOSED`. Un planning `INSTANT` est seulement indicatif et reste une paire début/fin complète lorsqu’il est présent.
+
 ### Action, déclaration et confirmation
 
 Une **action** est le fait consolidé. `occurred_at` représente l’heure annoncée du fait, `declared_at` l’heure de saisie et `official_occurred_at` l’heure finalement retenue.
@@ -93,6 +95,8 @@ La RLS utilise `auth.uid()`, les membres actifs, leurs rôles, la confidentialit
 
 La fonction `write_audit_log` est interne, `SECURITY DEFINER`, avec un `search_path` vide et sans droit d’exécution pour `public`, `anon` ou `authenticated`.
 
+`private.live_creation_requests` conserve l’unicité `(user_id, idempotency_key)` des créations de lives. `private.is_live_host` compare désormais l’utilisateur à `live_sessions.host_user_id`; les privilèges d’administration restent contrôlés séparément par les policies et la RPC.
+
 Les invitations de saison sont acceptées par RPC. Le token clair n’est pas stocké; seul un hash SHA-256 est conservé. La vue `member_action_feed` masque `private_note` et sert de surface de lecture pour les membres ordinaires.
 
 ## Développement et migrations
@@ -104,6 +108,6 @@ pnpm db:types
 pnpm db:stop
 ```
 
-`db:reset` repart de zéro, applique les cinq migrations et exécute le seed. Les types de `src/types/database.ts` sont générés depuis la base locale et devront être régénérés après chaque évolution du schéma.
+`db:reset` repart de zéro, applique toutes les migrations versionnées et exécute le seed. Les types de `src/types/database.ts` sont générés depuis la base locale et devront être régénérés après chaque évolution du schéma.
 
 Pour Production, appliquer d’abord les migrations sur une base Supabase Preview ou staging, exécuter les contrôles fonctionnels, puis appliquer les mêmes fichiers versionnés à Production avant de promouvoir une version applicative qui en dépend. Un rollback applicatif Vercel n’annule jamais une migration PostgreSQL.

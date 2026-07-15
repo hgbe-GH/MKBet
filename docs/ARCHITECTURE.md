@@ -15,13 +15,13 @@ Le runtime Node.js par défaut est conservé. Le runtime Edge ne sera ajouté qu
 - `src/app` composera les routes et orchestrera les cas d’usage côté serveur ;
 - `src/auth` contiendra les helpers de session et d’autorisation côté serveur ;
 - `src/config` validera l’environnement à la frontière du système ;
-- `src/fixtures/sportsbook` contient uniquement les données de démonstration utilisées par l’interface sportsbook tant que les repositories de marchés/lives réels ne sont pas branchés.
+- `src/fixtures/sportsbook` contient uniquement les données de démonstration encore nécessaires aux résultats et à la chronologie ; marchés et lives sont lus depuis Supabase.
 
 Les composants React ne seront jamais la seule source d’un calcul de cote ou d’une règle de règlement.
 
 ## Interface sportsbook
 
-Le shell privé est mobile-first : sidebar desktop, header compact, bottom navigation mobile, ticket visuel et lien d’évitement. Les pages `/dashboard`, `/markets`, `/lives`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin` présentent les surfaces sportsbook sans créer de mutation persistante.
+Le shell privé est mobile-first : sidebar desktop, header compact, bottom navigation mobile, ticket visuel et lien d’évitement. Les pages `/dashboard`, `/markets`, `/lives`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin` présentent les surfaces sportsbook. Les mutations sensibles, dont la création de marchés, les paris et la création de lives, passent par une Server Action puis une RPC PostgreSQL.
 
 Les cotes affichées dans cette étape proviennent de fixtures marquées “Données de démonstration”. Elles ne remplacent pas `market_templates`, `market_outcomes` ou `odds_snapshots`, et aucun placement de pari n’est possible depuis l’interface.
 
@@ -56,6 +56,10 @@ Pour l’ouverture initiale des marchés binaires, PostgreSQL duplique volontair
 Le parcours suit `sélection locale → Server Action → create_bet_quote → confirmation → place_bet`. Les Server Actions valident uniquement des identifiants, une mise et une clé d’idempotence. Les RPC `SECURITY DEFINER` relisent les valeurs autoritaires, vérifient Auth/rôles/saison et réalisent les mutations dans une transaction PostgreSQL unique.
 
 `src/data/supabase/markets`, `betting`, `wallets` et `leaderboard` assurent les lectures RLS. Les pages `/markets`, `/bets`, `/wallet`, `/leaderboard` et les surfaces financières du dashboard ne chargent plus de fixtures. Le compte à rebours du devis est seulement visuel ; PostgreSQL reste l’autorité sur l’expiration.
+
+## Création de lives
+
+`public.create_live_session` crée dans une même transaction un live, son hôte, ses participants, sa clé d’idempotence et son audit. Les pages `/admin/lives` et `/admin/lives/new` préparent cette mutation ; `/lives` et `/lives/[liveId]` lisent la session réelle sous RLS. Un `ADMIN` choisit un membre actif `LIVE_HOST`, tandis qu’un `LIVE_HOST` crée uniquement un live dont il est l’hôte. Le lancement, les actions, le check-in et les marchés live restent hors de cette étape.
 
 ## Migrations et types
 

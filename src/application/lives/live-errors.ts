@@ -40,7 +40,9 @@ const messages: Record<LiveErrorCode, string> = {
 export function extractLiveErrorCode(error: unknown): LiveErrorCode {
   if (error && typeof error === "object" && "message" in error) {
     const message = String(error.message);
-    const code = LIVE_ERROR_CODES.find((candidate) => message.includes(candidate));
+    const code = LIVE_ERROR_CODES.find((candidate) =>
+      message.includes(candidate),
+    );
     if (code) return code;
   }
   return "DATABASE_OPERATION_FAILED";

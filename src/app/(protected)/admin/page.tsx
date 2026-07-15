@@ -35,12 +35,15 @@ export default async function AdminPage() {
             </p>
           </Link>
         ) : null}
-        <article className="rounded-lg border border-[var(--border)] bg-white p-5">
-          <h2 className="text-xl font-black">Lives et résultats</h2>
+        <Link
+          className="rounded-lg border border-[var(--border)] bg-white p-5 hover:border-[var(--brand)]"
+          href="/admin/lives"
+        >
+          <h2 className="text-xl font-black">Lives</h2>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            Disponibles dans une étape future.
+            Créer une session et préparer sa liste de participants.
           </p>
-        </article>
+        </Link>
       </div>
     </div>
   );

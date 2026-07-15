@@ -187,7 +187,10 @@ export function LiveForm({
                     type="checkbox"
                     value={member.userId}
                   />
-                  <label className="min-w-0 flex-1 text-sm font-bold" htmlFor={`participant-${member.userId}`}>
+                  <label
+                    className="min-w-0 flex-1 text-sm font-bold"
+                    htmlFor={`participant-${member.userId}`}
+                  >
                     {member.displayName}
                   </label>
                   <select

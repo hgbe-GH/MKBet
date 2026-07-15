@@ -7,7 +7,7 @@
 - [x] 5. Identité visuelle et shell sportsbook
 - [x] 6. Marchés réels depuis templates
 - [x] 7. Devis, placement, tickets et portefeuille
-- [ ] 8. Création des lives
+- [x] 8. Création des lives
 - [ ] 9. Lancement et arrêt des lives
 - [ ] 10. Déclaration des actions
 - [ ] 11. Suspension et recalcul des marchés

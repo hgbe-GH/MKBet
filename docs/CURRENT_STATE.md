@@ -14,11 +14,12 @@ Dernière mise à jour : 15 juillet 2026.
 - Protection contre double clic/répétition réseau par verrous et clés d’idempotence.
 - Gestion de l’expiration et de `ODDS_CHANGED` sans placement automatique.
 - Pages réelles `/markets`, `/markets/[marketId]`, `/bets`, `/wallet`, `/leaderboard`, surfaces financières du dashboard et `/admin/markets`.
+- Création atomique des lives par `create_live_session` : saison, rôle, hôte, participants, planning, idempotence et audit sont validés par PostgreSQL.
+- Pages réelles `/lives`, `/lives/[liveId]`, `/admin/lives` et `/admin/lives/new`, avec hôte `LIVE_HOST` imposé pour un créateur hôte et sélection administrateur contrôlée.
 - Classement limité au nom/avatar et agrégats de portefeuille, sans transactions détaillées d’un autre joueur.
 
 ## Démonstration restante
 
-- Lives et participants.
 - Actions et signaux.
 - Résultats visuels.
 - Chronologie détaillée.
@@ -31,7 +32,7 @@ Ces surfaces affichent un badge ou un texte explicite. Aucune fixture de marché
 - Règlement des marchés et corrections.
 - Crédit des gains, remboursements et cash-out.
 - Déclaration/confirmation des actions et repricing après action.
-- Transitions complètes des lives.
+- Lancement, arrêt, check-in et transitions complètes des lives.
 - Supabase Realtime et notifications push.
 - Déploiement Vercel Preview ou Production.
 
@@ -39,21 +40,26 @@ Ces surfaces affichent un badge ou un texte explicite. Aucune fixture de marché
 
 La migration forward-only `20260712120000_transactional_betting.sql` ajoute l’enum `bet_quote_status`, les tables `accumulator_correlation_rules`, `bet_quotes`, `bet_quote_legs`, les contraintes de devis obligatoire, les primitives mathématiques privées, les RPC de marchés/devis/placement/classement et leurs policies RLS.
 
+La migration forward-only `20260712130000_live_creation.sql` ajoute la demande d’idempotence privée des lives, resserre `private.is_live_host` sur `host_user_id` et expose `create_live_session`. Cette RPC écrit une session `SCHEDULED` ou `PROPOSED`, ses attendees et un audit en une seule transaction.
+
 Les migrations historiques et le moteur TypeScript de cotes n’ont pas été modifiés. `src/types/database.ts` a été régénéré depuis PostgreSQL local.
 
 ## Validation locale
 
 Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés, vérifie les cotes, crée un devis simple, place un pari réel, répète le placement avec la même clé, vérifie l’unique débit, crée un combiné corrélé, provoque un changement de cote et confirme `ODDS_CHANGED` sans débit. Les verrous de devis/portefeuille/marchés et les contraintes uniques empêchent le double débit et le solde négatif.
 
+Le scénario lives crée un admin, deux `LIVE_HOST`, un joueur et un reporter. Il vérifie la création programmée avec participants, l’audit unique après répétition, la création `INSTANT` autonome, ainsi que les refus pour hôte inéligible, participant inter-saison, joueur et tentative de modification du live d’un autre hôte.
+
 ## Dernières validations
 
 - `pnpm format`, `pnpm lint` et `pnpm typecheck` : succès.
-- `pnpm test` : 96 tests réussis dans 21 fichiers.
-- `pnpm db:reset` : succès avec les neuf migrations et le seed.
+- `pnpm test` : 107 tests réussis dans 25 fichiers.
+- `pnpm db:reset` : succès avec les dix migrations et le seed.
 - Seconde exécution de `seed.sql` : décomptes inchangés, dont 5 corrélations.
 - `supabase db lint` : aucune erreur ni aucun avertissement.
 - `pnpm db:test:rls` : 7 blocs SQL RLS historiques réussis.
 - `pnpm db:test:betting` : 11 blocs SQL transactionnels réussis, couvrant aussi un scénario d’intégration complet.
+- `pnpm db:test:lives` : création, RLS, audit et idempotence des lives réussis.
 - `pnpm odds:demo` : résultats déterministes inchangés.
 - `pnpm build` : succès après arrêt de Supabase, sans variable Supabase ni accès base au build.
 - `pnpm install --frozen-lockfile` : succès.
@@ -65,14 +71,15 @@ Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés,
 
 - Playwright 1.61.1 avec Chrome for Testing 149.0.7827.55 (`chromium` v1228) installé dans le cache local ; lancement headless réel validé.
 - Deux projets exécutables : `chromium-desktop` en 1440 × 1000 et `chromium-mobile` avec le profil Pixel 7.
-- 39 tests E2E dans 11 fichiers, avec sessions SSR locales ADMIN et PLAYER créées par Auth/Mailpit, saisons/invitations/marchés préparés via les RPC existantes et états Auth ignorés par Git.
+- 43 tests E2E dans 12 fichiers, avec sessions SSR locales ADMIN, PLAYER, LIVE_HOST et lecteur de saison créées par Auth/Mailpit, saisons/invitations/marchés préparés via les RPC existantes et états Auth ignorés par Git.
 - Pages inspectées sur desktop : accueil, login, dashboard, marchés, détail marché, ticket à deux sélections, mes paris, portefeuille, classement et administration.
 - Pages inspectées sur mobile : login, dashboard, marchés, ticket fermé/ouvert, détail marché, mes paris, portefeuille et classement.
 - Matrice responsive contrôlée : 360 × 800, 390 × 844, 768 × 1024, 1024 × 900 et 1440 × 1000, sans débordement horizontal majeur.
 - Axe exécuté sur accueil, login, dashboard, marchés, détail marché, ticket ouvert et classement : aucune violation sérieuse ou critique restante.
 - Cinq snapshots visuels stables : login desktop, dashboard desktop, marchés desktop/mobile et ticket mobile ouvert.
 - Le dashboard et les écrans marchés/ticket de l’audit visuel utilisent une session PLAYER et une saison propres, distinctes des parcours transactionnels. Les cotes visibles de cette saison sont stabilisées par le harness E2E ; deux captures consécutives identiques ont été vérifiées avant régénération des références.
-- `pnpm test:e2e` : 39/39 parcours réussis ; `playwright test --repeat-each=2` : 78/78 ; projets séparés : 22/22 desktop et 17/17 mobile.
+- Le parcours lives crée une session programmée avec un ADMIN, la relit avec un membre distinct, puis crée une session `INSTANT` avec un `LIVE_HOST`; il passe sur desktop et mobile.
+- `pnpm test:e2e` : 43/43 parcours Chromium réussis.
 
 Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright.
 

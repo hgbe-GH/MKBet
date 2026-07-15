@@ -77,3 +77,9 @@
 **Décision :** séparer sélection, devis de 60 secondes et placement. PostgreSQL relit toutes les valeurs de cote, applique les corrélations explicites et réalise ticket, débit, journal et audit dans une seule RPC.
 
 **Motif :** empêcher le client d’imposer une valeur financière, garantir l’idempotence en environnement serverless et éviter toute transaction répartie entre plusieurs requêtes Vercel.
+
+## ADR-014 — Création atomique des lives
+
+**Décision :** créer un live, son hôte, ses participants et son audit par une RPC PostgreSQL idempotente. Un `LIVE_HOST` n’administre que les lives dont `host_user_id` lui appartient; un `ADMIN` peut choisir un hôte actif.
+
+**Motif :** empêcher les créations partielles, ne jamais faire confiance aux participants envoyés par le navigateur et aligner les droits de création sur les policies RLS futures de lancement et d’action.

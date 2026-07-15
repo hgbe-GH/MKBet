@@ -22,15 +22,15 @@ Variables publiques principales :
 
 Une ligne `season_members` représente un rôle dans une saison. Un utilisateur peut cumuler `ADMIN`, `LIVE_HOST`, `REPORTER`, `PLAYER` et `SUBJECT`. Le rôle `SUBJECT` exige une clé `MARGOT` ou `KEVIN`; les fonctions SQL empêchent un même utilisateur d'être simultanément les deux sujets actifs dans une saison.
 
-| Ressource     | PLAYER                      | REPORTER             | LIVE_HOST             | SUBJECT                        | ADMIN                                  |
-| ------------- | --------------------------- | -------------------- | --------------------- | ------------------------------ | -------------------------------------- |
-| Saisons       | Lecture                     | Lecture              | Lecture               | Lecture                        | Lecture/édition                        |
-| Invitations   | Acceptation                 | Acceptation          | Acceptation           | Acceptation                    | Création/révocation/liste sûre         |
-| Lives         | Lecture                     | Lecture              | Création/édition hôte | Lecture                        | Création/édition                       |
-| Actions       | Vue membre sans note privée | Déclaration          | Déclaration           | Déclaration/confirmation sujet | Lecture complète/administration future |
-| Portefeuilles | Lecture du sien             | Lecture du sien      | Lecture du sien       | Lecture du sien                | Lecture saison                         |
-| Audit         | Aucun accès                 | Aucun accès          | Aucun accès           | Aucun accès                    | Lecture saison                         |
-| Storage       | Lecture membre              | Upload propre chemin | Upload propre chemin  | Upload propre chemin           | Lecture/administration                 |
+| Ressource     | PLAYER                      | REPORTER             | LIVE_HOST                             | SUBJECT                        | ADMIN                                         |
+| ------------- | --------------------------- | -------------------- | ------------------------------------- | ------------------------------ | --------------------------------------------- |
+| Saisons       | Lecture                     | Lecture              | Lecture                               | Lecture                        | Lecture/édition                               |
+| Invitations   | Acceptation                 | Acceptation          | Acceptation                           | Acceptation                    | Création/révocation/liste sûre                |
+| Lives         | Lecture                     | Lecture              | Création/édition de ses propres lives | Lecture                        | Création et choix d’un hôte `LIVE_HOST` actif |
+| Actions       | Vue membre sans note privée | Déclaration          | Déclaration                           | Déclaration/confirmation sujet | Lecture complète/administration future        |
+| Portefeuilles | Lecture du sien             | Lecture du sien      | Lecture du sien                       | Lecture du sien                | Lecture saison                                |
+| Audit         | Aucun accès                 | Aucun accès          | Aucun accès                           | Aucun accès                    | Lecture saison                                |
+| Storage       | Lecture membre              | Upload propre chemin | Upload propre chemin                  | Upload propre chemin           | Lecture/administration                        |
 
 ## Fonctions SQL privées
 
@@ -46,6 +46,8 @@ Les 25 tables privées restent sous RLS. Les politiques métier remplacent le de
 
 `member_action_feed` est la vue prévue pour le futur fil membre. Elle ne contient pas `private_note` et repose sur `security_invoker = true`.
 
+La création d’un live utilise `create_live_session`, une RPC `SECURITY DEFINER` avec `search_path` vide, contrôle d’idempotence et audit. L’hôte doit avoir le rôle actif `LIVE_HOST`. Un `ADMIN` peut désigner cet hôte ; un `LIVE_HOST` ne peut se désigner que lui-même. La validation serveur refuse les participants inactifs, extérieurs à la saison, dupliqués ou ajoutés comme `HOST` par le client.
+
 ## Interface privée
 
 Le shell sportsbook reste derrière le layout protégé et `requireAuth()`. Les données de démonstration n’accordent aucun accès persistant et ne contournent pas RLS. Le lien d’administration est masqué pour les rôles ordinaires, mais la sécurité réelle continuera de reposer sur les RPC et policies PostgreSQL.
@@ -60,4 +62,4 @@ Les clés d’idempotence, contraintes uniques et verrous empêchent la double c
 
 ## Limites restantes
 
-Le règlement, le paiement des gains, les transitions de lives, les uploads média dans l’interface et le realtime ne sont pas encore implémentés. Les futures mutations de règlement resteront atomiques côté PostgreSQL.
+Le règlement, le paiement des gains, les transitions de lives, les actions live, les uploads média dans l’interface et le realtime ne sont pas encore implémentés. Les futures mutations de règlement resteront atomiques côté PostgreSQL.

@@ -83,6 +83,8 @@ describe("live administration form", () => {
       target: { value: "INSTANT" },
     });
     expect(screen.getByLabelText("Début planifié (UTC)")).not.toBeRequired();
-    expect(screen.getByText(/planning indicatif facultatif/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/planning indicatif facultatif/i),
+    ).toBeInTheDocument();
   });
 });

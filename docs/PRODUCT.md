@@ -38,7 +38,7 @@ Les classements compareront les performances amicales des participants. La chron
 
 Les marchés, cotes, devis, paris, portefeuilles et classements financiers sont réels dans Supabase local. Un joueur vérifie d’abord son ticket, reçoit un devis court, puis confirme explicitement le placement et le débit en MKB fictifs.
 
-Les lives, actions, résultats et chronologie détaillée restent des démonstrations clairement marquées. Aucun règlement ni paiement de gains n’est encore exécuté.
+Les administrateurs peuvent créer une session réelle en choisissant un hôte `LIVE_HOST` actif et des participants. Un `LIVE_HOST` peut préparer uniquement son propre live. Le lancement, les actions, les résultats et la chronologie détaillée restent à développer. Aucun règlement ni paiement de gains n’est encore exécuté.
 
 ## Ton éditorial
 
