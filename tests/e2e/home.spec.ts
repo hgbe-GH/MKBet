@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("shows the MK Bet pre-season home page", async ({ page }) => {
+test("opens the permanent Margot and Kévin room", async ({ page }) => {
   await page.goto("/");
 
   await expect(
@@ -10,6 +10,6 @@ test("shows the MK Bet pre-season home page", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "CONSULTER LES COTES" }),
-  ).toBeDisabled();
+    page.getByRole("link", { name: "ENTRER DANS LA SALLE" }),
+  ).toHaveAttribute("href", "/login?next=/direct");
 });

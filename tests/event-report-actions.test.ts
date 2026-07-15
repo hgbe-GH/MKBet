@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { revalidatePath, remove, rpc, toBuffer, upload } = vi.hoisted(() => ({
-  revalidatePath: vi.fn(),
+const { remove, rpc, toBuffer, upload } = vi.hoisted(() => ({
   remove: vi.fn(),
   rpc: vi.fn(),
   toBuffer: vi.fn(),
@@ -19,7 +18,6 @@ vi.mock("@/lib/supabase/server", () => ({
     storage: { from: vi.fn(() => ({ remove, upload })) },
   })),
 }));
-vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("sharp", () => ({
   default: vi.fn(() => ({
     rotate: vi.fn(() => ({
@@ -158,7 +156,7 @@ describe("event report actions", () => {
     expect(remove.mock.calls[0]?.[0]).toHaveLength(2);
   });
 
-  it("maps votes to a safe result and revalidates every financial view", async () => {
+  it("maps votes to a safe result without delaying the response", async () => {
     await expect(voteEventReportAction(reportId, "CONFIRM")).resolves.toEqual({
       ok: true,
       message: "Ton vote est enregistré.",
@@ -168,9 +166,5 @@ describe("event report actions", () => {
       p_report_id: reportId,
       p_decision: "CONFIRM",
     });
-    expect(revalidatePath).toHaveBeenCalledWith("/direct");
-    expect(revalidatePath).toHaveBeenCalledWith("/markets");
-    expect(revalidatePath).toHaveBeenCalledWith("/bets");
-    expect(revalidatePath).toHaveBeenCalledWith("/leaderboard");
   });
 });

@@ -21,19 +21,14 @@ export default defineConfig({
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 1000 },
-        storageState: "tests/e2e/.auth/player-desktop.json",
+        storageState: "tests/e2e/.auth/author.json",
       },
     },
     {
       name: "chromium-mobile",
-      testIgnore: [
-        /admin(?:-visual)?\.spec\.ts/,
-        /betting\.spec\.ts/,
-        /responsive-matrix\.spec\.ts/,
-      ],
       use: {
         ...devices["Pixel 7"],
-        storageState: "tests/e2e/.auth/player-mobile.json",
+        storageState: "tests/e2e/.auth/opposer.json",
       },
     },
   ],

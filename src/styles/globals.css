@@ -5,6 +5,7 @@
   --background: #f4f4f2;
   --foreground: #171412;
   --brand: #7f1717;
+  --brand-strong: #4c050f;
   --brand-hover: #991b1b;
   --brand-active: #5f1111;
   --brand-muted: #fee2e2;
@@ -42,8 +43,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-a {
-  color: inherit;
+@layer base {
+  a {
+    color: inherit;
+  }
 }
 
 :focus-visible {

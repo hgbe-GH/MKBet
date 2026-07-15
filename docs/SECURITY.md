@@ -46,6 +46,8 @@ Les 25 tables privées restent sous RLS. Les politiques métier remplacent le de
 
 `member_action_feed` est la vue prévue pour le futur fil membre. Elle ne contient pas `private_note` et repose sur `security_invoker = true`.
 
+Les rapports de la salle unique ne sont lisibles que par ses membres actifs. Tout membre peut soumettre un fait et au plus cinq preuves, mais seul PostgreSQL décide de son auteur, de sa saison et de son état initial. Un membre ne peut ni voter sur son propre rapport, ni modifier son vote, ni forcer un résultat. Les RPC de vote et de résolution qualifient tous leurs objets, utilisent un `search_path` vide et n’acceptent aucun montant, cote, gain ou identité autoritaire du navigateur.
+
 La création d’un live utilise `create_live_session`, une RPC `SECURITY DEFINER` avec `search_path` vide, contrôle d’idempotence et audit. L’hôte doit avoir le rôle actif `LIVE_HOST`. Un `ADMIN` peut désigner cet hôte ; un `LIVE_HOST` ne peut se désigner que lui-même. La validation serveur refuse les participants inactifs, extérieurs à la saison, dupliqués ou ajoutés comme `HOST` par le client.
 
 ## Interface privée
@@ -60,8 +62,10 @@ Le ticket conserve ses sélections uniquement en mémoire React et n’utilise p
 
 Les clés d’idempotence, contraintes uniques et verrous empêchent la double création et le double débit. `bets.quote_id` est obligatoire. Les tables `wallets`, `wallet_transactions`, `bets`, `bet_legs`, `bet_quotes`, `bet_quote_legs`, `odds_snapshots` et `settlements` n’ont aucune écriture client directe.
 
-## Limites restantes
+## Preuves privées
 
 Les médias de saison sont téléversés dans le bucket privé `season-media`, normalisés en WebP sans métadonnées et rendus uniquement par la route authentifiée `/api/media/[mediaId]`. Un membre ne voit que les médias `APPROVED`; un ADMIN les approuve, rejette ou archive avec audit. La politique `storage.objects` applique la même barrière : un membre ne peut pas lire directement un blob `PENDING`. La route retourne une `404` identique pour une absence, une non-authentification ou une autorisation refusée, avec `Cache-Control: private, no-store`. Aucun lien signé ni chemin Storage n’est rendu au navigateur.
 
-Le règlement, le paiement des gains, les transitions de lives, les actions live et le realtime ne sont pas encore implémentés. Les futures mutations de règlement resteront atomiques côté PostgreSQL.
+Les preuves de signalement sont téléversées sous `{seasonId}/{userId}/{uuid}.webp`, après rotation, redimensionnement maximal à 1 600 px et réencodage sans métadonnées. Elles ne sont jamais placées dans `public/`, rendues par URL signée ou exposées par un chemin Storage dans le HTML. `/api/media/[mediaId]` authentifie, applique RLS et renvoie une `404` uniforme hors autorisation avec `Cache-Control: private, no-store`.
+
+Le système reste un jeu privé en monnaie fictive. Il n’intègre ni paiement, ni argent réel, ni service role dans les parcours utilisateur. Realtime et les notifications push ne sont pas actifs ; l’état canonique est relu lors des navigations.

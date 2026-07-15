@@ -28,8 +28,9 @@ describe("Playwright configuration", () => {
     });
   });
 
-  it("reserves an isolated browser session for visual snapshots", () => {
-    expect(e2eAuthState.visual).toMatch(/tests\/e2e\/\.auth\/visual\.json$/);
+  it("reserves isolated sessions for the author and two validators", () => {
+    expect(e2eAuthState.author).toMatch(/tests\/e2e\/\.auth\/author\.json$/);
+    expect(e2eAuthState.validatorA).not.toBe(e2eAuthState.validatorB);
   });
 
   it("allows multipart media uploads larger than the default Server Action limit", () => {

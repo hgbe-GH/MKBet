@@ -328,4 +328,3 @@ $$;
 
 revoke all on function private.settle_event_market(uuid, uuid, uuid, uuid)
   from public, anon, authenticated;
-

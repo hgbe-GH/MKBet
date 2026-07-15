@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { expectNoSeriousAxeViolations } from "./support/assertions";
 
-const protectedPages = ["/dashboard", "/markets", "/leaderboard"];
+const protectedPages = ["/direct", "/report", "/markets", "/leaderboard"];
 
 for (const route of protectedPages) {
   test(`${route} has no serious or critical axe violation`, async ({

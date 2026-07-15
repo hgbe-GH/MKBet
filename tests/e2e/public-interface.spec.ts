@@ -16,9 +16,9 @@ test("home exposes brand, metadata, favicon and responsive public content", asyn
     /salle privée des marchés fictifs/i,
   );
   await expect(
-    page.getByLabel("MK Bet — aller au contenu principal"),
+    page.getByLabel("MK Bet, aller au contenu principal"),
   ).toBeVisible();
-  await expect(page.getByText("PRÉ-SAISON")).toBeVisible();
+  await expect(page.getByText("SALLE OUVERTE")).toBeVisible();
   await expect(page.getByText("100 % monnaie fictive")).toBeVisible();
   const faviconHref = await page
     .locator('link[rel="icon"]')
@@ -35,7 +35,7 @@ test("login is keyboard accessible and keeps responses non-enumerating", async (
 }) => {
   await page.goto("/login");
   await expect(
-    page.getByRole("heading", { name: "Accéder à la salle des marchés" }),
+    page.getByRole("heading", { name: "Rejoindre Margot × Kévin" }),
   ).toBeVisible();
   const email = page.getByLabel("Email");
   await email.focus();

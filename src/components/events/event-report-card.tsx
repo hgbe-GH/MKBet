@@ -67,6 +67,7 @@ export function EventReportCard({
               key={evidence.id}
               sizes="(max-width: 640px) 100vw, 360px"
               src={`/api/media/${evidence.id}`}
+              unoptimized
               width={960}
             />
           ))}

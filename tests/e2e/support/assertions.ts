@@ -23,7 +23,11 @@ export async function expectNoSeriousAxeViolations(page: Page): Promise<void> {
     blocking.map((violation) => ({
       id: violation.id,
       impact: violation.impact,
-      targets: violation.nodes.map((node) => node.target),
+      nodes: violation.nodes.map((node) => ({
+        target: node.target,
+        html: node.html,
+        failureSummary: node.failureSummary,
+      })),
     })),
   ).toEqual([]);
 }

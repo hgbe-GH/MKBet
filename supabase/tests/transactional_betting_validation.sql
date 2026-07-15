@@ -209,8 +209,8 @@ begin
   if (select count(*) from public.bet_quotes) <> 0 then
     raise exception 'Outsider must not read another user quote';
   end if;
-  if (select count(*) from public.accumulator_correlation_rules) <> 0 then
-    raise exception 'Outsider without active season must not read correlation rules';
+  if (select count(*) from public.accumulator_correlation_rules) <> 5 then
+    raise exception 'Automatic single-room member should read correlation rules';
   end if;
 end;
 $$;

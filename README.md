@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, le moteur déterministe de cotes et un sportsbook transactionnel : marchés réels, devis courts, paris simples/combinés, débit MKB, tickets, portefeuille, classement financier, lives privés et médias de saison validés.
+Cette version recentre tout le produit sur une salle permanente Margot × Kévin. Chaque compte confirmé rejoint automatiquement la salle, reçoit 1 000 MKB fictifs et peut parier sur deux questions : le prochain bisou et le retour officiel en couple. Chaque membre peut aussi déclarer un fait avec des preuves privées. Deux votes concordants le confirment ou l’invalident ; une confirmation règle atomiquement le marché et les tickets liés.
 
 ## Prérequis
 
@@ -55,7 +55,7 @@ pnpm lint         # analyse ESLint
 pnpm typecheck    # vérification TypeScript stricte
 pnpm test         # tests unitaires Vitest
 pnpm test:watch   # tests unitaires en mode interactif
-pnpm test:e2e     # 39 parcours Chromium desktop/mobile avec Supabase local actif
+pnpm test:e2e     # parcours Chromium desktop/mobile avec Supabase local actif
 pnpm odds:demo    # démonstration locale déterministe du moteur de cotes
 pnpm db:start     # démarre Supabase local avec Docker
 pnpm db:reset     # recrée la base depuis les migrations et le seed
@@ -63,6 +63,7 @@ pnpm db:types     # régénère les types TypeScript depuis la base locale
 pnpm db:test:betting # valide marchés, devis, placements et idempotence
 pnpm db:test:lives   # valide création de lives, RLS, audit et idempotence
 pnpm db:test:media   # valide médias privés, Storage, RLS et audit
+pnpm db:test:single-room # valide salle unique, votes et règlement atomique
 pnpm db:stop      # arrête Supabase local sans conserver son état
 pnpm format       # mise en forme Prettier
 pnpm format:check # contrôle Prettier sans modification
@@ -74,7 +75,7 @@ Chromium est une dépendance de développement locale : son binaire reste dans l
 
 - `src/app` : routes et interfaces Next.js App Router ;
 - `src/components` : composants de mise en page et composants UI accessibles ;
-- `src/fixtures/sportsbook` : démonstration isolée des lives, résultats et chronologie seulement ;
+- `src/domain/events` : règles et types des signalements collaboratifs ;
 - `src/domain` : types métier et logique métier pure, dont le moteur de cotes ;
 - `src/application` : orchestration pure et adaptation des modèles persistants ;
 - `src/auth`, `src/data` et `src/lib/supabase` : sessions SSR, autorisations et accès persistant à Supabase ;
@@ -84,12 +85,12 @@ Chromium est une dépendance de développement locale : son binaire reste dans l
 
 Consulter [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DATABASE.md`](docs/DATABASE.md), [`docs/ODDS.md`](docs/ODDS.md), [`docs/BETTING.md`](docs/BETTING.md) et [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md).
 
-## Déploiement Vercel futur
+## Déploiement
 
-Le dépôt pourra être connecté à Vercel avec `pnpm install --frozen-lockfile` comme commande d’installation et `pnpm build` comme commande de build. Les variables devront être configurées séparément dans Development, Preview et Production. Aucune mise en production n’a encore été réalisée.
+La production publique est déployée sur [mk-bet.vercel.app](https://mk-bet.vercel.app). Vercel utilise `pnpm install --frozen-lockfile` puis `pnpm build`. Les migrations Supabase restent une opération explicite exécutée avant toute version applicative qui en dépend.
 
 La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## État actuel
 
-La production est disponible sur [mk-bet.vercel.app](https://mk-bet.vercel.app). La page publique et l’Auth restent indépendantes du build. Les marchés, devis, paris, portefeuilles, tickets, classements et créations de lives utilisent Supabase. Les médias de saison passent par Storage privé, sont convertis en WebP sans métadonnées puis validés par un administrateur avant lecture par les membres. Les transitions de lives, actions, résultats et chronologie détaillée restent à développer. Le règlement et le paiement des gains ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page publique, l’Auth SSR, la salle unique, les deux marchés, le ticket, le classement et le fil de validation sont implémentés. Les preuves sont converties en WebP sans métadonnées, stockées dans un bucket privé et servies par une route authentifiée sans URL Storage. Le règlement MKB lié aux faits confirmés est réel, idempotent et audité. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).

@@ -10,7 +10,7 @@ const viewports = [
   { width: 1440, height: 1000 },
 ];
 
-const routes = ["/dashboard", "/markets", "/bets", "/wallet", "/leaderboard"];
+const routes = ["/direct", "/report", "/markets", "/bets", "/leaderboard"];
 
 test("critical pages fit all required viewport widths", async ({ page }) => {
   for (const viewport of viewports) {

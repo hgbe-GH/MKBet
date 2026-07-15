@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/application/events/actions", () => ({
@@ -8,7 +8,9 @@ vi.mock("@/application/events/actions", () => ({
 
 import { EventReportCard } from "@/components/events/event-report-card";
 import { EventReportForm } from "@/components/events/event-report-form";
+import { EventVoteControls } from "@/components/events/event-vote-controls";
 import type { EventReportView } from "@/domain/events/types";
+import { voteEventReportAction } from "@/application/events/actions";
 
 const pendingReport: EventReportView = {
   id: "report-1",
@@ -40,7 +42,7 @@ describe("EventReportCard", () => {
     expect(screen.getByText("Signalé par Alice")).toBeInTheDocument();
     expect(screen.getByAltText("Preuve du baiser")).toHaveAttribute(
       "src",
-      expect.stringContaining("%2Fapi%2Fmedia%2Fmedia-1"),
+      "/api/media/media-1",
     );
     expect(screen.getByText("1 validation sur 2")).toBeInTheDocument();
     expect(screen.getByText("0 invalidation sur 2")).toBeInTheDocument();
@@ -55,6 +57,24 @@ describe("EventReportCard", () => {
     expect(
       screen.getByText("Tu ne peux pas voter sur ton propre signalement."),
     ).toBeInTheDocument();
+  });
+});
+
+describe("EventVoteControls", () => {
+  it("replaces decisions with the durable local vote after success", async () => {
+    vi.mocked(voteEventReportAction).mockResolvedValue({
+      ok: true,
+      message: "Ton vote est enregistré.",
+    });
+    render(<EventVoteControls reportId="report-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Invalider" }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Ton vote : invalidation.")).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole("button", { name: "Valider" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Invalider" })).toBeNull();
   });
 });
 

@@ -1,23 +1,18 @@
 # Roadmap
 
-- [x] 1. Fondations
-- [x] 2. Schéma Supabase
-- [x] 3. Moteur de probabilités et de cotes
-- [x] 4. Authentification et invitations
-- [x] 5. Identité visuelle et shell sportsbook
-- [x] 6. Marchés réels depuis templates
-- [x] 7. Devis, placement, tickets et portefeuille
-- [x] 8. Création des lives
-- [x] 9. Médias de saison privés
-- [ ] 10. Lancement et arrêt des lives
-- [ ] 11. Déclaration des actions
-- [ ] 12. Suspension et recalcul des marchés
-- [ ] 13. Validation des résultats
-- [ ] 14. Règlement des paris
-- [ ] 15. Temps réel
-- [ ] 16. Chronologie complète (classement financier disponible)
-- [ ] 17. Administration
-- [x] 18. Tests end-to-end et validation visuelle Chromium
-- [ ] 19. Préparation Vercel
-- [ ] 20. Déploiement Preview
-- [ ] 21. Déploiement Production
+- [x] Fondations Next.js, TypeScript, Tailwind et Vercel
+- [x] Schéma Supabase, Auth SSR et RLS
+- [x] Moteur déterministe de cotes
+- [x] Paris transactionnels en MKB
+- [x] Salle permanente Margot × Kévin
+- [x] Inscription automatique et crédit initial idempotent
+- [x] Deux marchés ciblés : bisou et couple officiel
+- [x] Déclaration collaborative avec preuves privées
+- [x] Vote définitif, seuil 2 contre 2 et audit
+- [x] Règlement atomique du marché et des tickets confirmés
+- [x] Interface mobile-first et tests Chromium
+- [x] Déploiement initial Supabase/Vercel
+- [ ] Realtime ciblé sur le fil et les marchés
+- [ ] Notifications dans l’application
+- [ ] Outil de retrait/modération des preuves
+- [ ] Sauvegarde et supervision de production

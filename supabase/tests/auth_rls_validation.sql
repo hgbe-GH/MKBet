@@ -154,8 +154,8 @@ begin
   if (select count(*) from public.profiles where id in (
     '00000000-0000-0000-0000-0000000000b2',
     '00000000-0000-0000-0000-0000000000b7'
-  )) <> 1 then
-    raise exception 'Alice should read Bob but not Emma';
+  )) <> 2 then
+    raise exception 'Single-room members should read each other profiles';
   end if;
   if (select count(*) from public.audit_logs) <> 1 then
     raise exception 'Alice should read season A audit';
@@ -227,7 +227,12 @@ begin
   if not failed then
     raise exception 'Bob should not have update privileges on wallets';
   end if;
-  if (select balance_mkb from public.wallets where user_id = '00000000-0000-0000-0000-0000000000b2') = 1 then
+  if (
+    select balance_mkb
+    from public.wallets
+    where season_id = '10000000-0000-0000-0000-00000000000a'
+      and user_id = '00000000-0000-0000-0000-0000000000b2'
+  ) = 1 then
     raise exception 'Bob should not update wallet balance directly';
   end if;
 end;
@@ -250,10 +255,10 @@ select * from public.accept_season_invitation((select token from invitation_resu
 
 do $$
 begin
-  if (select count(*) from public.wallets where user_id = '00000000-0000-0000-0000-0000000000f6') <> 1 then
+  if (select count(*) from public.wallets where season_id = '10000000-0000-0000-0000-00000000000a' and user_id = '00000000-0000-0000-0000-0000000000f6') <> 1 then
     raise exception 'Invitation should create one wallet';
   end if;
-  if (select count(*) from public.wallet_transactions where user_id = '00000000-0000-0000-0000-0000000000f6') <> 1 then
+  if (select count(*) from public.wallet_transactions where season_id = '10000000-0000-0000-0000-00000000000a' and user_id = '00000000-0000-0000-0000-0000000000f6') <> 1 then
     raise exception 'Invitation should create one initial credit';
   end if;
 end;
@@ -315,7 +320,7 @@ insert into storage.objects (id, bucket_id, name, owner, metadata)
 values (
   extensions.gen_random_uuid(),
   'season-media',
-  '10000000-0000-0000-0000-00000000000a/00000000-0000-0000-0000-0000000000c3/proof.png',
+  '6d6b0000-0000-4000-8000-000000000001/00000000-0000-0000-0000-0000000000c3/proof.png',
   '00000000-0000-0000-0000-0000000000c3',
   '{}'::jsonb
 );
@@ -329,7 +334,7 @@ begin
     values (
       extensions.gen_random_uuid(),
       'season-media',
-      '10000000-0000-0000-0000-00000000000a/00000000-0000-0000-0000-0000000000b2/proof.png',
+      '6d6b0000-0000-4000-8000-000000000001/00000000-0000-0000-0000-0000000000b2/proof.png',
       '00000000-0000-0000-0000-0000000000c3',
       '{}'::jsonb
     );

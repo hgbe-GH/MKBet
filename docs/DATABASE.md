@@ -2,7 +2,7 @@
 
 ## Principes
 
-PostgreSQL/Supabase est la source de vérité de MK Bet. Le schéma public contient 28 tables privées, protégées par Row Level Security métier. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
+PostgreSQL/Supabase est la source de vérité de MK Bet. Toutes les tables applicatives privées utilisent Row Level Security métier. Les identifiants métier utilisent des UUID produits par `gen_random_uuid()`, les horaires sont des `timestamptz`, les montants MKB sont des entiers et les probabilités/cotes utilisent `numeric`.
 
 Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Vercel ou une requête utilisateur. `supabase/seed.sql` ne contient que des données de référence réexécutables.
 
@@ -15,6 +15,13 @@ Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Verc
 - `accumulator_correlation_rules`, `bet_quotes` et `bet_quote_legs` portent les corrélations et devis courts.
 - `wallets`, `bets`, `bet_legs`, `settlements` et `wallet_transactions` portent les mises fictives et leur règlement futur.
 - `notifications`, `audit_logs` et `rechute_snapshots` portent les projections utilisateur, la traçabilité et le Rechutomètre.
+- `event_reports`, `event_report_votes` et `event_report_resolution_requests` portent les faits proposés au groupe, les votes immuables et l’idempotence de leur résolution.
+
+## Salle permanente
+
+La migration `20260715170000_single_room.sql` installe la saison Margot × Kévin et ses deux marchés binaires. `ensure_single_room_access` inscrit chaque compte confirmé, attribue `PLAYER`, crée un portefeuille unique et crédite une seule transaction initiale de 1 000 MKB.
+
+Les migrations `20260715170001` à `20260715170003` ajoutent les signalements, votes, preuves privées, résolution financière et policies RLS. Une déclaration suspend son marché lié. Deux validations déclenchent dans une transaction la confirmation, le règlement du marché, le statut des paris, les gains et l’audit. Deux invalidations rejettent la déclaration et rouvrent le marché. L’auteur ne vote jamais sur son propre signalement et la contrainte unique `(report_id, voter_user_id)` rend chaque décision définitive.
 
 Les clés étrangères composites empêchent qu’un live, une action, un média ou une issue soit associé à une saison ou un marché incompatible. Des triggers ciblés complètent les règles qui traversent plusieurs tables.
 

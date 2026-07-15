@@ -23,9 +23,15 @@ Les composants React ne seront jamais la seule source d’un calcul de cote ou d
 
 ## Interface sportsbook
 
-Le shell privé est mobile-first : sidebar desktop, header compact, bottom navigation mobile, ticket visuel et lien d’évitement. Les pages `/dashboard`, `/markets`, `/lives`, `/bets`, `/results`, `/timeline`, `/leaderboard` et `/admin` présentent les surfaces sportsbook. Les mutations sensibles, dont la création de marchés, les paris et la création de lives, passent par une Server Action puis une RPC PostgreSQL.
+Le shell privé est mobile-first : sidebar desktop, header compact, bottom navigation mobile, ticket et lien d’évitement. Il expose seulement `Direct`, `Marchés`, `Déclarer`, `Mon ticket`, `Classement` et `Compte`. Les anciennes routes de saisons, lives, dashboard, résultats, chronologie et administration redirigent vers `/direct` afin de préserver les anciens favoris sans maintenir deux produits concurrents.
 
-Les cotes affichées dans cette étape proviennent de fixtures marquées “Données de démonstration”. Elles ne remplacent pas `market_templates`, `market_outcomes` ou `odds_snapshots`, et aucun placement de pari n’est possible depuis l’interface.
+Les marchés, cotes, devis, tickets, portefeuilles et classements proviennent exclusivement de Supabase. Le ticket reste local jusqu’au devis, puis la confirmation passe par les RPC transactionnelles existantes.
+
+## Salle unique et décisions du groupe
+
+`ensure_single_room_access` est le point d’entrée idempotent de chaque compte confirmé. Il rattache le profil à la saison permanente, lui donne le rôle `PLAYER`, crée son portefeuille et crédite exactement une fois 1 000 MKB. L’application ne demande donc plus de créer ou sélectionner une saison.
+
+Les déclarations suivent `Server Action → submit_event_report → Storage privé + métadonnées`. Les votes suivent `Server Action → vote_event_report`. PostgreSQL interdit l’auto-vote et le second vote d’un même membre. Au deuxième vote concordant, la même transaction confirme ou rejette le fait. La confirmation ferme le marché lié, crée son règlement, met à jour les tickets et crédite les gains ; le rejet rouvre le marché. Les anciennes cotes des jambes restent immuables.
 
 ## Supabase
 
@@ -59,9 +65,9 @@ Le parcours suit `sélection locale → Server Action → create_bet_quote → c
 
 `src/data/supabase/markets`, `betting`, `wallets` et `leaderboard` assurent les lectures RLS. Les pages `/markets`, `/bets`, `/wallet`, `/leaderboard` et les surfaces financières du dashboard ne chargent plus de fixtures. Le compte à rebours du devis est seulement visuel ; PostgreSQL reste l’autorité sur l’expiration.
 
-## Création de lives
+## Héritage conservé
 
-`public.create_live_session` crée dans une même transaction un live, son hôte, ses participants, sa clé d’idempotence et son audit. Les pages `/admin/lives` et `/admin/lives/new` préparent cette mutation ; `/lives` et `/lives/[liveId]` lisent la session réelle sous RLS. Un `ADMIN` choisit un membre actif `LIVE_HOST`, tandis qu’un `LIVE_HOST` crée uniquement un live dont il est l’hôte. Le lancement, les actions, le check-in et les marchés live restent hors de cette étape.
+Le schéma historique de saisons, lives et administration reste présent pour la compatibilité des migrations forward-only. Il n’est plus exposé dans l’expérience principale. Aucune migration historique ni le moteur de cotes déterministe n’a été réécrit.
 
 ## Migrations et types
 

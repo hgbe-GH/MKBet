@@ -1,45 +1,32 @@
 # Produit MK Bet
 
-## Concept
+## Promesse
 
-MK Bet est un sportsbook privé et humoristique destiné à un cercle d’amis. Il met en scène, avec une solennité volontairement excessive, l’évolution de la relation entre Margot et Kévin pendant leur saison post-rupture.
+MK Bet est une salle de paris fictifs privée consacrée à une seule histoire : Margot × Kévin. Le groupe parie en MKB sur leur prochain bisou et sur un éventuel retour officiel en couple, puis tranche collectivement les faits observés.
 
-L’application ne propose aucun pari en argent réel. Toutes les mises, gains, pertes et positions sont exprimés exclusivement dans la monnaie fictive **MKB**, sans valeur financière et sans conversion possible.
+Aucun euro, paiement, retrait ou échange de valeur n’existe. Chaque compte reçoit 1 000 MKB sans valeur financière.
 
-## Saison post-rupture Margot × Kévin
+## Parcours
 
-Une saison regroupe les marchés et les événements observables après la rupture. Son objectif narratif est de suivre les différents niveaux de rapprochement sans confondre des situations distinctes :
+1. Un ami crée son compte par magic link et rejoint automatiquement la salle.
+2. Il choisit une cote Oui ou Non et confirme son ticket.
+3. N’importe quel membre peut déclarer un bisou ou un retour officiel, avec jusqu’à cinq photos privées facultatives.
+4. L’auteur ne vote pas. Deux autres membres doivent valider ou invalider.
+5. Deux validations confirment le fait et règlent le marché lié ; deux invalidations rejettent le fait et rouvrent le marché.
 
-- un **rapprochement physique** est une interaction ponctuelle et ne présume pas d’une relation suivie ;
-- une situation de **sex-friends** suppose une relation physique récurrente et assumée, sans retour officiel en couple ;
-- un **retour officiel en couple** suppose une déclaration ou une validation explicite du statut amoureux.
+Les votes sont définitifs. Les cotes restent figées sur chaque jambe de pari et les gains MKB sont calculés côté PostgreSQL, jamais par le navigateur.
 
-Ces issues devront être validées selon des règles connues avant le règlement des marchés.
+## Navigation
 
-## Marchés permanents et lives
+- **Direct** : faits à vérifier, confirmés ou invalidés ;
+- **Marchés** : les deux questions et leurs cotes réelles ;
+- **Déclarer** : description, heure réelle, marché associé et preuves ;
+- **Mon ticket** : devis, confirmation et historique des paris ;
+- **Classement** : soldes et performance amicale ;
+- **Compte** : nom d’affichage et déconnexion.
 
-Les marchés permanents couvrent les grandes questions de la saison et restent disponibles selon leur état : ouverts, suspendus, clos ou réglés. Les cotes proposées refléteront des probabilités calculées par le futur moteur de cotes et seront figées au moment où un pari est placé.
+Les concepts historiques de saisons multiples, lives et console d’administration restent dans le schéma pour la compatibilité forward-only, mais ne structurent plus l’expérience.
 
-Les lives seront des sessions liées à un événement limité dans le temps, par exemple une soirée, un week-end ou une rencontre. Ils permettront à l’administration d’ouvrir, suspendre, recalculer et fermer des marchés en fonction des informations déclarées pendant l’événement.
+## Ton et garde-fous
 
-## Actions déclarées et validation
-
-Une action déclarée décrit un fait observé susceptible d’influencer les marchés. Son heure réelle (`occurred_at`) restera distincte de son heure de saisie (`declared_at`) afin de préserver une chronologie fiable.
-
-Les déclarations importantes ne règleront pas automatiquement un pari sans contrôle. Les résultats devront être confirmés par le processus de validation prévu, puis le règlement mettra à jour les portefeuilles fictifs de manière atomique et auditable.
-
-## Ticket, classement et chronologie
-
-Le ticket de pari regroupera les sélections, les mises en MKB et les cotes figées avant confirmation. Le portefeuille présentera uniquement un solde fictif.
-
-Les classements compareront les performances amicales des participants. La chronologie rassemblera les événements, déclarations, changements de marché et résultats validés pour raconter la saison de façon compréhensible.
-
-## Interface actuelle
-
-Les marchés, cotes, devis, paris, portefeuilles et classements financiers sont réels dans Supabase local. Un joueur vérifie d’abord son ticket, reçoit un devis court, puis confirme explicitement le placement et le débit en MKB fictifs.
-
-Les administrateurs peuvent créer une session réelle en choisissant un hôte `LIVE_HOST` actif et des participants. Un `LIVE_HOST` peut préparer uniquement son propre live. L’administration peut aussi téléverser des photos de saison privées : elles sont converties en WebP, restent en attente de validation, puis sont approuvées, rejetées ou archivées. Les membres ne consultent que les photos approuvées. Le lancement, les actions, les résultats et la chronologie détaillée restent à développer. Aucun règlement ni paiement de gains n’est encore exécuté.
-
-## Ton éditorial
-
-Le produit adopte un ton de salle de marchés et de retransmission sportive volontairement dramatique : alertes de séance, marchés suspendus, cote sous tension et incidents diplomatiques. L’humour doit rester lisible, bienveillant et clairement séparé de toute activité de jeu d’argent réel.
+L’interface emprunte le vocabulaire générique d’un sportsbook avec une identité bordeaux originale. Le ton est dramatique et humoristique, sans copier Betclic. Les textes doivent rester bienveillants, les preuves strictement privées et les personnes concernées capables de demander le retrait d’un contenu.

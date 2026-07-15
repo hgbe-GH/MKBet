@@ -8,13 +8,28 @@ import type { EventVoteDecision } from "@/domain/events/types";
 export function EventVoteControls({ reportId }: { reportId: string }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState("");
+  const [submittedDecision, setSubmittedDecision] =
+    useState<EventVoteDecision | null>(null);
 
   const vote = (decision: EventVoteDecision) => {
     startTransition(async () => {
       const result = await voteEventReportAction(reportId, decision);
       setMessage(result.message);
+      if (result.ok) setSubmittedDecision(decision);
     });
   };
+
+  if (submittedDecision) {
+    return (
+      <p
+        aria-live="polite"
+        className="mt-4 text-sm font-semibold text-[var(--text-secondary)]"
+      >
+        Ton vote :{" "}
+        {submittedDecision === "CONFIRM" ? "validation" : "invalidation"}.
+      </p>
+    );
+  }
 
   return (
     <div className="mt-5 border-t border-[var(--border)] pt-4">

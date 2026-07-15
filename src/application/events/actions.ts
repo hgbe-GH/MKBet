@@ -2,7 +2,6 @@
 
 import { randomUUID } from "node:crypto";
 
-import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 import { z } from "zod";
 
@@ -112,8 +111,6 @@ export async function submitEventReportAction(
     return failure("L’événement n’a pas pu être enregistré. Réessaie.");
   }
 
-  revalidatePath("/direct");
-  revalidatePath("/markets");
   return { ok: true, message: "Événement envoyé au vote du groupe." };
 }
 
@@ -126,9 +123,6 @@ export async function voteEventReportAction(
     await voteEventReport(reportId, decision);
   } catch (error) {
     return failure(mapEventError(error));
-  }
-  for (const path of ["/direct", "/markets", "/bets", "/leaderboard"]) {
-    revalidatePath(path);
   }
   return { ok: true, message: "Ton vote est enregistré." };
 }
