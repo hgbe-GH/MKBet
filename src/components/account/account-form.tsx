@@ -30,7 +30,7 @@ export function AccountForm({
           Nom d’affichage
         </label>
         <input
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-4 text-white"
           defaultValue={displayName}
           id="displayName"
           name="displayName"
@@ -43,7 +43,7 @@ export function AccountForm({
           Avatar URL
         </label>
         <input
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-4 text-white"
           defaultValue={avatarUrl ?? ""}
           id="avatarUrl"
           name="avatarUrl"
@@ -54,7 +54,7 @@ export function AccountForm({
         Enregistrer
       </Button>
       {state.message ? (
-        <p className="text-sm text-stone-600">{state.message}</p>
+        <p className="text-sm text-[var(--text-secondary)]">{state.message}</p>
       ) : null}
     </form>
   );
