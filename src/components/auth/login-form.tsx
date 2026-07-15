@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import type { AuthFormState } from "@/application/auth/actions";
 
 interface LoginFormProps {
@@ -25,6 +26,17 @@ async function inertAction(): Promise<AuthFormState> {
 export function LoginForm({ next, action = inertAction }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
 
+  if (state.ok && state.message) {
+    return (
+      <InlineNotice tone="success">
+        <h1 className="text-2xl font-black text-white">
+          Vérifie ta boîte mail
+        </h1>
+        <p className="mt-2 leading-6">{state.message}</p>
+      </InlineNotice>
+    );
+  }
+
   return (
     <form action={formAction} className="space-y-5">
       <h1 className="text-3xl font-black tracking-[-0.035em]">
@@ -37,7 +49,7 @@ export function LoginForm({ next, action = inertAction }: LoginFormProps) {
         </label>
         <input
           autoComplete="email"
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 text-stone-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-4 text-white"
           id="email"
           name="email"
           required
@@ -53,7 +65,7 @@ export function LoginForm({ next, action = inertAction }: LoginFormProps) {
         </label>
         <input
           autoComplete="nickname"
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 text-stone-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
+          className="min-h-12 w-full rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-4 text-white"
           id="displayName"
           name="displayName"
           type="text"
@@ -63,11 +75,11 @@ export function LoginForm({ next, action = inertAction }: LoginFormProps) {
         {pending ? "ENVOI EN COURS" : "RECEVOIR MON LIEN D’ACCÈS"}
       </Button>
       {state.message ? (
-        <p className="rounded-md border border-stone-200 bg-stone-50 p-3 text-sm text-stone-700">
+        <InlineNotice tone={state.ok ? "success" : "error"}>
           {state.message}
-        </p>
+        </InlineNotice>
       ) : null}
-      <p className="text-sm leading-6 text-stone-600">
+      <p className="text-sm leading-6 text-[var(--text-secondary)]">
         Un compte donne accès à la salle privée et à 1 000 MKB fictifs. Aucun
         pari en argent réel.
       </p>

@@ -13,25 +13,25 @@ describe("MK Bet home page", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "La salle des marchés de la rechute",
+        name: "Tout se joue entre nous.",
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
-    expect(screen.getByText("Saison post-rupture")).toBeInTheDocument();
+    expect(screen.getAllByText("Margot × Kévin")).toHaveLength(2);
+    expect(screen.getByText("Salle privée · 7 membres")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Parie en MKB, partage un fait et laisse le groupe trancher.",
+        "Une preuve, deux votes, une décision. Suis l’histoire de Margot et Kévin en MKB fictifs.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText("SALLE OUVERTE")).toBeInTheDocument();
     expect(screen.getByText("100 % monnaie fictive")).toBeInTheDocument();
+    expect(document.querySelector("[data-public-aurora]")).toBeInTheDocument();
   });
 
   it("sends visitors to the direct room login", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("link", { name: "ENTRER DANS LA SALLE" }),
+      screen.getByRole("link", { name: "Entrer dans la salle" }),
     ).toHaveAttribute("href", "/login?next=/direct");
   });
 });
