@@ -28,3 +28,49 @@ export const EVENT_VOTE_DECISIONS = ["CONFIRM", "REJECT"] as const;
 
 export type EventVoteDecision = (typeof EVENT_VOTE_DECISIONS)[number];
 
+export interface EventReportAuthor {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface EventReportEvidence {
+  id: string;
+  caption: string | null;
+  mediaType: string;
+}
+
+export interface EventReportMarketLink {
+  id: string;
+  title: string;
+  outcomeLabel: string;
+}
+
+export interface EventReportVoteView {
+  displayName: string;
+  decision: EventVoteDecision;
+}
+
+export interface EventReportView {
+  id: string;
+  author: EventReportAuthor;
+  reportType: EventReportType;
+  occurredAt: string;
+  declaredAt: string;
+  note: string;
+  status: EventReportStatus;
+  evidence: EventReportEvidence[];
+  market: EventReportMarketLink | null;
+  votes: {
+    confirmCount: number;
+    rejectCount: number;
+    currentUserDecision: EventVoteDecision | null;
+    voters: EventReportVoteView[];
+  };
+}
+
+export interface ReportableMarket {
+  id: string;
+  title: string;
+  outcomes: Array<{ id: string; label: string }>;
+}
