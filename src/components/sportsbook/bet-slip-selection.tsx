@@ -27,7 +27,7 @@ export function BetSlipSelectionItem({
         </div>
         <button
           aria-label={`Retirer ${selection.outcomeLabel}`}
-          className="rounded-md p-1 text-[var(--text-muted)] hover:bg-stone-100"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-stone-100"
           onClick={() =>
             betSlip.removeSelection(selection.marketId, selection.outcomeId)
           }

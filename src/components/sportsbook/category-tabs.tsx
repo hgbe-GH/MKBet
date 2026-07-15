@@ -46,7 +46,7 @@ export function CategoryTabs({
         return (
           <Link
             aria-current={active ? "page" : undefined}
-            className={`shrink-0 rounded-full border px-3 py-2 text-sm font-bold ${
+            className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm font-bold ${
               active
                 ? "border-[var(--brand)] bg-[var(--brand-muted)] text-[var(--brand-active)]"
                 : "border-[var(--border)] bg-white text-[var(--text-secondary)]"

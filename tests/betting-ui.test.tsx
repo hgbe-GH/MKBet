@@ -105,6 +105,9 @@ describe("transactional bet slip", () => {
     fireEvent.change(screen.getByLabelText("Mise en MKB"), {
       target: { value: "15" },
     });
+    fireEvent.change(screen.getByLabelText("Mise en MKB"), {
+      target: { value: "10" },
+    });
     expect(
       screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }),
     ).toBeInTheDocument();

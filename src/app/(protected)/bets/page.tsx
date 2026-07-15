@@ -1,5 +1,6 @@
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { OddsMovement } from "@/components/sportsbook/odds-movement";
+import { StatusBadge } from "@/components/sportsbook/status-badge";
 import { EmptyState } from "@/components/states/empty-state";
 import { listCurrentUserBets } from "@/data/supabase/betting/bet-repository";
 
@@ -35,19 +36,19 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
       </header>
       <nav aria-label="Filtrer les tickets" className="flex gap-2">
         <a
-          className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
+          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
           href="/bets"
         >
           Ouverts
         </a>
         <a
-          className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
+          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
           href="/bets?status=settled"
         >
           Réglés
         </a>
         <a
-          className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
+          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
           href="/bets?status=all"
         >
           Tous
@@ -72,9 +73,16 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
                     {bet.stakeMkb} MKB · cote {bet.totalOdds.toFixed(2)}
                   </h2>
                 </div>
-                <p className="text-sm font-bold text-[var(--text-secondary)]">
-                  Retour potentiel {bet.potentialReturnMkb} MKB
-                </p>
+                <div className="text-right">
+                  <StatusBadge
+                    tone={bet.status === "OPEN" ? "positive" : "muted"}
+                  >
+                    {bet.status}
+                  </StatusBadge>
+                  <p className="mt-2 text-sm font-bold text-[var(--text-secondary)]">
+                    Retour potentiel {bet.potentialReturnMkb} MKB
+                  </p>
+                </div>
               </div>
               <p className="mt-2 text-xs text-[var(--text-muted)]">
                 Ticket #{bet.id.slice(0, 8).toUpperCase()} ·{" "}

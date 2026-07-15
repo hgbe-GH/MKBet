@@ -3,10 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  mapAuthErrorToMessage,
-  sanitizeInternalRedirectPath,
-} from "@/application/auth";
+import { mapAuthErrorToMessage } from "@/application/auth";
 import {
   loginFormSchema,
   updateAccountSchema,
@@ -138,5 +135,3 @@ export async function updateAccount(
     message: "Profil mis à jour.",
   };
 }
-
-export { sanitizeInternalRedirectPath };

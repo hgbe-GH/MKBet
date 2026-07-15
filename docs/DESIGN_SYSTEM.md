@@ -21,10 +21,18 @@ Le shell privé utilise une sidebar desktop, un header compact, une navigation m
 
 Les boutons de cotes sont de vrais boutons, avec `aria-pressed`, libellé accessible complet, état suspendu désactivé et mouvement indiqué par texte + icône, pas uniquement par couleur.
 
+Les marchés binaires utilisent deux colonnes égales dès que l’espace le permet. Le graphique SVG affiche une grille et des points même lorsqu’un seul snapshot existe. Le ticket mobile est un panneau contrôlé, limité à la hauteur disponible, scrollable, refermable par son bouton ou par `Escape`, avec restitution du focus.
+
 ## États
 
 Les états vides, erreur, chargement et configuration manquante sont des composants réutilisables. Les actions métier non développées restent désactivées avec une mention explicite “Bientôt disponible” ou “Placement disponible à l’étape suivante”.
 
 ## Accessibilité
 
-Les pages privées conservent des landmarks, un lien d’évitement “Aller au contenu principal”, des titres hiérarchisés, un focus visible, des cibles tactiles proches de 44 px et une navigation active qui ne dépend pas seulement de la couleur. Les animations respectent `prefers-reduced-motion`.
+Les pages privées conservent des landmarks, un lien d’évitement “Aller au contenu principal” dont la cible reçoit le focus, des titres hiérarchisés, un focus visible, des cibles tactiles proches de 44 px et une navigation active qui ne dépend pas seulement de la couleur. Les zones horizontales, dont le classement mobile, sont focalisables. Les animations d’entrée, pulse, spinner et skeleton respectent `prefers-reduced-motion`.
+
+## Validation visuelle
+
+Les projets Playwright `chromium-desktop` (1440 × 1000) et `chromium-mobile` (Pixel 7) contrôlent navigation, overflow, clavier et axe. Une matrice complémentaire couvre 360 × 800, 390 × 844, 768 × 1024, 1024 × 900 et 1440 × 1000.
+
+Cinq références visuelles reproductibles sont conservées : login desktop, dashboard desktop, marchés desktop, marchés mobile et ticket mobile ouvert. Les captures d’audit plus larges restent temporaires et ignorées par Git.

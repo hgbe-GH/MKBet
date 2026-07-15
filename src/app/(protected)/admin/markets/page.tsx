@@ -11,7 +11,13 @@ import { getDefaultMarketSchedule } from "@/data/supabase/markets/template-repos
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminMarketsPage() {
+interface AdminMarketsPageProps {
+  searchParams?: Promise<{ created?: string }>;
+}
+
+export default async function AdminMarketsPage({
+  searchParams,
+}: AdminMarketsPageProps = {}) {
   const season = await requireSportsbookSeason();
   if (!season.roles.includes("ADMIN")) notFound();
   const [markets, audit, schedule] = await Promise.all([
@@ -24,6 +30,7 @@ export default async function AdminMarketsPage() {
     listRecentMarketAudit(season.id),
     getDefaultMarketSchedule(season.id),
   ]);
+  const marketCreated = (await searchParams)?.created === "1";
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -39,6 +46,14 @@ export default async function AdminMarketsPage() {
           <Link href="/admin/markets/new">NOUVEAU MARCHÉ</Link>
         </Button>
       </header>
+      {marketCreated ? (
+        <p
+          className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-900"
+          role="status"
+        >
+          Marché créé avec ses cotes et snapshots initiaux.
+        </p>
+      ) : null}
       <section className="rounded-lg border border-[var(--border)] bg-white p-5">
         <h2 className="text-xl font-black">Initialisation rapide</h2>
         <div className="mt-3">

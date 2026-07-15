@@ -84,6 +84,8 @@ export function OddsButton({
         suspended ? "suspendu" : "marché ouvert"
       }, ${movementText(movement)}${detail ? `, ${detail}` : ""}`}
       aria-pressed={selected}
+      data-market-id={marketId}
+      data-outcome-id={outcomeId}
       className={cn(
         "min-h-12 rounded-md border px-3 py-2 text-left transition hover:border-[var(--brand)] focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2",
         "flex items-center justify-between gap-3",

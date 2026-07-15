@@ -7,7 +7,9 @@ Cette version contient les fondations techniques, le schéma Supabase, l’authe
 ## Prérequis
 
 - Node.js 20.18.1 ou supérieur ;
-- pnpm 11.12.0.
+- pnpm 11.12.0 ;
+- Docker pour les parcours Supabase locaux ;
+- Chromium Playwright pour les tests end-to-end (`pnpm exec playwright install chromium`).
 
 ## Installation
 
@@ -53,7 +55,7 @@ pnpm lint         # analyse ESLint
 pnpm typecheck    # vérification TypeScript stricte
 pnpm test         # tests unitaires Vitest
 pnpm test:watch   # tests unitaires en mode interactif
-pnpm test:e2e     # futurs parcours Playwright
+pnpm test:e2e     # 39 parcours Chromium desktop/mobile avec Supabase local actif
 pnpm odds:demo    # démonstration locale déterministe du moteur de cotes
 pnpm db:start     # démarre Supabase local avec Docker
 pnpm db:reset     # recrée la base depuis les migrations et le seed
@@ -64,7 +66,7 @@ pnpm format       # mise en forme Prettier
 pnpm format:check # contrôle Prettier sans modification
 ```
 
-Les navigateurs Playwright ne sont pas installés ni lancés par l’installation standard de cette étape.
+Chromium est une dépendance de développement locale : son binaire reste dans le cache Playwright de la machine et n’est ni committé, ni requis par le runtime Vercel. `pnpm test:e2e` prépare des sessions Auth locales éphémères dans un dossier ignoré et lance le build E2E sur le port 3100.
 
 ## Architecture
 

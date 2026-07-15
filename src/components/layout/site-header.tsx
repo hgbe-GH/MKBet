@@ -3,7 +3,7 @@ export function SiteHeader() {
     <header className="border-b border-red-950 bg-red-950 text-white">
       <div className="mx-auto flex min-h-18 w-full max-w-6xl items-center justify-between px-5 sm:px-8">
         <a
-          className="rounded-sm text-xl font-black tracking-[-0.04em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-red-950"
+          className="inline-flex min-h-11 items-center rounded-sm text-xl font-black tracking-[-0.04em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-red-950"
           href="#main-content"
           aria-label="MK Bet — aller au contenu principal"
         >

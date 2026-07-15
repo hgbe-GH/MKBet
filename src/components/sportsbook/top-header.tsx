@@ -8,7 +8,7 @@ export function TopHeader({ season }: { season: SportsbookSeasonContext }) {
       <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6">
         <div>
           <Link
-            className="rounded-sm text-lg font-black tracking-[-0.04em] lg:hidden"
+            className="inline-flex min-h-11 items-center rounded-sm text-lg font-black tracking-[-0.04em] lg:hidden"
             href="/dashboard"
           >
             MK <span className="text-[var(--brand)]">BET</span>
@@ -28,7 +28,7 @@ export function TopHeader({ season }: { season: SportsbookSeasonContext }) {
           ) : null}
           <form action="/logout" method="post">
             <button
-              className="rounded-md border border-[var(--border)] px-3 py-2 text-sm font-bold hover:bg-stone-100"
+              className="min-h-11 rounded-md border border-[var(--border)] px-3 py-2 text-sm font-bold hover:bg-stone-100"
               type="submit"
             >
               Déconnexion

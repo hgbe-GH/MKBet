@@ -5,6 +5,7 @@ import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import { DesktopSidebar } from "@/components/sportsbook/desktop-sidebar";
 import { MobileBottomNavigation } from "@/components/sportsbook/mobile-bottom-navigation";
+import { MobileBetSlip } from "@/components/sportsbook/mobile-bet-slip";
 import { TopHeader } from "@/components/sportsbook/top-header";
 import type { SportsbookSeasonContext } from "@/fixtures/sportsbook/types";
 
@@ -30,7 +31,7 @@ export function AppShell({ children, season }: AppShellProps) {
           <div className="min-w-0 flex-1 pb-28 lg:pb-0">
             <TopHeader season={season} />
             <div className="grid gap-5 px-4 py-5 sm:px-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-              <main className="min-w-0" id="main-content">
+              <main className="min-w-0" id="main-content" tabIndex={-1}>
                 {children}
               </main>
               <div className="hidden xl:block">
@@ -44,16 +45,7 @@ export function AppShell({ children, season }: AppShellProps) {
             </div>
           </div>
         </div>
-        <div className="fixed inset-x-3 bottom-20 z-30 xl:hidden">
-          <details className="rounded-lg border border-[var(--border)] bg-white shadow-[0_14px_40px_rgba(28,25,23,0.18)]">
-            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-black">
-              Ouvrir le ticket
-            </summary>
-            <div className="border-t border-[var(--border)]">
-              <BetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />
-            </div>
-          </details>
-        </div>
+        <MobileBetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />
         <MobileBottomNavigation showAdmin={showAdmin} />
       </div>
     </BetSlipProvider>

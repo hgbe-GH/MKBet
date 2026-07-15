@@ -21,7 +21,21 @@ export default async function MarketDetailPage({
     notFound();
   }
 
-  const max = Math.max(...market.history.map((point) => point.odds));
+  const oddsValues = market.history.map((point) => point.odds);
+  const minimumOdds = oddsValues.length ? Math.min(...oddsValues) : 0;
+  const maximumOdds = oddsValues.length ? Math.max(...oddsValues) : 0;
+  const oddsRange = maximumOdds - minimumOdds;
+  const chartPoints = market.history.map((point, index) => {
+    const x =
+      market.history.length === 1
+        ? 150
+        : 20 + index * (260 / (market.history.length - 1));
+    const y =
+      oddsRange === 0
+        ? 60
+        : 100 - ((point.odds - minimumOdds) / oddsRange) * 70;
+    return { ...point, x, y };
+  });
 
   return (
     <div className="space-y-5">
@@ -46,18 +60,36 @@ export default async function MarketDetailPage({
           role="img"
           viewBox="0 0 300 120"
         >
+          {[25, 60, 95].map((y) => (
+            <line
+              key={y}
+              stroke="var(--border)"
+              strokeWidth="1"
+              x1="20"
+              x2="280"
+              y1={y}
+              y2={y}
+            />
+          ))}
           <polyline
             fill="none"
-            points={market.history
-              .map((point, index) => {
-                const x = 20 + index * (260 / (market.history.length - 1));
-                const y = 110 - (point.odds / max) * 90;
-                return `${x},${y}`;
-              })
+            points={chartPoints
+              .map((point) => `${point.x},${point.y}`)
               .join(" ")}
             stroke="var(--brand)"
             strokeWidth="4"
           />
+          {chartPoints.map((point) => (
+            <circle
+              cx={point.x}
+              cy={point.y}
+              fill="white"
+              key={`${point.label}:${point.odds}`}
+              r="5"
+              stroke="var(--brand)"
+              strokeWidth="3"
+            />
+          ))}
         </svg>
         <dl className="mt-3 grid gap-2 sm:grid-cols-3">
           {market.history.map((point) => (

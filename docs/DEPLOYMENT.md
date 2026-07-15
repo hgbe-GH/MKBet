@@ -59,6 +59,12 @@ Le build Vercel doit réussir sans connexion active à PostgreSQL. Les URL et cl
 
 Les pages sportsbook privées peuvent être buildées sans base active : leurs Server Components ne contactent Supabase qu’à la requête authentifiée. Marchés, devis, tickets, portefeuille et classement nécessitent les migrations appliquées avant la promotion applicative. Vercel ne lance jamais ces migrations.
 
+## Playwright et Chromium
+
+Chromium sert exclusivement au développement et aux tests end-to-end locaux. Le binaire installé par `pnpm exec playwright install chromium` reste dans le cache Playwright de la machine ; il n’est pas committé et n’est pas nécessaire au build ou au runtime Vercel.
+
+La suite E2E utilise Supabase local, Mailpit et un build isolé `.next-e2e` sur le port 3100. Les cookies et états Auth sont générés à chaque exécution dans `tests/e2e/.auth`, dossier ignoré. Aucun navigateur n’est lancé par `pnpm build`, aucune variable Vercel supplémentaire n’est requise et les snapshots ne dépendent d’aucune URL distante.
+
 Le parcours normal n’utilise pas `SUPABASE_SERVICE_ROLE_KEY`. Les Server Actions utilisent la session SSR de l’utilisateur et les RPC contrôlent `auth.uid()` ainsi que les rôles. Aucun timer serveur n’assure l’expiration des devis : PostgreSQL valide `expires_at` lors du placement.
 
 ## Rollback

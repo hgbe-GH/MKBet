@@ -16,7 +16,7 @@
 - [ ] 14. Temps réel
 - [ ] 15. Chronologie complète (classement financier disponible)
 - [ ] 16. Administration
-- [ ] 17. Tests end-to-end
+- [x] 17. Tests end-to-end et validation visuelle Chromium
 - [ ] 18. Préparation Vercel
 - [ ] 19. Déploiement Preview
 - [ ] 20. Déploiement Production

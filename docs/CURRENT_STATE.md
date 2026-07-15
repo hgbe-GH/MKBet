@@ -61,4 +61,17 @@ Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés,
 - Scan de secrets : aucun secret suivi ; seule la variable vide attendue de `.env.example` correspond au motif.
 - Migrations historiques et répertoires `src/domain/odds`, `src/application/odds` : aucun diff.
 
-Playwright Chromium n’est toujours pas installé ; aucun navigateur n’a été téléchargé automatiquement.
+## Validation Chromium et audit visuel
+
+- Playwright 1.61.1 avec Chrome for Testing 149.0.7827.55 (`chromium` v1228) installé dans le cache local ; lancement headless réel validé.
+- Deux projets exécutables : `chromium-desktop` en 1440 × 1000 et `chromium-mobile` avec le profil Pixel 7.
+- 39 tests E2E dans 11 fichiers, avec sessions SSR locales ADMIN et PLAYER créées par Auth/Mailpit, saisons/invitations/marchés préparés via les RPC existantes et états Auth ignorés par Git.
+- Pages inspectées sur desktop : accueil, login, dashboard, marchés, détail marché, ticket à deux sélections, mes paris, portefeuille, classement et administration.
+- Pages inspectées sur mobile : login, dashboard, marchés, ticket fermé/ouvert, détail marché, mes paris, portefeuille et classement.
+- Matrice responsive contrôlée : 360 × 800, 390 × 844, 768 × 1024, 1024 × 900 et 1440 × 1000, sans débordement horizontal majeur.
+- Axe exécuté sur accueil, login, dashboard, marchés, détail marché, ticket ouvert et classement : aucune violation sérieuse ou critique restante.
+- Cinq snapshots visuels stables : login desktop, dashboard desktop, marchés desktop/mobile et ticket mobile ouvert.
+
+Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin.
+
+Limites : les tests utilisent uniquement Supabase/Chromium locaux et ne valident aucun domaine Vercel distant. Les lives fonctionnels, règlements, paiements de gains, repricing automatique, Realtime et déploiements restent hors périmètre.

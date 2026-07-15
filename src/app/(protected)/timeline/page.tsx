@@ -34,7 +34,7 @@ export default async function TimelinePage() {
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
         {filters.map((filter) => (
           <button
-            className="shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
+            className="min-h-11 shrink-0 rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
             disabled={filter !== "Tout"}
             key={filter}
             type="button"

@@ -7,6 +7,7 @@ import { LiveBadge } from "@/components/sportsbook/live-badge";
 import { OddsButton } from "@/components/sportsbook/odds-button";
 import { StatusBadge } from "@/components/sportsbook/status-badge";
 import type { SportsbookMarket } from "@/fixtures/sportsbook/types";
+import { cn } from "@/lib/utils";
 
 function marketTypeLabel(type: SportsbookMarket["type"]) {
   if (type === "BINARY") {
@@ -47,7 +48,12 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
             <StatusBadge>{marketTypeLabel(market.type)}</StatusBadge>
           </div>
           <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--text-primary)]">
-            <Link href={`/markets/${market.id}`}>{market.title}</Link>
+            <Link
+              className="inline-flex min-h-11 items-center"
+              href={`/markets/${market.id}`}
+            >
+              {market.title}
+            </Link>
           </h2>
           {market.trashTitle ? (
             <p className="text-xs font-bold text-[var(--brand)]">
@@ -77,7 +83,12 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
           Suspension : {market.suspensionReason}
         </p>
       ) : null}
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={cn(
+          "mt-4 grid gap-2 sm:grid-cols-2",
+          market.outcomes.length > 2 && "lg:grid-cols-3",
+        )}
+      >
         {market.outcomes.map((outcome) => (
           <OddsButton
             key={outcome.id}

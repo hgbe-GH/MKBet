@@ -4,6 +4,7 @@
 
 # Next.js and production output
 /.next/
+/.next-e2e/
 /out/
 /build/
 
@@ -12,6 +13,8 @@
 /playwright-report/
 /test-results/
 /blob-report/
+/tests/e2e/.auth/
+/tests/e2e/.artifacts/
 
 # Environment and secrets
 .env

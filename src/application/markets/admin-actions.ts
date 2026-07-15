@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import {
@@ -60,10 +61,7 @@ export async function openTemplateMarketAction(
   }
   revalidatePath("/admin/markets");
   revalidatePath("/markets");
-  return {
-    ok: true,
-    message: "Marché créé avec ses cotes et snapshots initiaux.",
-  };
+  redirect("/admin/markets?created=1");
 }
 
 const statusSchema = z.object({

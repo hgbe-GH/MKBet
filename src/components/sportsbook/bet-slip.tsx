@@ -23,6 +23,7 @@ export function BetSlip({
 }) {
   const betSlip = useBetSlip();
   const [stake, setStake] = useState("10");
+  const [stakeRevision, setStakeRevision] = useState(0);
   const [quote, setQuote] = useState<BetQuoteResult | null>(null);
   const [quoteBasis, setQuoteBasis] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -41,7 +42,7 @@ export function BetSlip({
     () => betSlip.selections.map((selection) => selection.outcomeId).join(":"),
     [betSlip.selections],
   );
-  const currentBasis = `${selectionKey}|${stake}`;
+  const currentBasis = `${betSlip.revision}|${stakeRevision}|${selectionKey}|${stake}`;
   const activeQuote = quoteBasis === currentBasis ? quote : null;
 
   useEffect(() => {
@@ -119,7 +120,7 @@ export function BetSlip({
           </h2>
         </div>
         <button
-          className="text-xs font-bold text-[var(--text-muted)] underline-offset-4 hover:underline"
+          className="min-h-11 rounded-md px-2 text-xs font-bold text-[var(--text-muted)] underline-offset-4 hover:bg-stone-100 hover:underline"
           onClick={betSlip.clearSelections}
           type="button"
         >
@@ -171,7 +172,10 @@ export function BetSlip({
           inputMode="numeric"
           min={5}
           max={displayedBalance}
-          onChange={(event) => setStake(event.target.value)}
+          onChange={(event) => {
+            setStake(event.target.value);
+            setStakeRevision((revision) => revision + 1);
+          }}
           type="number"
           value={stake}
         />

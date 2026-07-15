@@ -27,7 +27,12 @@ export default async function LeaderboardPage() {
           description="Aucun portefeuille joueur actif dans cette saison."
         />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-white">
+        <div
+          aria-label="Tableau du classement défilable"
+          className="overflow-x-auto rounded-lg border border-[var(--border)] bg-white"
+          role="region"
+          tabIndex={0}
+        >
           <table className="min-w-full text-left text-sm">
             <caption className="sr-only">
               Classement des joueurs par capital MKB fictif

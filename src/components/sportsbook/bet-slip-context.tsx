@@ -14,6 +14,7 @@ import type { BetSlipSelection } from "@/fixtures/sportsbook/types";
 interface BetSlipState {
   selections: BetSlipSelection[];
   message: string;
+  revision: number;
 }
 
 type BetSlipAction =
@@ -32,7 +33,11 @@ const BetSlipContext = createContext<BetSlipContextValue | null>(null);
 
 function reducer(state: BetSlipState, action: BetSlipAction): BetSlipState {
   if (action.type === "clear") {
-    return { selections: [], message: "Ticket vidé." };
+    return {
+      selections: [],
+      message: "Ticket vidé.",
+      revision: state.revision + 1,
+    };
   }
 
   if (action.type === "remove") {
@@ -43,6 +48,7 @@ function reducer(state: BetSlipState, action: BetSlipAction): BetSlipState {
           selection.outcomeId !== action.outcomeId,
       ),
       message: "Sélection retirée du ticket.",
+      revision: state.revision + 1,
     };
   }
 
@@ -60,6 +66,7 @@ function reducer(state: BetSlipState, action: BetSlipAction): BetSlipState {
           selection.outcomeId !== action.selection.outcomeId,
       ),
       message: "Sélection retirée du ticket.",
+      revision: state.revision + 1,
     };
   }
 
@@ -84,6 +91,7 @@ function reducer(state: BetSlipState, action: BetSlipAction): BetSlipState {
   return {
     selections: [...state.selections, action.selection],
     message: "Sélection ajoutée au ticket.",
+    revision: state.revision + 1,
   };
 }
 
@@ -91,6 +99,7 @@ export function BetSlipProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, {
     selections: [],
     message: "",
+    revision: 0,
   });
 
   const toggleSelection = useCallback((selection: BetSlipSelection) => {

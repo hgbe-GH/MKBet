@@ -1,0 +1,28 @@
+import { describe, expect, it } from "vitest";
+
+import playwrightConfig from "../playwright.config";
+
+describe("Playwright configuration", () => {
+  it("defines dedicated desktop and mobile Chromium projects", () => {
+    const projects = playwrightConfig.projects ?? [];
+
+    expect(projects.map((project) => project.name)).toEqual(
+      expect.arrayContaining(["chromium-desktop", "chromium-mobile"]),
+    );
+    expect(
+      projects.find((project) => project.name === "chromium-desktop")?.use,
+    ).toMatchObject({ viewport: { width: 1440, height: 1000 } });
+  });
+
+  it("keeps diagnostic artifacts focused on failures", () => {
+    expect(playwrightConfig.use).toMatchObject({
+      trace: "on-first-retry",
+      screenshot: "only-on-failure",
+      video: "retain-on-failure",
+    });
+    expect(playwrightConfig.webServer).toMatchObject({
+      command: "pnpm e2e:server",
+      reuseExistingServer: true,
+    });
+  });
+});

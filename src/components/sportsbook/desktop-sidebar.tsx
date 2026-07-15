@@ -1,3 +1,5 @@
+"use client";
+
 import { sportsbookNavigation } from "@/application/sportsbook/navigation";
 import { NavigationLink } from "@/components/sportsbook/navigation-link";
 import { SeasonSwitcher } from "@/components/sportsbook/season-switcher";
