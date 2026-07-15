@@ -7,17 +7,17 @@ import { SeasonSelector } from "@/components/seasons/season-selector";
 
 describe("auth UI", () => {
   it("renders the login form without exposing user enumeration details", () => {
-    render(<LoginForm next="/seasons" />);
+    render(<LoginForm next="/direct" />);
 
     expect(
-      screen.getByRole("heading", { name: "Accéder à la salle des marchés" }),
+      screen.getByRole("heading", { name: "Rejoindre Margot × Kévin" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
     expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "RECEVOIR MON LIEN D’ACCÈS" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Accès privé sur invitation/)).toBeInTheDocument();
+    expect(screen.getByText(/1 000 MKB fictifs/)).toBeInTheDocument();
   });
 
   it("renders invitation previews without leaking the raw token", () => {

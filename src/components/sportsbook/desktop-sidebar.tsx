@@ -4,7 +4,6 @@ import { sportsbookNavigation } from "@/application/sportsbook/navigation";
 import { NavigationLink } from "@/components/sportsbook/navigation-link";
 
 export function DesktopSidebar() {
-
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-[var(--border)] bg-[var(--surface)] p-4 lg:block">
       <div className="mb-6">

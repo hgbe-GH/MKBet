@@ -6,7 +6,7 @@ import { sanitizeInternalRedirectPath } from "@/application/auth";
 import { AuthApplicationError } from "@/auth/auth-errors";
 import { getAuthClaims, type AuthClaims } from "@/auth/get-auth-claims";
 
-export async function requireAuth(nextPath = "/seasons"): Promise<AuthClaims> {
+export async function requireAuth(nextPath = "/direct"): Promise<AuthClaims> {
   const claims = await getAuthClaims();
 
   if (!claims) {

@@ -1,12 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  revalidatePath,
-  remove,
-  rpc,
-  toBuffer,
-  upload,
-} = vi.hoisted(() => ({
+const { revalidatePath, remove, rpc, toBuffer, upload } = vi.hoisted(() => ({
   revalidatePath: vi.fn(),
   remove: vi.fn(),
   rpc: vi.fn(),
@@ -180,4 +174,3 @@ describe("event report actions", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/leaderboard");
   });
 });
-

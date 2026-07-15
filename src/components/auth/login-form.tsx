@@ -28,7 +28,7 @@ export function LoginForm({ next, action = inertAction }: LoginFormProps) {
   return (
     <form action={formAction} className="space-y-5">
       <h1 className="text-3xl font-black tracking-[-0.035em]">
-        Accéder à la salle des marchés
+        Rejoindre Margot × Kévin
       </h1>
       <input name="next" type="hidden" value={next} />
       <div className="space-y-2">
@@ -68,7 +68,8 @@ export function LoginForm({ next, action = inertAction }: LoginFormProps) {
         </p>
       ) : null}
       <p className="text-sm leading-6 text-stone-600">
-        Accès privé sur invitation. Aucun argent réel, uniquement votre dignité.
+        Un compte donne accès à la salle privée et à 1 000 MKB fictifs. Aucun
+        pari en argent réel.
       </p>
     </form>
   );

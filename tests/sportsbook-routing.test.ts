@@ -44,7 +44,9 @@ describe("sportsbook routing and permissions", () => {
       "/settings/account",
     ]);
     expect(
-      sportsbookNavigation.filter((item) => item.mobile).map((item) => item.href),
+      sportsbookNavigation
+        .filter((item) => item.mobile)
+        .map((item) => item.href),
     ).toEqual(["/direct", "/markets", "/report", "/bets", "/leaderboard"]);
   });
 });

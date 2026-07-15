@@ -25,14 +25,14 @@ Les pages et liens de saisons, invitations, lives, administration, médias sépa
 
 ### Écrans et comportements attendus
 
-| Écran | But | Actions disponibles |
-| --- | --- | --- |
-| `Direct` | Prioriser ce qui doit être prouvé et voté. | Lire les rapports, ouvrir leurs preuves, voter, voir les marchés suspendus ou la décision finale. |
-| `Marchés` | Placer des pronostics MKB sur les marchés ouverts. | Filtrer, ajouter une issue au ticket, demander un devis puis confirmer le pari. |
-| `Déclarer` | Enregistrer un fait avant toute décision financière. | Choisir le type, l’heure réelle, une note, les preuves et, si nécessaire, le marché et l’issue concernés. |
-| `Mon ticket` | Suivre les tickets personnels et leur état. | Lire les cotes figées, les jambes, les gains/pertes/remboursements et les motifs de décision. |
-| `Classement` | Rendre le jeu lisible sans exposer les détails privés. | Lire le pseudonyme, le solde MKB, les tickets joués et les gains agrégés. |
-| `Compte` | Gérer uniquement son identité d’affichage et sa session. | Modifier le pseudo/l’avatar, se déconnecter. |
+| Écran        | But                                                      | Actions disponibles                                                                                       |
+| ------------ | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `Direct`     | Prioriser ce qui doit être prouvé et voté.               | Lire les rapports, ouvrir leurs preuves, voter, voir les marchés suspendus ou la décision finale.         |
+| `Marchés`    | Placer des pronostics MKB sur les marchés ouverts.       | Filtrer, ajouter une issue au ticket, demander un devis puis confirmer le pari.                           |
+| `Déclarer`   | Enregistrer un fait avant toute décision financière.     | Choisir le type, l’heure réelle, une note, les preuves et, si nécessaire, le marché et l’issue concernés. |
+| `Mon ticket` | Suivre les tickets personnels et leur état.              | Lire les cotes figées, les jambes, les gains/pertes/remboursements et les motifs de décision.             |
+| `Classement` | Rendre le jeu lisible sans exposer les détails privés.   | Lire le pseudonyme, le solde MKB, les tickets joués et les gains agrégés.                                 |
+| `Compte`     | Gérer uniquement son identité d’affichage et sa session. | Modifier le pseudo/l’avatar, se déconnecter.                                                              |
 
 La vue `Direct` utilise trois états clairement distincts : `À vérifier`, `Confirmé` et `Invalidé`. Les rapports à vérifier sont triés en premier. Une carte affiche la date réelle, l’auteur, les preuves, le marché éventuellement suspendu, le décompte des votes et la seule action pertinente pour le lecteur.
 

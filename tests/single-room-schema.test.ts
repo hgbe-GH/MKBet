@@ -21,8 +21,6 @@ describe("single-room event schema", () => {
     expect(rls).toContain(
       "alter table public.event_reports enable row level security",
     );
-    expect(rls).toContain(
-      "revoke all on function public.vote_event_report",
-    );
+    expect(rls).toContain("revoke all on function public.vote_event_report");
   });
 });

@@ -5,7 +5,7 @@ export function SiteHeader() {
         <a
           className="inline-flex min-h-11 items-center rounded-sm text-xl font-black tracking-[-0.04em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-red-950"
           href="#main-content"
-          aria-label="MK Bet — aller au contenu principal"
+          aria-label="MK Bet, aller au contenu principal"
         >
           MK <span className="text-red-300">BET</span>
         </a>

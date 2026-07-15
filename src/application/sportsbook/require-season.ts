@@ -1,11 +1,7 @@
 import "server-only";
 
-import { redirect } from "next/navigation";
+import { requireSingleRoom } from "@/application/sportsbook/require-single-room";
 
-import { getCurrentSportsbookSeason } from "@/data/supabase/sportsbook/repository";
-
-export async function requireSportsbookSeason(seasonId: string | null = null) {
-  const season = await getCurrentSportsbookSeason(seasonId);
-  if (!season) redirect("/seasons");
-  return season;
+export async function requireSportsbookSeason() {
+  return requireSingleRoom();
 }

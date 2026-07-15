@@ -13,9 +13,7 @@ interface MarketsPageProps {
 export default async function MarketsPage({ searchParams }: MarketsPageProps) {
   const rawParams = (await searchParams) ?? {};
   const filters = parseMarketSearchParams(rawParams);
-  const season = await requireSportsbookSeason(
-    typeof rawParams.season === "string" ? rawParams.season : null,
-  );
+  const season = await requireSportsbookSeason();
   const markets = await listSeasonMarkets(season.id, filters);
 
   return (

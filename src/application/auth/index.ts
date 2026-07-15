@@ -1,6 +1,6 @@
 import type { AuthErrorCode } from "@/auth/auth-errors";
 
-const DEFAULT_REDIRECT = "/seasons";
+const DEFAULT_REDIRECT = "/direct";
 
 const AUTH_MESSAGES: Record<AuthErrorCode, string> = {
   AUTH_REQUIRED: "Connecte-toi pour accéder à cette page.",

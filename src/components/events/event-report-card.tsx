@@ -20,7 +20,10 @@ export function EventReportCard({
   report: EventReportView;
 }) {
   const isAuthor = currentUserId === report.author.id;
-  const canVote = report.status === "PENDING" && !isAuthor && !report.votes.currentUserDecision;
+  const canVote =
+    report.status === "PENDING" &&
+    !isAuthor &&
+    !report.votes.currentUserDecision;
 
   return (
     <article className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-[0_16px_40px_rgba(76,5,15,0.07)]">
@@ -39,7 +42,9 @@ export function EventReportCard({
       </div>
 
       <div className="px-4 py-4 sm:px-5">
-        <p className="leading-relaxed text-[var(--text-primary)]">{report.note}</p>
+        <p className="leading-relaxed text-[var(--text-primary)]">
+          {report.note}
+        </p>
         <p className="mt-2 text-xs font-semibold text-[var(--text-muted)]">
           Événement du{" "}
           <time dateTime={report.occurredAt}>
@@ -77,10 +82,12 @@ export function EventReportCard({
         ) : null}
         <div className="grid grid-cols-2 gap-3" aria-label="État des votes">
           <p className="text-sm font-bold">
-            {report.votes.confirmCount} validation{report.votes.confirmCount > 1 ? "s" : ""} sur 2
+            {report.votes.confirmCount} validation
+            {report.votes.confirmCount > 1 ? "s" : ""} sur 2
           </p>
           <p className="text-right text-sm font-bold">
-            {report.votes.rejectCount} invalidation{report.votes.rejectCount > 1 ? "s" : ""} sur 2
+            {report.votes.rejectCount} invalidation
+            {report.votes.rejectCount > 1 ? "s" : ""} sur 2
           </p>
         </div>
         {canVote ? <EventVoteControls reportId={report.id} /> : null}
@@ -91,11 +98,14 @@ export function EventReportCard({
         ) : null}
         {report.votes.currentUserDecision ? (
           <p className="mt-4 text-sm font-semibold text-[var(--text-secondary)]">
-            Ton vote : {report.votes.currentUserDecision === "CONFIRM" ? "validation" : "invalidation"}.
+            Ton vote :{" "}
+            {report.votes.currentUserDecision === "CONFIRM"
+              ? "validation"
+              : "invalidation"}
+            .
           </p>
         ) : null}
       </div>
     </article>
   );
 }
-

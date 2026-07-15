@@ -30,7 +30,11 @@ const idempotencyKeySchema = z.uuid();
 const failure = (message: string): EventActionState => ({ ok: false, message });
 
 function asEvidenceDescriptor(file: File): EventEvidenceFile {
-  return { name: file.name, size: file.size, type: file.type as EventEvidenceFile["type"] };
+  return {
+    name: file.name,
+    size: file.size,
+    type: file.type as EventEvidenceFile["type"],
+  };
 }
 
 async function removeUploadedEvidence(paths: string[]): Promise<void> {
@@ -128,4 +132,3 @@ export async function voteEventReportAction(
   }
   return { ok: true, message: "Ton vote est enregistré." };
 }
-

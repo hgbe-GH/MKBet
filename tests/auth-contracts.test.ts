@@ -20,14 +20,10 @@ describe("auth redirects", () => {
     expect(sanitizeInternalRedirectPath("/invite/token-value")).toBe(
       "/invite/token-value",
     );
-    expect(sanitizeInternalRedirectPath("https://example.com")).toBe(
-      "/seasons",
-    );
-    expect(sanitizeInternalRedirectPath("//example.com")).toBe("/seasons");
-    expect(sanitizeInternalRedirectPath("javascript:alert(1)")).toBe(
-      "/seasons",
-    );
-    expect(sanitizeInternalRedirectPath("")).toBe("/seasons");
+    expect(sanitizeInternalRedirectPath("https://example.com")).toBe("/direct");
+    expect(sanitizeInternalRedirectPath("//example.com")).toBe("/direct");
+    expect(sanitizeInternalRedirectPath("javascript:alert(1)")).toBe("/direct");
+    expect(sanitizeInternalRedirectPath("")).toBe("/direct");
   });
 });
 

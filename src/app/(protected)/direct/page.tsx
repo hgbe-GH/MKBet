@@ -90,4 +90,3 @@ export default async function DirectPage({ searchParams }: DirectPageProps) {
     </div>
   );
 }
-

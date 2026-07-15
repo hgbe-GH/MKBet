@@ -15,11 +15,7 @@ const evidenceMimeTypeSchema = z.enum([
 
 export const eventEvidenceFileSchema = z.object({
   name: z.string().trim().min(1).max(255),
-  size: z
-    .number()
-    .int()
-    .positive()
-    .max(MAX_EVENT_EVIDENCE_FILE_SIZE),
+  size: z.number().int().positive().max(MAX_EVENT_EVIDENCE_FILE_SIZE),
   type: evidenceMimeTypeSchema,
 });
 
@@ -29,8 +25,8 @@ export const createEventReportFormSchema = (now: Date = new Date()) =>
   z
     .object({
       reportType: z.enum(EVENT_REPORT_TYPES),
-      occurredAt: z
-        .iso.datetime({ offset: false })
+      occurredAt: z.iso
+        .datetime({ offset: false })
         .refine((value) => Date.parse(value) <= now.getTime(), {
           message: "La date de l’événement ne peut pas être future.",
         }),
@@ -57,4 +53,3 @@ export const eventReportFormSchema = createEventReportFormSchema();
 export type EventReportFormInput = z.input<typeof eventReportFormSchema>;
 export type EventReportFormData = z.output<typeof eventReportFormSchema>;
 export type EventEvidenceFile = z.output<typeof eventEvidenceFileSchema>;
-

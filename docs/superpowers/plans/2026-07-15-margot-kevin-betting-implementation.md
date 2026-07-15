@@ -65,6 +65,7 @@
 ### Task 1: Verrouiller le contrat statique des migrations
 
 **Files:**
+
 - Create: `tests/single-room-schema.test.ts`
 - Test: `tests/database-schema.test.ts`
 
@@ -89,7 +90,9 @@ describe("single-room event schema", () => {
     expect(reports).toContain("unique (report_id, user_id)");
     expect(resolution).toContain("vote_event_report");
     expect(resolution).toContain("settle_event_market");
-    expect(rls).toContain("alter table public.event_reports enable row level security");
+    expect(rls).toContain(
+      "alter table public.event_reports enable row level security",
+    );
     expect(rls).toContain("revoke all on function public.vote_event_report");
   });
 });
@@ -111,6 +114,7 @@ git commit -m "test: define single room event schema contract"
 ### Task 2: Créer la salle unique et rattacher tous les comptes
 
 **Files:**
+
 - Modify: `supabase/migrations/20260715170000_single_room.sql`
 - Create: `supabase/tests/single_room_events_validation.sql`
 - Modify: `tests/single-room-schema.test.ts`
@@ -162,6 +166,7 @@ git commit -m "feat: add automatic margot kevin room"
 ### Task 3: Ajouter rapports, votes et preuves privées
 
 **Files:**
+
 - Modify: `supabase/migrations/20260715170001_event_reports.sql`
 - Modify: `supabase/migrations/20260715170003_event_reports_rls.sql`
 - Modify: `supabase/tests/single_room_events_validation.sql`
@@ -203,6 +208,7 @@ git commit -m "feat: add private event reports and votes"
 ### Task 4: Régler marchés, jambes et portefeuilles atomiquement
 
 **Files:**
+
 - Modify: `supabase/migrations/20260715170002_event_resolution.sql`
 - Modify: `supabase/tests/single_room_events_validation.sql`
 
@@ -242,6 +248,7 @@ git commit -m "feat: settle bets from confirmed events"
 ### Task 5: Régénérer les types et construire le domaine TypeScript
 
 **Files:**
+
 - Modify: `src/types/database.ts`
 - Create: `src/domain/events/types.ts`
 - Create: `src/application/events/event-report-schema.ts`
@@ -272,6 +279,7 @@ git commit -m "feat: add typed event report contracts"
 ### Task 6: Ajouter repositories et Server Actions
 
 **Files:**
+
 - Create: `src/application/events/event-errors.ts`
 - Create: `src/application/events/actions.ts`
 - Create: `src/data/supabase/events/repository.ts`
@@ -300,6 +308,7 @@ git commit -m "feat: add event report application layer"
 ### Task 7: Remplacer le shell par le Fil en direct
 
 **Files:**
+
 - Create: `src/app/(protected)/direct/page.tsx`
 - Create: `src/app/(protected)/report/page.tsx`
 - Create: `src/components/events/event-report-card.tsx`
@@ -335,6 +344,7 @@ git commit -m "feat: build margot kevin live feed"
 ### Task 8: Basculer Auth et toutes les routes sur la salle unique
 
 **Files:**
+
 - Create: `src/application/sportsbook/require-single-room.ts`
 - Modify: `src/app/auth/callback/route.ts`
 - Modify: `src/app/(protected)/layout.tsx`
@@ -364,6 +374,7 @@ git commit -m "feat: route every player into the single room"
 ### Task 9: Adapter le harness et ajouter le parcours E2E complet
 
 **Files:**
+
 - Modify: `tests/e2e/global-setup.ts`
 - Modify: `tests/e2e/support/auth-state.ts`
 - Create: `tests/e2e/event-reports.spec.ts`
@@ -394,6 +405,7 @@ git commit -m "test: cover collaborative event settlement"
 ### Task 10: Documentation, validation complète et livraison
 
 **Files:**
+
 - Modify: `README.md`, `docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/SECURITY.md`, `docs/PRODUCT.md`, `docs/ROADMAP.md`, `docs/CURRENT_STATE.md`
 
 - [ ] **Step 1: Update documentation truthfully**

@@ -34,7 +34,7 @@ export const loginFormSchema = z.object({
     .default(null),
   next: z
     .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())
-    .default("/seasons"),
+    .default("/direct"),
 });
 
 export const seasonFormSchema = z.object({

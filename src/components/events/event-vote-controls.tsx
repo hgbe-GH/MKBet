@@ -36,10 +36,12 @@ export function EventVoteControls({ reportId }: { reportId: string }) {
           Invalider
         </button>
       </div>
-      <p aria-live="polite" className="mt-2 min-h-5 text-sm text-[var(--text-secondary)]">
+      <p
+        aria-live="polite"
+        className="mt-2 min-h-5 text-sm text-[var(--text-secondary)]"
+      >
         {message}
       </p>
     </div>
   );
 }
-

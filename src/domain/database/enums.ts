@@ -166,7 +166,6 @@ export type BetStatus = Database["public"]["Enums"]["bet_status"];
 export type BetLegStatus = Database["public"]["Enums"]["bet_leg_status"];
 export type EventReportStatus =
   Database["public"]["Enums"]["event_report_status"];
-export type EventReportType =
-  Database["public"]["Enums"]["event_report_type"];
+export type EventReportType = Database["public"]["Enums"]["event_report_type"];
 export type EventVoteDecision =
   Database["public"]["Enums"]["event_vote_decision"];

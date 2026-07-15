@@ -12,9 +12,7 @@ const validInput = {
   note: "Un baiser observé par le groupe.",
   marketId: "6d6b0000-0000-4000-8000-000000000010",
   outcomeId: "6d6b0000-0000-4000-8000-000000000011",
-  files: [
-    { name: "preuve.jpg", size: 1_024, type: "image/jpeg" },
-  ],
+  files: [{ name: "preuve.jpg", size: 1_024, type: "image/jpeg" }],
 };
 
 describe("eventReportFormSchema", () => {

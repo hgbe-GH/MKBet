@@ -146,7 +146,11 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
       </button>
       <p
         aria-live="polite"
-        className={state.ok ? "text-sm font-bold text-emerald-800" : "text-sm font-bold text-[var(--danger)]"}
+        className={
+          state.ok
+            ? "text-sm font-bold text-emerald-800"
+            : "text-sm font-bold text-[var(--danger)]"
+        }
       >
         {state.message}
       </p>

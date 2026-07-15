@@ -9,21 +9,36 @@ vi.mock("@/auth/require-auth", () => ({
   requireAuth: vi.fn(async () => ({ userId: "player-1" })),
 }));
 
-vi.mock("@/data/supabase/sportsbook/repository", () => ({
-  getCurrentSportsbookSeason: vi.fn(async () => null),
+vi.mock("@/application/sportsbook/require-single-room", () => ({
+  requireSingleRoom: vi.fn(async () => ({
+    id: "single-room",
+    title: "Margot × Kévin",
+    matchup: "Margot × Kévin",
+    status: "ACTIVE",
+    breakupDate: "2026-07-01",
+    daysSinceBreakup: 14,
+    roles: ["PLAYER"],
+    balanceMkb: 1000,
+    isDemo: false,
+    rechute: { total: 0, delta: 0, label: "", explanation: "", segments: [] },
+  })),
 }));
 
-vi.mock("next/navigation", () => ({ redirect }));
+vi.mock("next/navigation", () => ({
+  redirect,
+  usePathname: vi.fn(() => "/direct"),
+}));
 
 describe("protected layout", () => {
-  it("renders the season onboarding when an authenticated player has no season", async () => {
+  it("always renders the permanent room shell for an authenticated player", async () => {
     render(
       await ProtectedLayout({
-        children: <p>Créer une saison</p>,
+        children: <p>Fil privé</p>,
       }),
     );
 
-    expect(screen.getByText("Créer une saison")).toBeInTheDocument();
+    expect(screen.getByText("Fil privé")).toBeInTheDocument();
+    expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
     expect(redirect).not.toHaveBeenCalled();
   });
 });

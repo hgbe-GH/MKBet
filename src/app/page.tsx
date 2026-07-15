@@ -23,7 +23,7 @@ export default function Home() {
                   aria-hidden="true"
                   className="mk-status-dot h-2 w-2 rounded-full bg-red-700"
                 />
-                PRÉ-SAISON
+                SALLE OUVERTE
               </span>
               <span className="text-[0.68rem] font-bold tracking-[0.16em] text-stone-500 uppercase">
                 Margot × Kévin
@@ -38,13 +38,13 @@ export default function Home() {
                 La salle des marchés de la rechute
               </h1>
               <p className="mt-6 max-w-lg text-lg leading-8 text-stone-600">
-                Les marchés ouvriront prochainement.
+                Parie en MKB, partage un fait et laisse le groupe trancher.
               </p>
             </div>
 
             <div className="flex flex-col gap-5 border-t border-stone-200 pt-7 sm:flex-row sm:items-center sm:justify-between">
-              <Button disabled type="button">
-                CONSULTER LES COTES
+              <Button asChild>
+                <Link href="/login?next=/direct">ENTRER DANS LA SALLE</Link>
               </Button>
               <p className="flex items-center gap-2 text-xs font-bold tracking-[0.08em] text-stone-500 uppercase">
                 <span aria-hidden="true">●</span>
@@ -58,3 +58,4 @@ export default function Home() {
     </div>
   );
 }
+import Link from "next/link";

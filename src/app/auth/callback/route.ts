@@ -22,7 +22,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/error", request.url));
   }
 
-  await asRpcClient(supabase).rpc("ensure_current_profile");
+  const { error: profileError } = await asRpcClient(supabase).rpc(
+    "ensure_current_profile",
+  );
+  const { error: roomError } = await asRpcClient(supabase).rpc(
+    "ensure_single_room_access",
+  );
+  if (profileError || roomError) {
+    return NextResponse.redirect(new URL("/auth/error", request.url));
+  }
 
-  return NextResponse.redirect(new URL(next || "/seasons", request.url));
+  return NextResponse.redirect(new URL(next || "/direct", request.url));
 }

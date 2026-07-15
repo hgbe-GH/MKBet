@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import Home from "@/app/page";
 
 describe("MK Bet home page", () => {
-  it("presents the pre-season experience with accessible landmarks", () => {
+  it("presents the active private room with accessible landmarks", () => {
     render(<Home />);
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
@@ -19,17 +19,19 @@ describe("MK Bet home page", () => {
     expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
     expect(screen.getByText("Saison post-rupture")).toBeInTheDocument();
     expect(
-      screen.getByText("Les marchés ouvriront prochainement."),
+      screen.getByText(
+        "Parie en MKB, partage un fait et laisse le groupe trancher.",
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByText("PRÉ-SAISON")).toBeInTheDocument();
+    expect(screen.getByText("SALLE OUVERTE")).toBeInTheDocument();
     expect(screen.getByText("100 % monnaie fictive")).toBeInTheDocument();
   });
 
-  it("keeps the odds action unavailable before markets open", () => {
+  it("sends visitors to the direct room login", () => {
     render(<Home />);
 
     expect(
-      screen.getByRole("button", { name: "CONSULTER LES COTES" }),
-    ).toBeDisabled();
+      screen.getByRole("link", { name: "ENTRER DANS LA SALLE" }),
+    ).toHaveAttribute("href", "/login?next=/direct");
   });
 });

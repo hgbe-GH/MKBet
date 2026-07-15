@@ -13,7 +13,11 @@ export class EventApplicationError extends Error {
     public readonly code: EventErrorCode | "EVENT_OPERATION_FAILED",
     message?: string,
   ) {
-    super(message ?? EVENT_ERROR_MESSAGES[code as EventErrorCode] ?? "L’opération a échoué.");
+    super(
+      message ??
+        EVENT_ERROR_MESSAGES[code as EventErrorCode] ??
+        "L’opération a échoué.",
+    );
     this.name = "EventApplicationError";
   }
 }
@@ -28,4 +32,3 @@ export function mapEventError(error: unknown): string {
     ? EVENT_ERROR_MESSAGES[code]
     : "L’opération n’a pas pu aboutir. Réessaie.";
 }
-

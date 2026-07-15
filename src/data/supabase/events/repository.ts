@@ -51,7 +51,9 @@ export async function listEventReports(
   if (!reports?.length) return [];
 
   const reportIds = reports.map((report) => report.id);
-  const authorIds = [...new Set(reports.map((report) => report.author_user_id))];
+  const authorIds = [
+    ...new Set(reports.map((report) => report.author_user_id)),
+  ];
   const marketIds = reports.flatMap((report) =>
     report.market_id ? [report.market_id] : [],
   );
@@ -59,30 +61,32 @@ export async function listEventReports(
     report.outcome_id ? [report.outcome_id] : [],
   );
 
-  const [profilesResult, votesResult, mediaLinksResult, marketsResult, outcomesResult] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select("id,display_name,avatar_url")
-        .in("id", authorIds),
-      supabase
-        .from("event_report_votes")
-        .select("report_id,user_id,decision")
-        .in("report_id", reportIds),
-      supabase
-        .from("event_report_media")
-        .select("report_id,media_asset_id")
-        .in("report_id", reportIds),
-      marketIds.length
-        ? supabase.from("markets").select("id,title").in("id", marketIds)
-        : Promise.resolve({ data: [], error: null }),
-      outcomeIds.length
-        ? supabase
-            .from("market_outcomes")
-            .select("id,label")
-            .in("id", outcomeIds)
-        : Promise.resolve({ data: [], error: null }),
-    ]);
+  const [
+    profilesResult,
+    votesResult,
+    mediaLinksResult,
+    marketsResult,
+    outcomesResult,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id,display_name,avatar_url")
+      .in("id", authorIds),
+    supabase
+      .from("event_report_votes")
+      .select("report_id,user_id,decision")
+      .in("report_id", reportIds),
+    supabase
+      .from("event_report_media")
+      .select("report_id,media_asset_id")
+      .in("report_id", reportIds),
+    marketIds.length
+      ? supabase.from("markets").select("id,title").in("id", marketIds)
+      : Promise.resolve({ data: [], error: null }),
+    outcomeIds.length
+      ? supabase.from("market_outcomes").select("id,label").in("id", outcomeIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
   if (
     profilesResult.error ||
     votesResult.error ||
@@ -118,10 +122,9 @@ export async function listEventReports(
   }
 
   const profiles = new Map(
-    [...(profilesResult.data ?? []), ...(voterProfiles ?? [])].map((profile) => [
-      profile.id,
-      profile,
-    ]),
+    [...(profilesResult.data ?? []), ...(voterProfiles ?? [])].map(
+      (profile) => [profile.id, profile],
+    ),
   );
   const markets = new Map(
     (marketsResult.data ?? []).map((market) => [market.id, market]),
@@ -159,7 +162,13 @@ export async function listEventReports(
         .flatMap((link) => {
           const asset = mediaById.get(link.media_asset_id);
           return asset
-            ? [{ id: asset.id, caption: asset.caption, mediaType: asset.media_type }]
+            ? [
+                {
+                  id: asset.id,
+                  caption: asset.caption,
+                  mediaType: asset.media_type,
+                },
+              ]
             : [];
         }),
       market:
@@ -176,8 +185,8 @@ export async function listEventReports(
         rejectCount: reportVotes.filter((vote) => vote.decision === "REJECT")
           .length,
         currentUserDecision:
-          reportVotes.find((vote) => vote.user_id === currentUserId)?.decision ??
-          null,
+          reportVotes.find((vote) => vote.user_id === currentUserId)
+            ?.decision ?? null,
         voters: reportVotes.map((vote) => ({
           displayName:
             profiles.get(vote.user_id)?.display_name ?? "Membre MK Bet",
@@ -261,10 +270,7 @@ export async function voteEventReport(
     p_decision: decision,
   });
   if (error || !data) {
-    throw new EventApplicationError(
-      "EVENT_OPERATION_FAILED",
-      error?.message,
-    );
+    throw new EventApplicationError("EVENT_OPERATION_FAILED", error?.message);
   }
   return data;
 }

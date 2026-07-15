@@ -85,7 +85,11 @@ describe("EventReportForm", () => {
     expect(screen.getByLabelText("Preuves privées")).toHaveAttribute(
       "multiple",
     );
-    expect(screen.getByText(/visibles uniquement par les comptes connectés/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Envoyer au vote" })).toBeEnabled();
+    expect(
+      screen.getByText(/visibles uniquement par les comptes connectés/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Envoyer au vote" }),
+    ).toBeEnabled();
   });
 });
