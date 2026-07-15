@@ -78,8 +78,8 @@ export interface SportsbookLive {
   title: string;
   type: string;
   status: string;
-  scheduledStart: string;
-  scheduledEnd: string;
+  scheduledStart: string | null;
+  scheduledEnd: string | null;
   host: string;
   marketCount: number;
   participants: string[];
