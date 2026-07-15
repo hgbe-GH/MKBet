@@ -132,6 +132,15 @@ export const DATABASE_ENUM_VALUES = {
     "OPEN_RELATED",
     "REPRICE",
   ],
+  event_report_status: ["PENDING", "CONFIRMED", "REJECTED"],
+  event_report_type: [
+    "FRIENDLY_MEETING",
+    "AFFECTIONATE_GESTURE",
+    "KISS",
+    "DIPLOMATIC_INCIDENT",
+    "OFFICIAL_RELATIONSHIP",
+  ],
+  event_vote_decision: ["CONFIRM", "REJECT"],
 } as const satisfies {
   [
     Name in keyof Database["public"]["Enums"]
@@ -155,3 +164,9 @@ export type BetType = Database["public"]["Enums"]["bet_type"];
 export type BetQuoteStatus = Database["public"]["Enums"]["bet_quote_status"];
 export type BetStatus = Database["public"]["Enums"]["bet_status"];
 export type BetLegStatus = Database["public"]["Enums"]["bet_leg_status"];
+export type EventReportStatus =
+  Database["public"]["Enums"]["event_report_status"];
+export type EventReportType =
+  Database["public"]["Enums"]["event_report_type"];
+export type EventVoteDecision =
+  Database["public"]["Enums"]["event_vote_decision"];
