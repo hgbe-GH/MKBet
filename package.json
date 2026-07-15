@@ -24,6 +24,7 @@
     "db:test:betting": "PGPASSWORD=${SUPABASE_LOCAL_DB_PASSWORD:-postgres} psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/transactional_betting_validation.sql",
     "db:test:lives": "PGPASSWORD=${SUPABASE_LOCAL_DB_PASSWORD:-postgres} psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/live_creation_validation.sql",
     "db:test:media": "PGPASSWORD=${SUPABASE_LOCAL_DB_PASSWORD:-postgres} psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/private_media_validation.sql",
+    "db:test:single-room": "PGPASSWORD=${SUPABASE_LOCAL_DB_PASSWORD:-postgres} psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/single_room_events_validation.sql",
     "db:stop": "supabase stop --no-backup",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
