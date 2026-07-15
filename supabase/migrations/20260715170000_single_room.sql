@@ -28,8 +28,8 @@ declare
   yes_odds numeric;
   no_odds numeric;
   calculated_at timestamptz := now();
-  closes_at constant timestamptz := '2030-12-30T23:59:59Z';
-  deadline_at constant timestamptz := '2030-12-31T23:59:59Z';
+  closes_at constant timestamptz := '2030-12-30T23:59:59Z'::timestamptz;
+  deadline_at constant timestamptz := '2030-12-31T23:59:59Z'::timestamptz;
   template_code text;
 begin
   if p_user_id is null or not exists (
@@ -382,4 +382,3 @@ revoke all on function private.ensure_single_room_membership(uuid)
   from public, anon, authenticated;
 revoke all on function private.handle_new_auth_user()
   from public, anon, authenticated;
-
