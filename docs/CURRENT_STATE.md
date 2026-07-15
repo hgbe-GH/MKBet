@@ -37,7 +37,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 
 La refonte est disponible sur [mk-bet.vercel.app](https://mk-bet.vercel.app) et liée au projet Supabase Production. Les quinze migrations locales et distantes sont alignées ; les quatre migrations de salle unique ont été appliquées avant le déploiement Vercel. `/`, `/login` et `/api/health` répondent en Production, et une requête anonyme vers `/direct` est redirigée vers `/login?next=/direct`. Aucune migration n’est exécutée par Vercel.
 
-La validation authentifiée complète a été exécutée localement avec de vraies sessions Supabase. La session Chrome personnelle n’était pas accessible depuis l’environnement d’automatisation lors de la promotion ; un dernier essai manuel du magic link en Production reste donc recommandé.
+La validation authentifiée complète a été exécutée localement avec de vraies sessions Supabase. Le magic link Production a aussi été validé manuellement le 15 juillet 2026 : le callback crée la session puis `/direct`, `/markets`, `/report`, `/bets` et `/leaderboard` répondent sous session authentifiée. Les échecs du callback sont journalisés uniquement avec une étape stable, sans adresse, jeton ni détail Supabase.
 
 ## Limites assumées
 
