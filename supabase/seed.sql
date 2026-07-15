@@ -113,6 +113,16 @@ on conflict (code) do update set
   settlement_rule = excluded.settlement_rule,
   is_active = excluded.is_active;
 
+insert into public.event_market_outcome_rules (
+  report_type,
+  template_code,
+  outcome_code
+)
+values
+  ('KISS', 'KISS', 'YES'),
+  ('OFFICIAL_RELATIONSHIP', 'OFFICIAL_COUPLE', 'YES')
+on conflict (report_type, template_code, outcome_code) do nothing;
+
 with impact_rules (source_code, target_event_code, effect_type, effect_value) as (
   values
 -- MARKET_ACTION_RULES_BEGIN
