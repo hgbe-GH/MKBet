@@ -1,5 +1,7 @@
 import { EmptyState } from "@/components/states/empty-state";
 import { LiveCard } from "@/components/sportsbook/live-card";
+import Image from "next/image";
+import { listSeasonMedia } from "@/data/supabase/media/repository";
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { listSeasonLives } from "@/data/supabase/lives/repository";
 
@@ -7,7 +9,10 @@ export const dynamic = "force-dynamic";
 
 export default async function LivesPage() {
   const season = await requireSportsbookSeason();
-  const lives = await listSeasonLives(season.id);
+  const [lives, media] = await Promise.all([
+    listSeasonLives(season.id),
+    listSeasonMedia(season.id),
+  ]);
   const liveNow = lives.filter((live) => live.status === "LIVE");
   const upcoming = lives.filter((live) => live.status !== "LIVE");
 
@@ -54,6 +59,33 @@ export default async function LivesPage() {
           />
         )}
       </section>
+      {media.filter((item) => item.status === "APPROVED").length ? (
+        <section className="space-y-3">
+          <h2 className="text-xl font-black">Médias de la saison</h2>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {media
+              .filter((item) => item.status === "APPROVED")
+              .map((item) => (
+                <figure
+                  className="overflow-hidden rounded-lg border border-[var(--border)] bg-white"
+                  key={item.id}
+                >
+                  <Image
+                    alt={item.caption ?? "Média de saison"}
+                    className="aspect-[4/5] w-full object-cover"
+                    height={800}
+                    src={`/api/media/${item.id}`}
+                    unoptimized
+                    width={640}
+                  />
+                  <figcaption className="p-3 text-sm">
+                    {item.caption ?? "Média de saison"}
+                  </figcaption>
+                </figure>
+              ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

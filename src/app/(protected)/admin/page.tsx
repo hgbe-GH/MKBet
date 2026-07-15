@@ -44,6 +44,17 @@ export default async function AdminPage() {
             Créer une session et préparer sa liste de participants.
           </p>
         </Link>
+        {season.roles.includes("ADMIN") ? (
+          <Link
+            className="rounded-lg border border-[var(--border)] bg-white p-5 hover:border-[var(--brand)]"
+            href="/admin/media"
+          >
+            <h2 className="text-xl font-black">Médias</h2>
+            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+              Téléverser et valider les photos privées.
+            </p>
+          </Link>
+        ) : null}
       </div>
     </div>
   );

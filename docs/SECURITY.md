@@ -62,4 +62,6 @@ Les clés d’idempotence, contraintes uniques et verrous empêchent la double c
 
 ## Limites restantes
 
-Le règlement, le paiement des gains, les transitions de lives, les actions live, les uploads média dans l’interface et le realtime ne sont pas encore implémentés. Les futures mutations de règlement resteront atomiques côté PostgreSQL.
+Les médias de saison sont téléversés dans le bucket privé `season-media`, normalisés en WebP sans métadonnées et rendus uniquement par la route authentifiée `/api/media/[mediaId]`. Un membre ne voit que les médias `APPROVED`; un ADMIN les approuve, rejette ou archive avec audit. La politique `storage.objects` applique la même barrière : un membre ne peut pas lire directement un blob `PENDING`. La route retourne une `404` identique pour une absence, une non-authentification ou une autorisation refusée, avec `Cache-Control: private, no-store`. Aucun lien signé ni chemin Storage n’est rendu au navigateur.
+
+Le règlement, le paiement des gains, les transitions de lives, les actions live et le realtime ne sont pas encore implémentés. Les futures mutations de règlement resteront atomiques côté PostgreSQL.

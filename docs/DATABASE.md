@@ -101,10 +101,13 @@ Les invitations de saison sont acceptées par RPC. Le token clair n’est pas st
 
 ## Développement et migrations
 
+La migration `20260712140000_private_media.sql` retire les écritures directes de `media_assets` et ajoute les RPC `register_media_asset` et `moderate_media_asset`. La première lie un objet WebP privé appartenant à l’utilisateur à une saison; la seconde est réservée à un ADMIN et écrit l’audit. Elle remplace aussi la lecture Storage trop large : un membre ne peut télécharger un blob que si son `media_assets.status` est `APPROVED`; l’auteur et les ADMIN gardent l’accès de modération.
+
 ```bash
 pnpm db:start
 pnpm db:reset
 pnpm db:types
+pnpm db:test:media
 pnpm db:stop
 ```
 

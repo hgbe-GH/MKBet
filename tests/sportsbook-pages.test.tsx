@@ -54,6 +54,16 @@ vi.mock("@/data/supabase/lives/repository", () => ({
   ]),
   listSeasonLives: vi.fn(async () => realLives),
 }));
+vi.mock("@/data/supabase/media/repository", () => ({
+  listSeasonMedia: vi.fn(async () => [
+    {
+      id: "media-1",
+      caption: "Photo de groupe",
+      mediaType: "image/webp",
+      status: "APPROVED",
+    },
+  ]),
+}));
 vi.mock("@/auth/get-auth-claims", () => ({
   getAuthClaims: vi.fn(async () => ({ userId: "admin-user" })),
 }));
@@ -104,6 +114,12 @@ describe("sportsbook pages", () => {
     expect(
       screen.queryByText(/Données de démonstration/i),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Médias de la saison" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "Photo de groupe" }),
+    ).toHaveAttribute("src", "/api/media/media-1");
   });
 
   it("renders a persisted live detail and keeps action reporting unavailable", async () => {

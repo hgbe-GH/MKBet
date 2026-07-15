@@ -1875,6 +1875,31 @@ export type Database = {
           use_count: number;
         }[];
       };
+      moderate_media_asset: {
+        Args: {
+          p_media_asset_id: string;
+          p_status: Database["public"]["Enums"]["media_status"];
+        };
+        Returns: {
+          action_id: string | null;
+          caption: string | null;
+          created_at: string;
+          id: string;
+          live_id: string | null;
+          media_type: string;
+          season_id: string;
+          status: Database["public"]["Enums"]["media_status"];
+          storage_path: string;
+          taken_at: string | null;
+          uploaded_by: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "media_assets";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       open_template_binary_market: {
         Args: {
           p_closes_at: string;
@@ -1892,6 +1917,35 @@ export type Database = {
       place_bet: {
         Args: { p_idempotency_key: string; p_quote_id: string };
         Returns: Json;
+      };
+      register_media_asset: {
+        Args: {
+          p_caption?: string;
+          p_live_id?: string;
+          p_media_type: string;
+          p_season_id: string;
+          p_storage_path: string;
+          p_taken_at?: string;
+        };
+        Returns: {
+          action_id: string | null;
+          caption: string | null;
+          created_at: string;
+          id: string;
+          live_id: string | null;
+          media_type: string;
+          season_id: string;
+          status: Database["public"]["Enums"]["media_status"];
+          storage_path: string;
+          taken_at: string | null;
+          uploaded_by: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "media_assets";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       reopen_market: { Args: { p_market_id: string }; Returns: Json };
       revoke_season_invitation: {

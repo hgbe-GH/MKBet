@@ -8,15 +8,16 @@
 - [x] 6. Marchés réels depuis templates
 - [x] 7. Devis, placement, tickets et portefeuille
 - [x] 8. Création des lives
-- [ ] 9. Lancement et arrêt des lives
-- [ ] 10. Déclaration des actions
-- [ ] 11. Suspension et recalcul des marchés
-- [ ] 12. Validation des résultats
-- [ ] 13. Règlement des paris
-- [ ] 14. Temps réel
-- [ ] 15. Chronologie complète (classement financier disponible)
-- [ ] 16. Administration
-- [x] 17. Tests end-to-end et validation visuelle Chromium
-- [ ] 18. Préparation Vercel
-- [ ] 19. Déploiement Preview
-- [ ] 20. Déploiement Production
+- [x] 9. Médias de saison privés
+- [ ] 10. Lancement et arrêt des lives
+- [ ] 11. Déclaration des actions
+- [ ] 12. Suspension et recalcul des marchés
+- [ ] 13. Validation des résultats
+- [ ] 14. Règlement des paris
+- [ ] 15. Temps réel
+- [ ] 16. Chronologie complète (classement financier disponible)
+- [ ] 17. Administration
+- [x] 18. Tests end-to-end et validation visuelle Chromium
+- [ ] 19. Préparation Vercel
+- [ ] 20. Déploiement Preview
+- [ ] 21. Déploiement Production

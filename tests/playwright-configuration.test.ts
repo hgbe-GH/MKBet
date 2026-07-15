@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import playwrightConfig from "../playwright.config";
+import nextConfig from "../next.config";
 import { e2eAuthState } from "./e2e/support/auth-state";
 
 describe("Playwright configuration", () => {
@@ -29,5 +30,11 @@ describe("Playwright configuration", () => {
 
   it("reserves an isolated browser session for visual snapshots", () => {
     expect(e2eAuthState.visual).toMatch(/tests\/e2e\/\.auth\/visual\.json$/);
+  });
+
+  it("allows multipart media uploads larger than the default Server Action limit", () => {
+    expect(nextConfig.experimental?.serverActions).toMatchObject({
+      bodySizeLimit: "12mb",
+    });
   });
 });

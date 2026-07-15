@@ -17,6 +17,8 @@ Dernière mise à jour : 15 juillet 2026.
 - Création atomique des lives par `create_live_session` : saison, rôle, hôte, participants, planning, idempotence et audit sont validés par PostgreSQL.
 - Pages réelles `/lives`, `/lives/[liveId]`, `/admin/lives` et `/admin/lives/new`, avec hôte `LIVE_HOST` imposé pour un créateur hôte et sélection administrateur contrôlée.
 - Classement limité au nom/avatar et agrégats de portefeuille, sans transactions détaillées d’un autre joueur.
+- Médias de saison privés : formulaire ADMIN, validation Zod, conversion WebP sans métadonnées, nettoyage du blob en cas d’échec d’enregistrement, validation ADMIN, audit et diffusion authentifiée depuis `/api/media/[mediaId]`.
+- Les médias `PENDING` ne sont lisibles ni dans `media_assets` ni dans `storage.objects` par un PLAYER ; les membres ne voient que les médias `APPROVED`.
 
 ## Démonstration restante
 
@@ -42,6 +44,8 @@ La migration forward-only `20260712120000_transactional_betting.sql` ajoute l’
 
 La migration forward-only `20260712130000_live_creation.sql` ajoute la demande d’idempotence privée des lives, resserre `private.is_live_host` sur `host_user_id` et expose `create_live_session`. Cette RPC écrit une session `SCHEDULED` ou `PROPOSED`, ses attendees et un audit en une seule transaction.
 
+La migration forward-only `20260712140000_private_media.sql` retire les écritures directes de `media_assets`, ajoute les RPC `register_media_asset` et `moderate_media_asset`, et remplace la politique Storage des membres par une lecture limitée aux blobs approuvés. L’auteur et les administrateurs gardent l’accès nécessaire à la modération.
+
 Les migrations historiques et le moteur TypeScript de cotes n’ont pas été modifiés. `src/types/database.ts` a été régénéré depuis PostgreSQL local.
 
 ## Validation locale
@@ -50,16 +54,21 @@ Le scénario SQL local crée un administrateur et un joueur, ouvre des marchés,
 
 Le scénario lives crée un admin, deux `LIVE_HOST`, un joueur et un reporter. Il vérifie la création programmée avec participants, l’audit unique après répétition, la création `INSTANT` autonome, ainsi que les refus pour hôte inéligible, participant inter-saison, joueur et tentative de modification du live d’un autre hôte.
 
+Le scénario médias crée un ADMIN, un REPORTER et un PLAYER. Il vérifie l’enregistrement RPC autorisé, le refus de l’insertion directe, l’invisibilité d’un blob et de ses métadonnées `PENDING` pour le PLAYER, l’approbation auditée par ADMIN et la lecture du blob seulement après approbation.
+
+Les cinq images personnelles convenues ont aussi été téléversées puis approuvées par l’interface ADMIN dans l’instance Supabase locale. Elles ne sont pas versionnées et l’arrêt local sans sauvegarde les retire ensuite de Docker ; aucun fichier n’est placé dans `public/` ni dans le build.
+
 ## Dernières validations
 
 - `pnpm format`, `pnpm lint` et `pnpm typecheck` : succès.
-- `pnpm test` : 107 tests réussis dans 25 fichiers.
-- `pnpm db:reset` : succès avec les dix migrations et le seed.
+- `pnpm test` : 123 tests réussis dans 31 fichiers.
+- `pnpm db:reset` : succès avec les onze migrations et le seed.
 - Seconde exécution de `seed.sql` : décomptes inchangés, dont 5 corrélations.
 - `supabase db lint` : aucune erreur ni aucun avertissement.
 - `pnpm db:test:rls` : 7 blocs SQL RLS historiques réussis.
 - `pnpm db:test:betting` : 11 blocs SQL transactionnels réussis, couvrant aussi un scénario d’intégration complet.
 - `pnpm db:test:lives` : création, RLS, audit et idempotence des lives réussis.
+- `pnpm db:test:media` : upload RPC, RLS Storage/métadonnées, modération et audit réussis.
 - `pnpm odds:demo` : résultats déterministes inchangés.
 - `pnpm build` : succès après arrêt de Supabase, sans variable Supabase ni accès base au build.
 - `pnpm install --frozen-lockfile` : succès.
@@ -79,8 +88,9 @@ Le scénario lives crée un admin, deux `LIVE_HOST`, un joueur et un reporter. I
 - Cinq snapshots visuels stables : login desktop, dashboard desktop, marchés desktop/mobile et ticket mobile ouvert.
 - Le dashboard et les écrans marchés/ticket de l’audit visuel utilisent une session PLAYER et une saison propres, distinctes des parcours transactionnels. Les cotes visibles de cette saison sont stabilisées par le harness E2E ; deux captures consécutives identiques ont été vérifiées avant régénération des références.
 - Le parcours lives crée une session programmée avec un ADMIN, la relit avec un membre distinct, puis crée une session `INSTANT` avec un `LIVE_HOST`; il passe sur desktop et mobile.
-- `pnpm test:e2e` : 43/43 parcours Chromium réussis.
+- Le parcours médias téléverse une image PNG locale avec un ADMIN, l’approuve, la rend lisible à un PLAYER puis vérifie qu’un contexte sans session reçoit `404`; il passe sur desktop et mobile.
+- `pnpm test:e2e` : 45/45 parcours Chromium réussis.
 
-Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright.
+Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright. Le formulaire média attend maintenant l’hydratation client avant tout envoi, ce qui stabilise l’état de retour des Server Actions lors du chargement d’images privées.
 
-Limites : les tests utilisent uniquement Supabase/Chromium locaux et ne valident aucun domaine Vercel distant. Les lives fonctionnels, règlements, paiements de gains, repricing automatique, Realtime et déploiements restent hors périmètre.
+Limites : les tests utilisent uniquement Supabase/Chromium locaux et ne valident aucun domaine Vercel distant. Les images personnelles ne sont jamais versionnées : leur import Production reste à faire dans le projet Supabase distant une fois ses accès CLI configurés. Les lives fonctionnels, règlements, paiements de gains, repricing automatique, Realtime et déploiements restent hors périmètre.

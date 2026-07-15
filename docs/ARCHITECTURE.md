@@ -17,6 +17,8 @@ Le runtime Node.js par défaut est conservé. Le runtime Edge ne sera ajouté qu
 - `src/config` validera l’environnement à la frontière du système ;
 - `src/fixtures/sportsbook` contient uniquement les données de démonstration encore nécessaires aux résultats et à la chronologie ; marchés et lives sont lus depuis Supabase.
 
+Les médias de saison sont stockés dans le bucket privé Supabase `season-media`. Une Server Action valide le formulaire avec Zod, normalise les images en WebP sans métadonnées, puis enregistre leur référence; elle supprime le blob si la transaction de métadonnées échoue. La limite de transport des Server Actions est fixée à 12 Mo afin d’accepter l’enveloppe multipart, tandis que la règle métier conserve une limite stricte de 10 Mo par image. Une route authentifiée les diffuse sans URL Storage publique, avec `Cache-Control: private, no-store` et une réponse `404` uniforme. Seuls les médias `APPROVED` sont lisibles par les membres, y compris lors d’un accès Storage direct; l’auteur et les administrateurs conservent l’accès aux médias en attente.
+
 Les composants React ne seront jamais la seule source d’un calcul de cote ou d’une règle de règlement.
 
 ## Interface sportsbook

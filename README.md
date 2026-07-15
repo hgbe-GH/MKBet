@@ -2,7 +2,7 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, le moteur déterministe de cotes et un sportsbook transactionnel : marchés réels, devis courts, paris simples/combinés, débit MKB, tickets, portefeuille, classement financier et création de lives privés.
+Cette version contient les fondations techniques, le schéma Supabase, l’authentification privée, le moteur déterministe de cotes et un sportsbook transactionnel : marchés réels, devis courts, paris simples/combinés, débit MKB, tickets, portefeuille, classement financier, lives privés et médias de saison validés.
 
 ## Prérequis
 
@@ -62,6 +62,7 @@ pnpm db:reset     # recrée la base depuis les migrations et le seed
 pnpm db:types     # régénère les types TypeScript depuis la base locale
 pnpm db:test:betting # valide marchés, devis, placements et idempotence
 pnpm db:test:lives   # valide création de lives, RLS, audit et idempotence
+pnpm db:test:media   # valide médias privés, Storage, RLS et audit
 pnpm db:stop      # arrête Supabase local sans conserver son état
 pnpm format       # mise en forme Prettier
 pnpm format:check # contrôle Prettier sans modification
@@ -91,4 +92,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page publique et l’Auth restent indépendantes du build. Les marchés, devis, paris, portefeuilles, tickets, classements et créations de lives utilisent Supabase. Les transitions de lives, actions, résultats et chronologie détaillée restent à développer. Le règlement et le paiement des gains ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page publique et l’Auth restent indépendantes du build. Les marchés, devis, paris, portefeuilles, tickets, classements et créations de lives utilisent Supabase. Les médias de saison passent par Storage privé, sont convertis en WebP sans métadonnées puis validés par un administrateur avant lecture par les membres. Les transitions de lives, actions, résultats et chronologie détaillée restent à développer. Le règlement et le paiement des gains ne sont pas encore développés. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
