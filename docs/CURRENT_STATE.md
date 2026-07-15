@@ -19,6 +19,9 @@ Dernière mise à jour : 15 juillet 2026.
 - Classement limité au nom/avatar et agrégats de portefeuille, sans transactions détaillées d’un autre joueur.
 - Médias de saison privés : formulaire ADMIN, validation Zod, conversion WebP sans métadonnées, nettoyage du blob en cas d’échec d’enregistrement, validation ADMIN, audit et diffusion authentifiée depuis `/api/media/[mediaId]`.
 - Les médias `PENDING` ne sont lisibles ni dans `media_assets` ni dans `storage.objects` par un PLAYER ; les membres ne voient que les médias `APPROVED`.
+- Supabase Production `mk-bet-production` : les onze migrations forward-only et le seed de référence sont appliqués.
+- Vercel Production : [mk-bet.vercel.app](https://mk-bet.vercel.app) est relié à `main`, avec les variables publiques Supabase et `NEXT_PUBLIC_SITE_URL` configurées; `/` et `/api/health` répondent HTTP 200.
+- Supabase Auth Production : `site_url` et les URLs de redirection autorisées couvrent `https://mk-bet.vercel.app/auth/callback` et les environnements locaux de test.
 
 ## Démonstration restante
 
@@ -36,7 +39,6 @@ Ces surfaces affichent un badge ou un texte explicite. Aucune fixture de marché
 - Déclaration/confirmation des actions et repricing après action.
 - Lancement, arrêt, check-in et transitions complètes des lives.
 - Supabase Realtime et notifications push.
-- Déploiement Vercel Preview ou Production.
 
 ## Base et migrations
 
@@ -73,6 +75,8 @@ Les cinq images personnelles convenues ont aussi été téléversées puis appro
 - `pnpm build` : succès après arrêt de Supabase, sans variable Supabase ni accès base au build.
 - `pnpm install --frozen-lockfile` : succès.
 - Serveur de production local : `/` répond et `/api/health` retourne exactement `{"status":"ok","application":"mk-bet"}`.
+- Production Vercel : build `pnpm install --frozen-lockfile` puis `pnpm build` réussi ; `/`, `/login` et `/api/health` répondent HTTP 200, et le HTML de login ne contient aucune clé secrète.
+- Production Supabase : `supabase migration list --linked` confirme les onze versions locales et distantes identiques ; la configuration Auth et Storage est appliquée sans activer Storage Vector.
 - Scan de secrets : aucun secret suivi ; seule la variable vide attendue de `.env.example` correspond au motif.
 - Migrations historiques et répertoires `src/domain/odds`, `src/application/odds` : aucun diff.
 

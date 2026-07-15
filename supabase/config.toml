@@ -43,13 +43,17 @@ port = 54324
 enabled = true
 file_size_limit = "50MiB"
 
+[storage.vector]
+enabled = false
+
 [auth]
 enabled = true
-site_url = "http://127.0.0.1:3000"
+site_url = "https://mk-bet.vercel.app"
 additional_redirect_urls = [
   "http://127.0.0.1:3000",
   "http://localhost:3100/**",
-  "http://127.0.0.1:3100/**"
+  "http://127.0.0.1:3100/**",
+  "https://mk-bet.vercel.app/**"
 ]
 jwt_expiry = 3600
 enable_signup = true
@@ -58,3 +62,12 @@ minimum_password_length = 8
 
 [auth.rate_limit]
 email_sent = 100
+
+[auth.email]
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true

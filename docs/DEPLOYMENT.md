@@ -1,6 +1,6 @@
 # Déploiement Vercel
 
-Ce document prépare un futur déploiement. Il ne signifie pas que MK Bet a déjà été connecté ou publié sur Vercel.
+MK Bet est publié sur [mk-bet.vercel.app](https://mk-bet.vercel.app). Le projet Vercel `mk-bet` est relié à `main` et au dépôt GitHub. Son installation utilise `pnpm install --frozen-lockfile` et son build `pnpm build`.
 
 ## Import du dépôt
 
@@ -25,15 +25,17 @@ Chaque déploiement qui nécessite une URL publique absolue doit utiliser `NEXT_
 
 Les secrets ne doivent jamais être committés. `.env.local` reste local et la clé de service ne doit être disponible que dans le runtime serveur.
 
-## Redirections Supabase futures
+## Redirections Supabase
 
 Déclarer dans Supabase Auth les URLs de redirection autorisées pour :
 
 - local : `http://localhost:3000/auth/callback` et `http://127.0.0.1:3000/auth/callback` ;
 - Preview : les domaines Preview utilisés par le projet, sans coder de domaine inventé ;
-- Production : le domaine canonique pointé par `NEXT_PUBLIC_SITE_URL`, avec `/auth/callback`.
+- Production : `https://mk-bet.vercel.app/auth/callback`.
 
 Les paramètres `next` reçus du client sont limités à des chemins internes.
+
+La configuration Auth Production actuellement appliquée utilise `https://mk-bet.vercel.app` comme `site_url` et autorise son callback. Les URLs Preview ne sont ajoutées que lorsqu’un domaine Preview concret doit accepter des magic links.
 
 ## Migrations Supabase
 
@@ -47,7 +49,7 @@ Avant de déployer une version qui dépend d’une nouvelle migration :
 4. appliquer les mêmes migrations versionnées à Production ;
 5. seulement ensuite promouvoir la version applicative dépendante.
 
-Le build Vercel doit réussir sans connexion active à PostgreSQL. Les URL et clés Supabase seront configurées ultérieurement, séparément pour Development, Preview et Production.
+Le build Vercel réussit sans connexion active à PostgreSQL. `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sont configurées séparément sur Vercel pour Development, Preview et Production; `NEXT_PUBLIC_SITE_URL` est configurée pour Production.
 
 ## Vérification après déploiement
 
