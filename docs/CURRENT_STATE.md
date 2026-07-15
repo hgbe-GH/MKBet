@@ -25,6 +25,8 @@ Dernière mise à jour : 15 juillet 2026.
 
 ## Démonstration restante
 
+- Refonte approuvée « Margot × Kévin » : une salle unique, inscriptions ouvertes, rapports avec preuves et vote 2-pour/2-contre. La spécification est disponible dans `docs/superpowers/specs/2026-07-15-margot-kevin-betting-design.md`; elle n’est pas encore implémentée.
+
 - Actions et signaux.
 - Résultats visuels.
 - Chronologie détaillée.

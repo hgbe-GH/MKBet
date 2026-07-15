@@ -42,3 +42,6 @@
 # TypeScript and tooling caches
 *.tsbuildinfo
 .eslintcache
+
+# Local brainstorming companion
+/.superpowers/
