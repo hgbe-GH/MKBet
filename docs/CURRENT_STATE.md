@@ -63,7 +63,7 @@ Les cinq images personnelles convenues ont aussi été téléversées puis appro
 ## Dernières validations
 
 - `pnpm format`, `pnpm lint` et `pnpm typecheck` : succès.
-- `pnpm test` : 123 tests réussis dans 31 fichiers.
+- `pnpm test` : 124 tests réussis dans 32 fichiers.
 - `pnpm db:reset` : succès avec les onze migrations et le seed.
 - Seconde exécution de `seed.sql` : décomptes inchangés, dont 5 corrélations.
 - `supabase db lint` : aucune erreur ni aucun avertissement.
@@ -95,6 +95,6 @@ Les cinq images personnelles convenues ont aussi été téléversées puis appro
 - Le parcours médias téléverse une image PNG locale avec un ADMIN, l’approuve, la rend lisible à un PLAYER puis vérifie qu’un contexte sans session reçoit `404`; il passe sur desktop et mobile.
 - `pnpm test:e2e` : 45/45 parcours Chromium réussis.
 
-Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright. Le formulaire média attend maintenant l’hydratation client avant tout envoi, ce qui stabilise l’état de retour des Server Actions lors du chargement d’images privées.
+Corrections réalisées : frontière React des icônes de navigation, enregistrement des Server Actions Auth, contraste du texte atténué, focus du lien d’évitement, classement horizontal focalisable, ticket mobile scrollable et refermable par `Escape`, cibles tactiles, grille des cotes binaires, graphique à snapshot unique, invalidation définitive d’un devis après modification, statut visible des tickets et confirmation redirigée après création admin, isolation des snapshots visuels et identifiants de marchés administratifs compatibles avec les répétitions Playwright. Le formulaire média attend maintenant l’hydratation client avant tout envoi, ce qui stabilise l’état de retour des Server Actions lors du chargement d’images privées. Un joueur authentifié sans saison peut désormais atteindre `/seasons` et `/seasons/new` sans boucle de redirection.
 
 Limites : les tests utilisent uniquement Supabase/Chromium locaux et ne valident aucun domaine Vercel distant. Les images personnelles ne sont jamais versionnées : leur import Production reste à faire dans le projet Supabase distant une fois ses accès CLI configurés. Les lives fonctionnels, règlements, paiements de gains, repricing automatique, Realtime et déploiements restent hors périmètre.
