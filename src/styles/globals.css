@@ -234,6 +234,14 @@ a {
   color: #ffc3c8;
 }
 
+.mk-form-step {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 1rem;
+}
+
 @supports not (backdrop-filter: blur(1px)) {
   .mk-glass-subtle,
   .mk-glass-interactive,

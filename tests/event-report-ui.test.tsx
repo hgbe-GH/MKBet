@@ -125,5 +125,17 @@ describe("EventReportForm", () => {
     expect(
       screen.getByRole("button", { name: "Envoyer au vote" }),
     ).toBeEnabled();
+    expect(
+      screen.getByRole("group", { name: "1. Événement" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "2. Moment" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "3. Marché concerné" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "4. Preuves privées" }),
+    ).toBeInTheDocument();
   });
 });
