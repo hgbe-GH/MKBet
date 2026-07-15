@@ -46,14 +46,24 @@ describe("EventReportCard", () => {
     );
     expect(screen.getByText("1 validation sur 2")).toBeInTheDocument();
     expect(screen.getByText("0 invalidation sur 2")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Valider" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Invalider" })).toBeEnabled();
+    expect(screen.getByRole("article")).toHaveAttribute(
+      "data-report-status",
+      "PENDING",
+    );
+    expect(
+      screen.getByRole("button", { name: "Valider ce fait" }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: "Invalider ce fait" }),
+    ).toBeEnabled();
   });
 
   it("never lets the author vote on their own report", () => {
     render(<EventReportCard currentUserId="alice" report={pendingReport} />);
 
-    expect(screen.queryByRole("button", { name: "Valider" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Valider ce fait" }),
+    ).toBeNull();
     expect(
       screen.getByText("Tu ne peux pas voter sur ton propre signalement."),
     ).toBeInTheDocument();
@@ -68,13 +78,17 @@ describe("EventVoteControls", () => {
     });
     render(<EventVoteControls reportId="report-1" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Invalider" }));
+    fireEvent.click(screen.getByRole("button", { name: "Invalider ce fait" }));
 
     await waitFor(() =>
       expect(screen.getByText("Ton vote : invalidation.")).toBeInTheDocument(),
     );
-    expect(screen.queryByRole("button", { name: "Valider" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Invalider" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Valider ce fait" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Invalider ce fait" }),
+    ).toBeNull();
   });
 });
 
