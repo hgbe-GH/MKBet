@@ -26,7 +26,7 @@ const emailSchema = z
 const passwordSchema = z
   .string()
   .min(10, "Le mot de passe doit contenir au moins 10 caractères")
-  .max(128);
+  .max(128, "Le mot de passe est trop long");
 
 const safeNextSchema = z
   .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())

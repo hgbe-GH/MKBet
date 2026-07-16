@@ -136,12 +136,21 @@ describe("auth validation", () => {
         passwordConfirmation: "autre-mot-de-passe",
       }),
     ).toThrow();
-    expect(() =>
-      passwordUpdateSchema.parse({
-        password: "a".repeat(129),
-        passwordConfirmation: "a".repeat(129),
-      }),
-    ).toThrow();
+    const overlengthResult = passwordUpdateSchema.safeParse({
+      password: "a".repeat(129),
+      passwordConfirmation: "a".repeat(129),
+    });
+    expect(overlengthResult.success).toBe(false);
+    if (!overlengthResult.success) {
+      expect(overlengthResult.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["password"],
+            message: "Le mot de passe est trop long",
+          }),
+        ]),
+      );
+    }
   });
 
   it("validates season creation input", () => {
