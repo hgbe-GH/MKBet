@@ -26,7 +26,7 @@ export default async function ReportPage() {
       />
       <section
         aria-label="Formulaire de signalement"
-        className="mk-glass-subtle mt-6 rounded-2xl p-5 sm:p-7"
+        className="mk-surface-opaque mt-6 rounded-2xl p-5 sm:p-7"
       >
         <EventReportForm markets={markets} />
       </section>

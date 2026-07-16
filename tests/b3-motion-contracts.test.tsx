@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { render, screen } from "@testing-library/react";
@@ -46,10 +46,32 @@ const mobileBetSlip = readFileSync(
   join(process.cwd(), "src/components/sportsbook/mobile-bet-slip.tsx"),
   "utf8",
 );
+const mobileNavigation = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/mobile-bottom-navigation.tsx"),
+  "utf8",
+);
 const eventReportForm = readFileSync(
   join(process.cwd(), "src/components/events/event-report-form.tsx"),
   "utf8",
 );
+const reportPage = readFileSync(
+  join(process.cwd(), "src/app/(protected)/report/page.tsx"),
+  "utf8",
+);
+const desktopSidebar = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/desktop-sidebar.tsx"),
+  "utf8",
+);
+
+function collectTsxSources(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return collectTsxSources(path);
+    return entry.name.endsWith(".tsx") ? [readFileSync(path, "utf8")] : [];
+  });
+}
+
+const tsxSources = collectTsxSources(join(process.cwd(), "src"));
 
 function relativeLuminance(hex: string): number {
   const channels = hex
@@ -107,7 +129,7 @@ describe("B3 motion contracts", () => {
 
     expect(
       screen.getByText("Portail").closest("[data-motion]"),
-    ).toHaveAttribute("data-motion", "enter");
+    ).toHaveAttribute("data-motion", "auth-content");
     expect(
       screen.getByRole("button", { name: /Oui, cote 1,88/i }),
     ).toHaveAttribute("data-interactive", "lift");
@@ -131,6 +153,18 @@ describe("B3 motion contracts", () => {
     expect(styles).toMatch(
       /@media\s*\(hover:\s*hover\)\s*and\s*\(pointer:\s*fine\)/,
     );
+
+    const transitions = [...styles.matchAll(/transition:\s*([^;]+);/g)].flatMap(
+      ([, declaration]) => declaration.split(","),
+    );
+    expect(transitions.length).toBeGreaterThan(0);
+    for (const transition of transitions) {
+      expect(transition.trim()).toMatch(/^(?:transform|opacity)\s/);
+    }
+
+    for (const source of tsxSources) {
+      expect(source).not.toMatch(/\btransition(?!-(?:transform|opacity)\b)/);
+    }
   });
 
   it("provides opaque transparency and reduced-motion fallbacks", () => {
@@ -144,6 +178,9 @@ describe("B3 motion contracts", () => {
     )?.[1];
     expect(reducedMotion).toContain("transform: none");
     expect(reducedMotion).toContain("animation: none");
+    expect(reducedMotion).toMatch(
+      /\.mk-auth-mode-indicator\s*\{[^}]*transition-duration:\s*0\.01ms/,
+    );
   });
 
   it("routes vote lift through the fine-pointer motion contract", () => {
@@ -198,5 +235,63 @@ describe("B3 motion contracts", () => {
     expect(voteControls).toContain("text-[var(--on-brand)]");
     expect(mobileBetSlip).toContain("text-[var(--on-brand)]");
     expect(eventReportForm).toContain("file:text-[var(--on-brand)]");
+  });
+
+  it("keeps fixed mobile controls inside landscape safe areas", () => {
+    expect(mobileBetSlip).toContain(
+      "left-[max(0.75rem,env(safe-area-inset-left))]",
+    );
+    expect(mobileBetSlip).toContain(
+      "right-[max(0.75rem,env(safe-area-inset-right))]",
+    );
+    expect(mobileNavigation).toContain(
+      "left-[max(0.5rem,env(safe-area-inset-left))]",
+    );
+    expect(mobileNavigation).toContain(
+      "right-[max(0.5rem,env(safe-area-inset-right))]",
+    );
+  });
+
+  it("separates dense reading surfaces from small interactive glass", () => {
+    const subtleSurface = styles.match(/\.mk-glass-subtle\s*\{([^}]*)\}/)?.[1];
+    const interactiveSurface = styles.match(
+      /\.mk-glass-interactive\s*\{([^}]*)\}/,
+    )?.[1];
+
+    expect(subtleSurface).toBeDefined();
+    expect(subtleSurface).not.toContain("backdrop-filter");
+    expect(interactiveSurface).toContain("backdrop-filter: blur(18px)");
+    expect(reportPage).toContain("mk-surface-opaque");
+    expect(desktopSidebar).not.toContain("backdrop-blur");
+  });
+
+  it("uses one shared URL-driven auth indicator and fades only its content", () => {
+    const { container } = render(
+      <AuthShell mode="register" next="/markets">
+        <p>Inscription</p>
+      </AuthShell>,
+    );
+
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    expect(navigation).toHaveAttribute("data-auth-mode", "register");
+    expect(navigation.querySelectorAll(".mk-auth-mode-indicator")).toHaveLength(
+      1,
+    );
+    expect(
+      screen.getByText("Inscription").closest("[data-motion]"),
+    ).toHaveAttribute("data-motion", "auth-content");
+    expect(
+      screen.getByText("Inscription").closest("[data-surface]"),
+    ).toHaveAttribute("data-surface", "opaque");
+    expect(container.querySelector('[data-motion="enter"]')).toBeNull();
+    expect(screen.getByRole("link", { name: "Connexion" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fmarkets",
+    );
+    expect(
+      screen.getByRole("link", { name: "Créer un compte" }),
+    ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
   });
 });

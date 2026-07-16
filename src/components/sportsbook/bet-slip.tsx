@@ -112,7 +112,7 @@ export function BetSlip({
   return (
     <aside
       aria-label="Ticket de pari"
-      className="mk-glass-subtle rounded-2xl p-4"
+      className="mk-glass-interactive mk-fallback-opaque rounded-2xl p-4"
       data-ticket-step={ticketStep}
     >
       <div className="flex items-center justify-between gap-3">

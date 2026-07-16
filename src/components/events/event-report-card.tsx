@@ -31,7 +31,7 @@ export function EventReportCard({
       as="article"
       className="overflow-hidden rounded-2xl"
       data-report-status={report.status}
-      variant={report.status === "PENDING" ? "interactive" : "opaque"}
+      variant="opaque"
     >
       <div className="flex items-start justify-between gap-4 px-4 pt-4 sm:px-6 sm:pt-6">
         <div>

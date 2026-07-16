@@ -80,15 +80,16 @@ export function AuthShell({
 
         <section className="flex items-start px-4 pb-5 sm:px-8 sm:pb-8 lg:min-h-dvh lg:items-center lg:px-8 lg:py-10 xl:px-12">
           <GlassSurface
-            className="w-full rounded-2xl border-white/16 bg-[#111016]/88 p-2 shadow-[0_32px_90px_rgba(0,0,0,0.55)] sm:rounded-3xl sm:p-3"
-            data-motion="enter"
-            variant="subtle"
+            className="w-full rounded-2xl border-white/16 bg-[#111016] p-2 shadow-[0_32px_90px_rgba(0,0,0,0.55)] sm:rounded-3xl sm:p-3"
+            variant="opaque"
           >
             {showModeNavigation ? (
               <nav
                 aria-label="Choisir le mode d’accès"
-                className="grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/25 p-1"
+                className="relative grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/25 p-1"
+                data-auth-mode={mode}
               >
+                <span aria-hidden="true" className="mk-auth-mode-indicator" />
                 {(["login", "register"] as const).map((itemMode) => {
                   const isActive = itemMode === mode;
                   const label =
@@ -98,28 +99,24 @@ export function AuthShell({
                     <Link
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "mk-auth-mode relative inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black",
+                        "mk-auth-mode relative z-10 inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black",
                         isActive
-                          ? "bg-white/10 text-white"
+                          ? "text-white"
                           : "text-[var(--text-muted)] hover:bg-white/6 hover:text-white",
                       )}
                       href={modeHref(itemMode, safeNext)}
                       key={itemMode}
                     >
                       {label}
-                      {isActive ? (
-                        <span
-                          aria-hidden="true"
-                          className="absolute right-3 bottom-1.5 left-3 h-0.5 rounded-full bg-[var(--brand)]"
-                        />
-                      ) : null}
                     </Link>
                   );
                 })}
               </nav>
             ) : null}
 
-            <div className="p-5 sm:p-7 lg:p-8">{children}</div>
+            <div className="p-5 sm:p-7 lg:p-8" data-motion="auth-content">
+              {children}
+            </div>
           </GlassSurface>
         </section>
       </div>

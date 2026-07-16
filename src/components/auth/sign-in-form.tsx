@@ -65,7 +65,7 @@ export function SignInForm({ action = inertAction, next }: SignInFormProps) {
           aria-describedby={errorId}
           aria-invalid={hasError || undefined}
           autoComplete="email"
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none transition-[border-color,box-shadow,background-color] focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
+          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
           id="sign-in-email"
           maxLength={320}
           name="email"
@@ -90,7 +90,7 @@ export function SignInForm({ action = inertAction, next }: SignInFormProps) {
 
       <div className="flex justify-end">
         <Link
-          className="inline-flex min-h-11 items-center text-sm font-bold text-[var(--text-secondary)] underline decoration-white/25 underline-offset-4 transition-colors hover:text-white"
+          className="inline-flex min-h-11 items-center text-sm font-bold text-[var(--text-secondary)] underline decoration-white/25 underline-offset-4 hover:text-white"
           href="/forgot-password"
         >
           Mot de passe oublié ?

@@ -52,7 +52,7 @@ export function PasswordField({
           aria-describedby={describedBy}
           aria-invalid={invalid || undefined}
           autoComplete={autoComplete}
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 pr-14 text-base text-white outline-none transition-[border-color,box-shadow,background-color] placeholder:text-[var(--text-muted)] focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
+          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 pr-14 text-base text-white outline-none placeholder:text-[var(--text-muted)] focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
           id={id}
           maxLength={128}
           minLength={minLength}
@@ -65,7 +65,7 @@ export function PasswordField({
         <button
           aria-controls={id}
           aria-label={visibilityLabel}
-          className="absolute top-1/2 right-1 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--text-secondary)] transition-colors hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-hover)]"
+          className="absolute top-1/2 right-1 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-hover)]"
           onClick={() => setIsVisible((visible) => !visible)}
           type="button"
         >

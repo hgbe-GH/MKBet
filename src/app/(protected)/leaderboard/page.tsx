@@ -33,7 +33,7 @@ export default async function LeaderboardPage() {
               <GlassSurface
                 className="rounded-2xl p-5"
                 key={row.rank}
-                variant={row.rank === 1 ? "interactive" : "subtle"}
+                variant="subtle"
               >
                 <p className="text-sm font-black text-[var(--brand-hover)]">
                   #{row.rank}

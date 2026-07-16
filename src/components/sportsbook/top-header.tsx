@@ -22,7 +22,7 @@ export function TopHeader({ season }: { season: SportsbookSeasonContext }) {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            className="mk-glass-subtle hidden min-h-11 items-center rounded-lg px-3 py-2 text-sm font-bold transition hover:border-white/25 sm:inline-flex"
+            className="mk-glass-subtle hidden min-h-11 items-center rounded-lg px-3 py-2 text-sm font-bold hover:border-white/25 sm:inline-flex"
             href="/settings/account"
           >
             Compte

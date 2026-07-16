@@ -32,7 +32,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 225 tests réussis dans 40 fichiers.
+- `pnpm test` : 241 tests réussis dans 41 fichiers.
 - `pnpm test:e2e` : 27 parcours réussis et 3 skips de projet attendus sur 30 cas desktop/mobile.
 - Répétition ciblée `--repeat-each=2` : 4 parcours métier desktop et 2 contrôles mobiles réussis, avec les skips croisés attendus.
 - `db:reset`, génération des types, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : succès.

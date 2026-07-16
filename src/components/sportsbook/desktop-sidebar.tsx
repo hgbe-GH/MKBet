@@ -5,7 +5,7 @@ import { NavigationLink } from "@/components/sportsbook/navigation-link";
 
 export function DesktopSidebar() {
   return (
-    <aside className="sticky top-0 hidden h-dvh border-r border-white/10 bg-black/20 p-4 backdrop-blur-xl lg:block">
+    <aside className="sticky top-0 hidden h-dvh border-r border-white/10 bg-[rgba(8,8,11,0.94)] p-4 lg:block">
       <div className="mb-8 px-2 pt-2">
         <p className="text-xl font-black tracking-[-0.07em]">
           MK<span className="text-[var(--brand)]">BET</span>
