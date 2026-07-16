@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { mapAuthErrorToMessage } from "@/application/auth";
@@ -14,8 +13,12 @@ import {
 import { initializeAuthenticatedAccess } from "@/application/auth/initialize-access";
 import type { ActionResult, AuthErrorCode } from "@/auth/auth-errors";
 import { requireAuthForAction } from "@/auth/require-auth";
+import { getSiteUrl } from "@/config/env";
+import {
+  SupabaseConfigurationError,
+  toSupabaseConfigurationError,
+} from "@/lib/supabase/errors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { toSupabaseConfigurationError } from "@/lib/supabase/errors";
 
 export type AuthFormState = ActionResult;
 
@@ -34,31 +37,12 @@ function failure(code: AuthErrorCode): AuthFormState {
   };
 }
 
-function requestOrigin(headersList: Headers): string | null {
-  const origin = headersList.get("origin");
-  if (origin) {
-    try {
-      const parsed = new URL(origin);
-      if (
-        parsed.protocol === "https:" ||
-        (parsed.protocol === "http:" && parsed.hostname === "localhost")
-      ) {
-        return parsed.origin;
-      }
-    } catch {
-      return null;
-    }
+function configuredSiteUrl(): string {
+  try {
+    return getSiteUrl();
+  } catch {
+    throw new SupabaseConfigurationError();
   }
-
-  const host = headersList.get("host");
-  if (!host) {
-    return process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : null;
-  }
-
-  const protocol = host.includes("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
 }
 
 export async function signInWithPasswordAction(
@@ -125,8 +109,7 @@ export async function signUpWithPasswordAction(
 
   try {
     const supabase = await createServerSupabaseClient();
-    const origin = requestOrigin(await headers()) ?? "http://localhost:3000";
-    const callbackUrl = new URL("/auth/callback", origin);
+    const callbackUrl = new URL("/auth/callback", configuredSiteUrl());
     callbackUrl.searchParams.set("intent", "signup");
     callbackUrl.searchParams.set("next", parsed.data.next);
 
@@ -169,8 +152,7 @@ export async function requestPasswordResetAction(
 
   try {
     const supabase = await createServerSupabaseClient();
-    const origin = requestOrigin(await headers()) ?? "http://localhost:3000";
-    const callbackUrl = new URL("/auth/callback", origin);
+    const callbackUrl = new URL("/auth/callback", configuredSiteUrl());
     callbackUrl.searchParams.set("intent", "recovery");
 
     await supabase.auth.resetPasswordForEmail(parsed.data.email, {

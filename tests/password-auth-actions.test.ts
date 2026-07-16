@@ -6,6 +6,7 @@ import { SupabaseConfigurationError } from "@/lib/supabase/errors";
 
 const {
   createServerSupabaseClient,
+  getSiteUrl,
   getUser,
   headers,
   redirect,
@@ -17,6 +18,7 @@ const {
   updateUser,
 } = vi.hoisted(() => ({
   createServerSupabaseClient: vi.fn(),
+  getSiteUrl: vi.fn(),
   getUser: vi.fn(),
   headers: vi.fn(),
   redirect: vi.fn((path: string) => {
@@ -37,6 +39,8 @@ vi.mock("next/headers", () => ({
 vi.mock("next/navigation", () => ({ redirect }));
 
 vi.mock("@/lib/supabase/server", () => ({ createServerSupabaseClient }));
+
+vi.mock("@/config/env", () => ({ getSiteUrl }));
 
 vi.mock("@/data/supabase/rpc", () => ({
   asRpcClient: vi.fn(() => ({ rpc })),
@@ -92,8 +96,12 @@ const validPasswordUpdateData = () =>
 describe("password authentication actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getSiteUrl.mockReturnValue("https://mk-bet.vercel.app");
     headers.mockResolvedValue(
-      new Headers({ origin: "https://mk-bet.vercel.app" }),
+      new Headers({
+        host: "localhost.evil.example",
+        origin: "https://evil.example",
+      }),
     );
     createServerSupabaseClient.mockResolvedValue({
       auth: {
@@ -131,6 +139,17 @@ describe("password authentication actions", () => {
     expect(redirect).toHaveBeenCalledWith("/markets");
   });
 
+  it("sanitizes an external sign-in redirect to the internal default", async () => {
+    const unsafeData = validSignInData();
+    unsafeData.set("next", "https://evil.example/private");
+
+    await expect(
+      signInWithPasswordAction(initialState, unsafeData),
+    ).rejects.toThrow("NEXT_REDIRECT:/direct");
+
+    expect(redirect).toHaveBeenCalledWith("/direct");
+  });
+
   it("returns a generic failure without leaking invalid-credential details", async () => {
     signInWithPassword.mockResolvedValue({
       error: new Error("user missing: alice@example.com"),
@@ -149,8 +168,8 @@ describe("password authentication actions", () => {
     expect(rpc).not.toHaveBeenCalled();
   });
 
-  it("signs out and reports a database failure when access initialization fails", async () => {
-    rpc.mockResolvedValueOnce({ data: null, error: new Error("profile raw") });
+  it("signs out and reports a database failure when the profile RPC throws", async () => {
+    rpc.mockRejectedValueOnce(new Error("profile raw"));
 
     const result = await signInWithPasswordAction(
       initialState,
@@ -163,6 +182,25 @@ describe("password authentication actions", () => {
       code: "DATABASE_OPERATION_FAILED",
     });
     expect(JSON.stringify(result)).not.toContain("profile raw");
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("signs out and reports a database failure when the room RPC throws", async () => {
+    rpc
+      .mockResolvedValueOnce({ data: "profile-id", error: null })
+      .mockRejectedValueOnce(new Error("room raw"));
+
+    const result = await signInWithPasswordAction(
+      initialState,
+      validSignInData(),
+    );
+
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({
+      ok: false,
+      code: "DATABASE_OPERATION_FAILED",
+    });
+    expect(JSON.stringify(result)).not.toContain("room raw");
     expect(redirect).not.toHaveBeenCalled();
   });
 
@@ -188,19 +226,22 @@ describe("password authentication actions", () => {
     });
   });
 
-  it("rejects a non-HTTP localhost origin when building the sign-up callback", async () => {
-    headers.mockResolvedValue(new Headers({ origin: "ftp://localhost:3000" }));
+  it("ignores hostile request headers and sanitizes an external sign-up redirect", async () => {
+    const unsafeData = validSignUpData();
+    unsafeData.set("next", "//evil.example/private");
 
-    await signUpWithPasswordAction(initialState, validSignUpData());
+    await signUpWithPasswordAction(initialState, unsafeData);
 
     expect(signUp).toHaveBeenCalledWith(
       expect.objectContaining({
         options: expect.objectContaining({
           emailRedirectTo:
-            "http://localhost:3000/auth/callback?intent=signup&next=%2Fdirect",
+            "https://mk-bet.vercel.app/auth/callback?intent=signup&next=%2Fdirect",
         }),
       }),
     );
+    expect(getSiteUrl).toHaveBeenCalledOnce();
+    expect(headers).not.toHaveBeenCalled();
   });
 
   it("does not leak sign-up errors or account state", async () => {
@@ -310,6 +351,51 @@ describe("password authentication actions", () => {
       "private configuration detail",
     );
   });
+
+  it.each([
+    ["sign-up", signUpWithPasswordAction, validSignUpData],
+    ["reset", requestPasswordResetAction, validResetData],
+    ["update", updatePasswordAction, validPasswordUpdateData],
+  ])(
+    "maps a client configuration exception for %s without raw details",
+    async (_label, action, validData) => {
+      createServerSupabaseClient.mockRejectedValue(
+        new SupabaseConfigurationError("private client configuration"),
+      );
+
+      const result = await action(initialState, validData());
+
+      expect(result).toMatchObject({
+        ok: false,
+        code: "SUPABASE_NOT_CONFIGURED",
+      });
+      expect(JSON.stringify(result)).not.toContain(
+        "private client configuration",
+      );
+    },
+  );
+
+  it.each([
+    ["sign-up", signUpWithPasswordAction, validSignUpData],
+    ["reset", requestPasswordResetAction, validResetData],
+  ])(
+    "maps a site URL configuration exception for %s without raw details",
+    async (_label, action, validData) => {
+      getSiteUrl.mockImplementationOnce(() => {
+        throw new Error("raw NEXT_PUBLIC_SITE_URL detail");
+      });
+
+      const result = await action(initialState, validData());
+
+      expect(result).toMatchObject({
+        ok: false,
+        code: "SUPABASE_NOT_CONFIGURED",
+      });
+      expect(JSON.stringify(result)).not.toContain(
+        "raw NEXT_PUBLIC_SITE_URL detail",
+      );
+    },
+  );
 });
 
 describe("initializeAuthenticatedAccess", () => {
@@ -336,5 +422,25 @@ describe("initializeAuthenticatedAccess", () => {
     expect(result).toEqual({ ok: false, stage: "room" });
     expect(rpc).toHaveBeenNthCalledWith(1, "ensure_current_profile");
     expect(rpc).toHaveBeenNthCalledWith(2, "ensure_single_room_access");
+  });
+
+  it("converts a thrown profile RPC failure to the profile stage", async () => {
+    rpc.mockRejectedValueOnce(new Error("thrown raw profile"));
+
+    const result = await initializeAuthenticatedAccess({} as never);
+
+    expect(result).toEqual({ ok: false, stage: "profile" });
+    expect(JSON.stringify(result)).not.toContain("thrown raw profile");
+  });
+
+  it("converts a thrown room RPC failure to the room stage", async () => {
+    rpc
+      .mockResolvedValueOnce({ data: "profile-id", error: null })
+      .mockRejectedValueOnce(new Error("thrown raw room"));
+
+    const result = await initializeAuthenticatedAccess({} as never);
+
+    expect(result).toEqual({ ok: false, stage: "room" });
+    expect(JSON.stringify(result)).not.toContain("thrown raw room");
   });
 });
