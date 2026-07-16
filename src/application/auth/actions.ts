@@ -190,7 +190,7 @@ export async function updatePasswordAction(
     }
 
     try {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
     } catch {
       // The password change is authoritative; local cleanup is best effort.
     }

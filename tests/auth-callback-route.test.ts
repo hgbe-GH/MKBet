@@ -1,17 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-const { exchangeCodeForSession, getClaims, initializeAuthenticatedAccess } =
-  vi.hoisted(() => ({
-    exchangeCodeForSession: vi.fn(),
-    getClaims: vi.fn(),
-    initializeAuthenticatedAccess: vi.fn(),
-  }));
+const {
+  createServerSupabaseClient,
+  exchangeCodeForSession,
+  getClaims,
+  initializeAuthenticatedAccess,
+} = vi.hoisted(() => ({
+  createServerSupabaseClient: vi.fn(),
+  exchangeCodeForSession: vi.fn(),
+  getClaims: vi.fn(),
+  initializeAuthenticatedAccess: vi.fn(),
+}));
 
 vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(async () => ({
-    auth: { exchangeCodeForSession, getClaims },
-  })),
+  createServerSupabaseClient,
 }));
 
 vi.mock("@/application/auth/initialize-access", () => ({
@@ -26,6 +29,9 @@ describe("GET /auth/callback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    createServerSupabaseClient.mockResolvedValue({
+      auth: { exchangeCodeForSession, getClaims },
+    });
     exchangeCodeForSession.mockResolvedValue({ error: null });
     getClaims.mockResolvedValue({
       data: { claims: { amr: ["password"] } },
@@ -216,6 +222,53 @@ describe("GET /auth/callback", () => {
     expect(JSON.stringify(consoleError.mock.calls)).not.toMatch(
       /secret-code|sensitive provider detail|private|recovery/i,
     );
+    expect(getClaims).not.toHaveBeenCalled();
+  });
+
+  it("contains client creation exceptions as stable exchange failures", async () => {
+    createServerSupabaseClient.mockRejectedValue(
+      new Error("sensitive Supabase configuration detail"),
+    );
+
+    const response = await GET(
+      new NextRequest(
+        "https://mk-bet.vercel.app/auth/callback?code=secret-code&intent=recovery&next=%2Fprivate",
+      ),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://mk-bet.vercel.app/auth/error?reason=exchange",
+    );
+    expect(consoleError).toHaveBeenCalledWith("[auth.callback] failed", {
+      stage: "exchange",
+    });
+    expect(
+      `${response.headers.get("location")}${JSON.stringify(consoleError.mock.calls)}`,
+    ).not.toMatch(/secret-code|configuration detail|private|recovery/i);
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(getClaims).not.toHaveBeenCalled();
+  });
+
+  it("contains thrown code exchanges as stable exchange failures", async () => {
+    exchangeCodeForSession.mockRejectedValue(
+      new Error("sensitive exchange network detail"),
+    );
+
+    const response = await GET(
+      new NextRequest(
+        "https://mk-bet.vercel.app/auth/callback?code=secret-code&intent=signup&next=%2Fmarkets",
+      ),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://mk-bet.vercel.app/auth/error?reason=exchange",
+    );
+    expect(consoleError).toHaveBeenCalledWith("[auth.callback] failed", {
+      stage: "exchange",
+    });
+    expect(
+      `${response.headers.get("location")}${JSON.stringify(consoleError.mock.calls)}`,
+    ).not.toMatch(/secret-code|network detail|markets|signup/i);
     expect(getClaims).not.toHaveBeenCalled();
   });
 });

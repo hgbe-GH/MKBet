@@ -33,10 +33,15 @@ export async function GET(request: NextRequest) {
     return redirectToAuthError(request, "missing_code");
   }
 
-  const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  let supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  try {
+    supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+    if (error) {
+      return redirectToAuthError(request, "exchange");
+    }
+  } catch {
     return redirectToAuthError(request, "exchange");
   }
 

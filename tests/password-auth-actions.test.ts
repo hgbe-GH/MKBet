@@ -301,6 +301,7 @@ describe("password authentication actions", () => {
       ok: true,
       message: "Mot de passe modifié. Tu peux maintenant te connecter.",
     });
+    expect(signOut).toHaveBeenCalledWith({ scope: "local" });
   });
 
   it("keeps a successful password update successful when local sign-out cleanup fails", async () => {
@@ -315,6 +316,7 @@ describe("password authentication actions", () => {
       ok: true,
       message: "Mot de passe modifié. Tu peux maintenant te connecter.",
     });
+    expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(JSON.stringify(result)).not.toContain("sensitive cleanup detail");
   });
 
