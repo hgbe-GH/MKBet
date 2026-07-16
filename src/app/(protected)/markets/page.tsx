@@ -41,7 +41,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
             className="mt-1 min-h-11 w-full rounded-lg border border-[var(--border)] bg-white/[0.07] px-3 text-white"
             defaultValue={filters.q}
             name="q"
-            placeholder="bisou, statut..."
+            placeholder="bisou, statut…"
           />
         </label>
         <label className="text-sm font-bold">

@@ -26,7 +26,7 @@ export function AuthShell({
   const safeNext = sanitizeInternalRedirectPath(next);
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[#08080b] text-white">
+    <main className="mk-auth-shell relative min-h-dvh overflow-hidden bg-[#08080b] text-white">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-44 -left-40 hidden h-[32rem] w-[32rem] rounded-full bg-[var(--brand)]/18 blur-3xl lg:block"
@@ -43,7 +43,7 @@ export function AuthShell({
           <div className="flex items-center">
             <Link
               aria-label="Retour à l’accueil MK Bet"
-              className="inline-flex min-h-11 items-center border-l-4 border-[var(--brand)] pl-3 text-sm font-black tracking-[0.22em]"
+              className="mk-brand-link inline-flex min-h-11 items-center border-l-4 border-[var(--brand)] pl-3 text-sm font-black tracking-[0.22em]"
               href="/"
             >
               MKBET
@@ -81,6 +81,7 @@ export function AuthShell({
         <section className="flex items-start px-4 pb-5 sm:px-8 sm:pb-8 lg:min-h-dvh lg:items-center lg:px-8 lg:py-10 xl:px-12">
           <GlassSurface
             className="w-full rounded-2xl border-white/16 bg-[#111016]/88 p-2 shadow-[0_32px_90px_rgba(0,0,0,0.55)] sm:rounded-3xl sm:p-3"
+            data-motion="enter"
             variant="subtle"
           >
             {showModeNavigation ? (
@@ -97,7 +98,7 @@ export function AuthShell({
                     <Link
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "relative inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black transition-colors",
+                        "mk-auth-mode relative inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black",
                         isActive
                           ? "bg-white/10 text-white"
                           : "text-[var(--text-muted)] hover:bg-white/6 hover:text-white",

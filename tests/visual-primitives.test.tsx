@@ -57,5 +57,31 @@ describe("B3 visual primitives", () => {
       "data-surface",
       "opaque",
     );
+    expect(screen.getByText("Règle lisible")).toHaveClass("mk-fallback-opaque");
+  });
+
+  it.each(["subtle", "interactive"] as const)(
+    "keeps an opaque fallback on the %s glass surface",
+    (variant) => {
+      render(<GlassSurface variant={variant}>{variant}</GlassSurface>);
+      expect(screen.getByText(variant)).toHaveAttribute(
+        "data-surface",
+        variant,
+      );
+      expect(screen.getByText(variant)).toHaveClass("mk-fallback-opaque");
+    },
+  );
+
+  it("keeps filter links at touch-target size", () => {
+    render(
+      <SegmentedFilter
+        ariaLabel="Filtrer"
+        items={[{ href: "/direct", label: "À vérifier", active: true }]}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "À vérifier" })).toHaveClass(
+      "min-h-11",
+    );
   });
 });

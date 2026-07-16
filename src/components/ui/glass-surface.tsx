@@ -3,9 +3,9 @@ import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const surfaceClasses = {
-  subtle: "mk-glass-subtle",
-  interactive: "mk-glass-interactive",
-  opaque: "mk-surface-opaque",
+  subtle: "mk-glass-subtle mk-fallback-opaque",
+  interactive: "mk-glass-interactive mk-fallback-opaque",
+  opaque: "mk-surface-opaque mk-fallback-opaque",
 } as const;
 
 interface GlassSurfaceProps extends HTMLAttributes<HTMLElement> {

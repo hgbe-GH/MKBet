@@ -52,7 +52,7 @@ export function PasswordField({
           aria-describedby={describedBy}
           aria-invalid={invalid || undefined}
           autoComplete={autoComplete}
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 pr-14 text-base text-white outline-none transition-[border-color,box-shadow,background-color] placeholder:text-[var(--text-muted)] focus:border-[var(--brand-hover)] focus:bg-black/35 focus:ring-2 focus:ring-[var(--brand-muted)]"
+          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 pr-14 text-base text-white outline-none transition-[border-color,box-shadow,background-color] placeholder:text-[var(--text-muted)] focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
           id={id}
           maxLength={128}
           minLength={minLength}

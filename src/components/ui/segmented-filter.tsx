@@ -20,7 +20,10 @@ export function SegmentedFilter({
       {items.map((item) => (
         <Link
           aria-current={item.active ? "page" : undefined}
-          className={cn("mk-segment", item.active && "mk-segment-active")}
+          className={cn(
+            "mk-segment min-h-11",
+            item.active && "mk-segment-active",
+          )}
           href={item.href}
           key={item.href}
         >

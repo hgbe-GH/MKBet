@@ -48,8 +48,8 @@ export function CategoryTabs({
             aria-current={active ? "page" : undefined}
             className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm font-bold ${
               active
-                ? "border-[var(--brand)] bg-[var(--brand-muted)] text-[var(--brand-active)]"
-                : "border-[var(--border)] bg-white text-[var(--text-secondary)]"
+                ? "border-[var(--brand)] bg-[var(--brand-muted)] text-[var(--brand-hover)]"
+                : "border-[var(--border)] bg-white/[0.06] text-[var(--text-secondary)] hover:bg-white/[0.1] hover:text-white"
             }`}
             href={`/markets?${params.toString()}`}
             key={category.value}

@@ -7,6 +7,7 @@ Dernière mise à jour : 16 juillet 2026.
 - Les contrats et Server Actions Auth couvrent désormais connexion, inscription, demande de réinitialisation et changement de mot de passe avec normalisation Zod, redirections internes, initialisation idempotente de la salle et erreurs françaises génériques.
 - Le portail public `/login` réunit connexion et création de compte par mot de passe dans un shell responsive, sans exposer de donnée privée ni modifier les routes protégées.
 - Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur, conserve des erreurs génériques et ferme la session locale après modification.
+- La finition B3 centralise les durées de mouvement, limite les translations de survol aux pointeurs fins, neutralise les animations avec réduction de mouvement et fournit des surfaces graphite opaques sans transparence ni flou.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.

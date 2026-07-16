@@ -28,7 +28,7 @@ export function MobileBetSlip({
   }, [open]);
 
   return (
-    <div className="mk-glass-subtle fixed inset-x-3 bottom-20 z-30 overflow-hidden rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:bottom-4 xl:hidden">
+    <div className="mk-glass-subtle mk-fallback-opaque fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 overflow-hidden rounded-2xl shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:bottom-4 xl:hidden">
       <button
         aria-controls="mobile-bet-slip-panel"
         aria-expanded={open}
@@ -45,6 +45,7 @@ export function MobileBetSlip({
       {open ? (
         <div
           className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-[var(--border)]"
+          data-motion="ticket"
           id="mobile-bet-slip-panel"
         >
           <BetSlip balanceMkb={balanceMkb} seasonId={seasonId} />

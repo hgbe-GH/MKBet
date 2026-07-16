@@ -73,7 +73,7 @@ export function PasswordResetRequestForm({
           aria-describedby={errorId}
           aria-invalid={hasError || undefined}
           autoComplete="email"
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus:border-[var(--brand-hover)] focus:ring-2 focus:ring-[var(--brand-muted)]"
+          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus-visible:border-[var(--brand-hover)] focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
           id="password-reset-email"
           maxLength={320}
           name="email"
