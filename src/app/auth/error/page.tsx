@@ -4,8 +4,8 @@ export default function AuthErrorPage() {
   return (
     <StatusPage
       actionHref="/login"
-      actionLabel="Recevoir un nouveau lien"
-      description="Le lien d'accès n'a pas pu être validé. Aucun jeton n'a été conservé."
+      actionLabel="Revenir à la connexion"
+      description="La demande d’authentification n’a pas pu être validée. Recommence depuis la connexion."
       eyebrow="Connexion"
       title="Accès refusé"
     />

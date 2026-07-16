@@ -48,6 +48,7 @@ import {
   type AuthFormState,
 } from "@/application/auth/actions";
 import { initializeAuthenticatedAccess } from "@/application/auth/initialize-access";
+import { hasRecoveryAuthenticationMethod } from "@/application/auth/recovery-claims";
 
 const initialState: AuthFormState = {
   ok: false,
@@ -292,10 +293,29 @@ describe("password authentication actions", () => {
     expect(getClaims.mock.invocationCallOrder[0]).toBeLessThan(
       updateUser.mock.invocationCallOrder[0],
     );
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(updateUser.mock.invocationCallOrder[0]).toBeLessThan(
+      signOut.mock.invocationCallOrder[0],
+    );
     expect(result).toEqual({
       ok: true,
       message: "Mot de passe modifié. Tu peux maintenant te connecter.",
     });
+  });
+
+  it("keeps a successful password update successful when local sign-out cleanup fails", async () => {
+    signOut.mockRejectedValue(new Error("sensitive cleanup detail"));
+
+    const result = await updatePasswordAction(
+      initialState,
+      validPasswordUpdateData(),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      message: "Mot de passe modifié. Tu peux maintenant te connecter.",
+    });
+    expect(JSON.stringify(result)).not.toContain("sensitive cleanup detail");
   });
 
   it("accepts a recovery AMR represented as a string", async () => {
@@ -431,6 +451,30 @@ describe("password authentication actions", () => {
       );
     },
   );
+});
+
+describe("hasRecoveryAuthenticationMethod", () => {
+  it.each([
+    [{ amr: ["recovery"] }],
+    [{ amr: [{ method: "recovery" }] }],
+    [{ amr: ["password", { method: "recovery" }] }],
+  ])("accepts a valid recovery AMR %#", (claims) => {
+    expect(hasRecoveryAuthenticationMethod(claims)).toBe(true);
+  });
+
+  it.each([
+    null,
+    undefined,
+    {},
+    { amr: "recovery" },
+    { amr: [] },
+    { amr: ["password"] },
+    { amr: [{ method: "password" }] },
+    { amr: [null, "recovery"] },
+    { amr: [{ method: 42 }, "recovery"] },
+  ])("fails closed for missing, ordinary, or malformed claims %#", (claims) => {
+    expect(hasRecoveryAuthenticationMethod(claims)).toBe(false);
+  });
 });
 
 describe("initializeAuthenticatedAccess", () => {

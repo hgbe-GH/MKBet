@@ -1,9 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
 
 import { mapAuthErrorToMessage } from "@/application/auth";
+import { hasRecoveryAuthenticationMethod } from "@/application/auth/recovery-claims";
 import {
   passwordResetRequestSchema,
   passwordUpdateSchema,
@@ -29,19 +29,6 @@ const RESET_REQUEST_SUCCESS =
   "Si un compte correspond à cette adresse, un e-mail de récupération vient d'être envoyé.";
 const PASSWORD_UPDATE_SUCCESS =
   "Mot de passe modifié. Tu peux maintenant te connecter.";
-
-const recoveryClaimsSchema = z.object({
-  amr: z.array(
-    z
-      .union([
-        z.string(),
-        z.object({
-          method: z.string(),
-        }),
-      ])
-      .transform((entry) => (typeof entry === "string" ? entry : entry.method)),
-  ),
-});
 
 function failure(code: AuthErrorCode): AuthFormState {
   return {
@@ -190,13 +177,8 @@ export async function updatePasswordAction(
   try {
     const supabase = await createServerSupabaseClient();
     const { data, error: claimsError } = await supabase.auth.getClaims();
-    const parsedClaims = recoveryClaimsSchema.safeParse(data?.claims);
 
-    if (
-      claimsError ||
-      !parsedClaims.success ||
-      !parsedClaims.data.amr.some((method) => method === "recovery")
-    ) {
+    if (claimsError || !hasRecoveryAuthenticationMethod(data?.claims)) {
       return failure("AUTH_INVALID_SESSION");
     }
 
@@ -205,6 +187,12 @@ export async function updatePasswordAction(
     });
     if (error) {
       return failure("AUTH_PASSWORD_UPDATE_FAILED");
+    }
+
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // The password change is authoritative; local cleanup is best effort.
     }
 
     return { ok: true, message: PASSWORD_UPDATE_SUCCESS };

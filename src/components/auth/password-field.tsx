@@ -1,13 +1,14 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, type Ref } from "react";
 
 interface PasswordFieldProps {
   autoComplete: string;
   describedBy?: string;
   id: string;
   invalid?: boolean;
+  inputRef?: Ref<HTMLInputElement>;
   label: string;
   minLength?: number;
   name: string;
@@ -20,6 +21,7 @@ export function PasswordField({
   describedBy,
   id,
   invalid = false,
+  inputRef,
   label,
   minLength,
   name,
@@ -55,6 +57,7 @@ export function PasswordField({
           maxLength={128}
           minLength={minLength}
           name={name}
+          ref={inputRef}
           required={required}
           spellCheck={false}
           type={isVisible ? "text" : "password"}
