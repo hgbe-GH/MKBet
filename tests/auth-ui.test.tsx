@@ -153,7 +153,7 @@ describe("auth UI", () => {
 
     await screen.findByText("Connexion impossible.");
     expect(email).toHaveValue("safe@example.test");
-    expect(email).toHaveFocus();
+    await waitFor(() => expect(email).toHaveFocus());
     expect(email).toHaveAttribute("aria-invalid", "true");
     expect(email).toHaveAttribute("aria-describedby", "sign-in-error");
     expect(password).toHaveAttribute("aria-invalid", "true");
@@ -184,7 +184,7 @@ describe("auth UI", () => {
     await screen.findByText("Création impossible.");
     expect(displayName).toHaveValue("Joueur Sûr");
     expect(email).toHaveValue("safe@example.test");
-    expect(displayName).toHaveFocus();
+    await waitFor(() => expect(displayName).toHaveFocus());
     for (const input of [displayName, email, password, confirmation]) {
       expect(input).toHaveAttribute("aria-invalid", "true");
       expect(input).toHaveAttribute("aria-describedby", "sign-up-error");

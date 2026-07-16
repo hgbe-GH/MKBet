@@ -9,6 +9,7 @@ import type { BetQuoteResult } from "@/application/betting/types";
 import { BetSlipSelectionItem } from "@/components/sportsbook/bet-slip-selection";
 import { useBetSlip } from "@/components/sportsbook/bet-slip-context";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function remainingSeconds(expiresAt: string): number {
   return Math.max(0, Math.ceil((Date.parse(expiresAt) - Date.now()) / 1000));
@@ -17,9 +18,11 @@ function remainingSeconds(expiresAt: string): number {
 export function BetSlip({
   balanceMkb,
   seasonId,
+  surface = "interactive",
 }: {
   balanceMkb: number;
   seasonId: string;
+  surface?: "interactive" | "opaque";
 }) {
   const betSlip = useBetSlip();
   const [stake, setStake] = useState("10");
@@ -112,7 +115,12 @@ export function BetSlip({
   return (
     <aside
       aria-label="Ticket de pari"
-      className="mk-glass-interactive mk-fallback-opaque rounded-2xl p-4"
+      className={cn(
+        "rounded-2xl p-4",
+        surface === "interactive"
+          ? "mk-glass-interactive mk-fallback-opaque"
+          : "mk-surface-opaque",
+      )}
       data-ticket-step={ticketStep}
     >
       <div className="flex items-center justify-between gap-3">

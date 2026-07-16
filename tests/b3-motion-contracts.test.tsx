@@ -294,4 +294,39 @@ describe("B3 motion contracts", () => {
       screen.getByRole("link", { name: "Créer un compte" }),
     ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
   });
+
+  it("remounts only the bounded auth content when the URL mode changes", () => {
+    const { rerender } = render(
+      <AuthShell mode="login">
+        <p>Contenu connexion</p>
+      </AuthShell>,
+    );
+    const loginContent = screen
+      .getByText("Contenu connexion")
+      .closest('[data-motion="auth-content"]');
+    const indicator = document.querySelector(".mk-auth-mode-indicator");
+
+    expect(loginContent).toHaveClass("mk-auth-mode-content");
+    expect(styles).toMatch(
+      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*39rem/,
+    );
+    expect(styles).toMatch(
+      /@media\s*\(min-width:\s*640px\)[\s\S]*?\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*34rem/,
+    );
+
+    rerender(
+      <AuthShell mode="register">
+        <p>Contenu inscription</p>
+      </AuthShell>,
+    );
+
+    const registerContent = screen
+      .getByText("Contenu inscription")
+      .closest('[data-motion="auth-content"]');
+    expect(registerContent).not.toBe(loginContent);
+    expect(document.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+    expect(
+      screen.getByRole("navigation", { name: "Choisir le mode d’accès" }),
+    ).toHaveAttribute("data-auth-mode", "register");
+  });
 });

@@ -114,7 +114,14 @@ export function AuthShell({
               </nav>
             ) : null}
 
-            <div className="p-5 sm:p-7 lg:p-8" data-motion="auth-content">
+            <div
+              className={cn(
+                "p-5 sm:p-7 lg:p-8",
+                showModeNavigation && "mk-auth-mode-content",
+              )}
+              data-motion={showModeNavigation ? "auth-content" : undefined}
+              key={showModeNavigation ? mode : "single"}
+            >
               {children}
             </div>
           </GlassSurface>

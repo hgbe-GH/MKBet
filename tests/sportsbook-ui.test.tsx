@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { MarketCard } from "@/components/sportsbook/market-card";
+import { MobileBetSlip } from "@/components/sportsbook/mobile-bet-slip";
 import { OddsButton } from "@/components/sportsbook/odds-button";
 import { RechuteMeter } from "@/components/sportsbook/rechute-meter";
 import { SeasonSwitcher } from "@/components/sportsbook/season-switcher";
@@ -105,6 +106,21 @@ describe("sportsbook UI components", () => {
     const stake = screen.getByLabelText("Mise en MKB");
     fireEvent.change(stake, { target: { value: "3" } });
     expect(screen.getByText("Mise minimale : 5 MKB.")).toBeInTheDocument();
+  });
+
+  it("uses one opaque ticket surface inside the position-only mobile wrapper", () => {
+    const { container } = render(
+      <BetSlipProvider>
+        <MobileBetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+      </BetSlipProvider>,
+    );
+
+    expect(container.firstElementChild).not.toHaveClass("mk-glass-interactive");
+    fireEvent.click(screen.getByRole("button", { name: /^Ouvrir le ticket/ }));
+    expect(
+      screen.getByRole("complementary", { name: "Ticket de pari" }),
+    ).toHaveClass("mk-surface-opaque");
+    expect(container.querySelectorAll(".mk-glass-interactive")).toHaveLength(0);
   });
 
   it("renders season context, roles and no admin link for regular players", () => {
