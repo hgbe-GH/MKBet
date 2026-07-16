@@ -145,9 +145,6 @@ export async function signUpWithPasswordAction(
   }
 }
 
-/** @deprecated Removed with LoginForm in Task 3. */
-export const requestLoginLink = signUpWithPasswordAction;
-
 export async function requestPasswordResetAction(
   _previousState: AuthFormState,
   formData: FormData,

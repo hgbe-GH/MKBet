@@ -30,20 +30,20 @@ test("home exposes brand, metadata, favicon and responsive public content", asyn
   await expectNoSeriousAxeViolations(page);
 });
 
-test("login is keyboard accessible and keeps responses non-enumerating", async ({
+test("login is keyboard accessible and exposes password authentication", async ({
   page,
 }) => {
   await page.goto("/login");
   await expect(
-    page.getByRole("heading", { name: "Rejoindre Margot × Kévin" }),
+    page.getByRole("heading", { name: "Bon retour dans la salle" }),
   ).toBeVisible();
-  const email = page.getByLabel("Email");
+  const email = page.getByLabel("Adresse e-mail");
   await email.focus();
   await expect(email).toBeFocused();
   await expect(email).toHaveCSS("min-height", "48px");
-  await expect(page.getByLabel("Nom d’affichage")).toBeVisible();
+  await expect(page.getByLabel("Mot de passe")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "RECEVOIR MON LIEN D’ACCÈS" }),
+    page.getByRole("button", { name: "SE CONNECTER" }),
   ).toBeVisible();
   await expectNoHorizontalOverflow(page);
   await expectNoSeriousAxeViolations(page);
