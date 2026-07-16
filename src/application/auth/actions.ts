@@ -32,9 +32,14 @@ const PASSWORD_UPDATE_SUCCESS =
 
 const recoveryClaimsSchema = z.object({
   amr: z.array(
-    z.object({
-      method: z.string(),
-    }),
+    z
+      .union([
+        z.string(),
+        z.object({
+          method: z.string(),
+        }),
+      ])
+      .transform((entry) => (typeof entry === "string" ? entry : entry.method)),
   ),
 });
 
@@ -193,7 +198,7 @@ export async function updatePasswordAction(
     if (
       claimsError ||
       !parsedClaims.success ||
-      !parsedClaims.data.amr.some(({ method }) => method === "recovery")
+      !parsedClaims.data.amr.some((method) => method === "recovery")
     ) {
       return failure("AUTH_INVALID_SESSION");
     }

@@ -298,6 +298,26 @@ describe("password authentication actions", () => {
     });
   });
 
+  it("accepts a recovery AMR represented as a string", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { amr: ["recovery"] } },
+      error: null,
+    });
+
+    const result = await updatePasswordAction(
+      initialState,
+      validPasswordUpdateData(),
+    );
+
+    expect(updateUser).toHaveBeenCalledWith({
+      password: "nouveau-mot-de-passe",
+    });
+    expect(result).toEqual({
+      ok: true,
+      message: "Mot de passe modifié. Tu peux maintenant te connecter.",
+    });
+  });
+
   it("rejects an ordinary password session for a recovery update", async () => {
     getClaims.mockResolvedValue({
       data: { claims: { amr: [{ method: "password" }] } },
