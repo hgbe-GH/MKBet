@@ -72,21 +72,6 @@ export const passwordUpdateSchema = z
     path: ["passwordConfirmation"],
   });
 
-/** @deprecated Removed in the password actions task. */
-export const loginFormSchema = z.object({
-  email: emailSchema,
-  displayName: z
-    .preprocess((value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-      const normalized = normalizeSpaces(value);
-      return normalized.length > 0 ? normalized : null;
-    }, z.string().min(2).max(80).nullable())
-    .default(null),
-  next: safeNextSchema,
-});
-
 export const seasonFormSchema = z.object({
   title: z.string().transform(normalizeSpaces).pipe(z.string().min(2).max(120)),
   description: optionalText,
@@ -147,8 +132,6 @@ export type PasswordResetRequestInput = z.infer<
   typeof passwordResetRequestSchema
 >;
 export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>;
-/** @deprecated Removed in the password actions task. */
-export type LoginFormInput = z.infer<typeof loginFormSchema>;
 export type SeasonFormInput = z.infer<typeof seasonFormSchema>;
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;
