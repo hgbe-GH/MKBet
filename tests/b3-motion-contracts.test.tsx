@@ -38,6 +38,38 @@ const marketsPage = readFileSync(
   join(process.cwd(), "src/app/(protected)/markets/page.tsx"),
   "utf8",
 );
+const buttonSource = readFileSync(
+  join(process.cwd(), "src/components/ui/button.tsx"),
+  "utf8",
+);
+const mobileBetSlip = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/mobile-bet-slip.tsx"),
+  "utf8",
+);
+const eventReportForm = readFileSync(
+  join(process.cwd(), "src/components/events/event-report-form.tsx"),
+  "utf8",
+);
+
+function relativeLuminance(hex: string): number {
+  const channels = hex
+    .match(/.{2}/g)
+    ?.map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) =>
+      channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
+    );
+  if (!channels || channels.length !== 3) throw new Error("Invalid hex color");
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+}
+
+function contrastRatio(first: string, second: string): number {
+  const firstLuminance = relativeLuminance(first);
+  const secondLuminance = relativeLuminance(second);
+  return (
+    (Math.max(firstLuminance, secondLuminance) + 0.05) /
+    (Math.min(firstLuminance, secondLuminance) + 0.05)
+  );
+}
 
 describe("B3 motion contracts", () => {
   it("marks bounded page, interaction, ticket and URL filter states", () => {
@@ -138,5 +170,33 @@ describe("B3 motion contracts", () => {
   it("uses a typographic ellipsis in the market search hint", () => {
     expect(marketsPage).not.toContain('placeholder="bisou, statut..."');
     expect(marketsPage).toContain('placeholder="bisou, statut…"');
+  });
+
+  it("keeps brand control text AA across normal, hover and active states", () => {
+    const token = (name: string) =>
+      styles.match(new RegExp(`--${name}:\\s*#([0-9a-f]{6})`, "i"))?.[1];
+    const onBrand = token("on-brand");
+
+    expect(onBrand).toBeDefined();
+    for (const state of ["brand", "brand-hover", "brand-active"]) {
+      const background = token(state);
+      expect(background).toBeDefined();
+      expect(
+        contrastRatio(onBrand ?? "000000", background ?? "ffffff"),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("uses the on-brand token on every bright raspberry control", () => {
+    expect(styles).toMatch(
+      /\.mk-primary-action\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
+    );
+    expect(styles).toMatch(
+      /\.mk-segment-active\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
+    );
+    expect(buttonSource).toContain("text-[var(--on-brand)]");
+    expect(voteControls).toContain("text-[var(--on-brand)]");
+    expect(mobileBetSlip).toContain("text-[var(--on-brand)]");
+    expect(eventReportForm).toContain("file:text-[var(--on-brand)]");
   });
 });

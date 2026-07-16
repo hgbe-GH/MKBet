@@ -144,7 +144,7 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
         </label>
         <input
           accept="image/jpeg,image/png,image/webp"
-          className="min-h-12 rounded-lg border border-dashed border-[var(--border-strong)] bg-white/[0.05] p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand)] file:px-3 file:py-2 file:font-bold file:text-white"
+          className="min-h-12 rounded-lg border border-dashed border-[var(--border-strong)] bg-white/[0.05] p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand)] file:px-3 file:py-2 file:font-bold file:text-[var(--on-brand)]"
           id="report-files"
           multiple
           name="files"

@@ -38,7 +38,7 @@ export function MobileBetSlip({
         type="button"
       >
         <span>{open ? "Fermer le ticket" : "Ouvrir le ticket"}</span>
-        <span className="rounded-md bg-[var(--brand)] px-2 py-1 text-xs text-white tabular-nums">
+        <span className="rounded-md bg-[var(--brand)] px-2 py-1 text-xs text-[var(--on-brand)] tabular-nums">
           {betSlip.selections.length}
         </span>
       </button>
