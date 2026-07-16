@@ -308,10 +308,10 @@ describe("B3 motion contracts", () => {
 
     expect(loginContent).toHaveClass("mk-auth-mode-content");
     expect(styles).toMatch(
-      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*39rem/,
+      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*40rem/,
     );
-    expect(styles).toMatch(
-      /@media\s*\(min-width:\s*640px\)[\s\S]*?\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*34rem/,
+    expect(styles).not.toMatch(
+      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*34rem/,
     );
 
     rerender(

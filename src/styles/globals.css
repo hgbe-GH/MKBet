@@ -352,13 +352,7 @@ a {
 }
 
 .mk-auth-mode-content {
-  min-block-size: 39rem;
-}
-
-@media (min-width: 640px) {
-  .mk-auth-mode-content {
-    min-block-size: 34rem;
-  }
+  min-block-size: 40rem;
 }
 
 @keyframes mk-auth-content {

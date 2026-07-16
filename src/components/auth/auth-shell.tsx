@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { sanitizeInternalRedirectPath } from "@/application/auth";
+import { AuthModeSwitcher } from "@/components/auth/auth-mode-switcher";
 import { GlassSurface } from "@/components/ui/glass-surface";
 import { cn } from "@/lib/utils";
 
@@ -10,11 +11,6 @@ interface AuthShellProps {
   mode?: "login" | "register";
   next?: string;
   showModeNavigation?: boolean;
-}
-
-function modeHref(mode: "login" | "register", next: string): string {
-  const modeQuery = mode === "register" ? "mode=register&" : "";
-  return `/login?${modeQuery}next=${encodeURIComponent(next)}`;
 }
 
 export function AuthShell({
@@ -84,34 +80,7 @@ export function AuthShell({
             variant="opaque"
           >
             {showModeNavigation ? (
-              <nav
-                aria-label="Choisir le mode d’accès"
-                className="relative grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/25 p-1"
-                data-auth-mode={mode}
-              >
-                <span aria-hidden="true" className="mk-auth-mode-indicator" />
-                {(["login", "register"] as const).map((itemMode) => {
-                  const isActive = itemMode === mode;
-                  const label =
-                    itemMode === "login" ? "Connexion" : "Créer un compte";
-
-                  return (
-                    <Link
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "mk-auth-mode relative z-10 inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black",
-                        isActive
-                          ? "text-white"
-                          : "text-[var(--text-muted)] hover:bg-white/6 hover:text-white",
-                      )}
-                      href={modeHref(itemMode, safeNext)}
-                      key={itemMode}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
-              </nav>
+              <AuthModeSwitcher mode={mode} next={safeNext} />
             ) : null}
 
             <div

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { AuthFormState } from "@/application/auth/actions";
 import { parseAuthMode } from "@/app/login/page";
 import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthModeSwitcher } from "@/components/auth/auth-mode-switcher";
 import { PasswordField } from "@/components/auth/password-field";
 import { SignInForm } from "@/components/auth/sign-in-form";
 import { SignUpForm } from "@/components/auth/sign-up-form";
@@ -11,6 +12,39 @@ import { InvitationPanel } from "@/components/invitations/invitation-panel";
 import { SeasonSelector } from "@/components/seasons/season-selector";
 
 describe("auth UI", () => {
+  it("moves the shared mode indicator optimistically and syncs URL props", async () => {
+    const { rerender } = render(
+      <AuthModeSwitcher mode="login" next="/markets" />,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    const indicator = navigation.querySelector(".mk-auth-mode-indicator");
+    const registerLink = screen.getByRole("link", {
+      name: "Créer un compte",
+    });
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(registerLink).toHaveAttribute(
+      "href",
+      "/login?mode=register&next=%2Fmarkets",
+    );
+    registerLink.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+    fireEvent.click(registerLink);
+    expect(navigation).toHaveAttribute("data-auth-mode", "register");
+    expect(registerLink).toHaveAttribute("aria-current", "page");
+
+    rerender(<AuthModeSwitcher mode="register" next="/markets" />);
+    expect(navigation.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+
+    rerender(<AuthModeSwitcher mode="login" next="/markets" />);
+    await waitFor(() =>
+      expect(navigation).toHaveAttribute("data-auth-mode", "login"),
+    );
+  });
+
   it("renders the password sign-in controls without magic-link copy", () => {
     render(<SignInForm next="/direct" />);
 
