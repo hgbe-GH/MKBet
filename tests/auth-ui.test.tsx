@@ -22,6 +22,14 @@ describe("auth UI", () => {
       "type",
       "email",
     );
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "maxlength",
+      "320",
+    );
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "spellcheck",
+      "false",
+    );
     expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
       "type",
       "password",
@@ -44,6 +52,10 @@ describe("auth UI", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Nouveau joueur")).toHaveClass("mk-kicker");
     expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
+    expect(screen.getByLabelText("Nom d’affichage")).toHaveAttribute(
+      "maxlength",
+      "80",
+    );
     expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
       "type",
       "email",
@@ -55,6 +67,10 @@ describe("auth UI", () => {
     expect(screen.getByLabelText("Confirmer le mot de passe")).toHaveAttribute(
       "minlength",
       "10",
+    );
+    expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
+      "maxlength",
+      "128",
     );
     expect(
       screen.getByRole("button", { name: "CRÉER MON COMPTE" }),
@@ -78,6 +94,9 @@ describe("auth UI", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Afficher le mot de passe" }),
     );
+    expect(
+      screen.getByRole("button", { name: "Masquer le mot de passe" }),
+    ).toHaveAttribute("aria-controls", "member-password");
     expect(input).toHaveAttribute("type", "text");
     expect(
       screen.getByRole("button", { name: "Masquer le mot de passe" }),
@@ -87,6 +106,92 @@ describe("auth UI", () => {
       screen.getByRole("button", { name: "Masquer le mot de passe" }),
     );
     expect(input).toHaveAttribute("type", "password");
+  });
+
+  it("exposes independent password toggles throughout sign-up", () => {
+    render(<SignUpForm next="/direct" />);
+
+    const password = screen.getByLabelText("Mot de passe");
+    const confirmation = screen.getByLabelText("Confirmer le mot de passe");
+    const showPassword = screen.getByRole("button", {
+      name: "Afficher le mot de passe",
+    });
+    const showConfirmation = screen.getByRole("button", {
+      name: "Afficher la confirmation du mot de passe",
+    });
+
+    expect(showPassword).toHaveAttribute("aria-controls", "sign-up-password");
+    expect(showConfirmation).toHaveAttribute(
+      "aria-controls",
+      "sign-up-password-confirmation",
+    );
+
+    fireEvent.click(showConfirmation);
+    expect(confirmation).toHaveAttribute("type", "text");
+    expect(password).toHaveAttribute("type", "password");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Masquer la confirmation du mot de passe",
+      }),
+    );
+    expect(confirmation).toHaveAttribute("type", "password");
+  });
+
+  it("preserves sign-in email and associates the generic failure", async () => {
+    const failureAction = async (): Promise<AuthFormState> => ({
+      ok: false,
+      code: "AUTH_INVALID_CREDENTIALS",
+      message: "Connexion impossible.",
+    });
+    render(<SignInForm action={failureAction} next="/direct" />);
+
+    const email = screen.getByLabelText("Adresse e-mail");
+    const password = screen.getByLabelText("Mot de passe");
+    fireEvent.change(email, { target: { value: "safe@example.test" } });
+    fireEvent.change(password, { target: { value: "password-value" } });
+    fireEvent.submit(email.closest("form") as HTMLFormElement);
+
+    await screen.findByText("Connexion impossible.");
+    expect(email).toHaveValue("safe@example.test");
+    expect(email).toHaveFocus();
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-describedby", "sign-in-error");
+    expect(password).toHaveAttribute("aria-invalid", "true");
+    expect(password).toHaveAttribute("aria-describedby", "sign-in-error");
+    expect(document.getElementById("sign-in-error")).toHaveTextContent(
+      "Connexion impossible.",
+    );
+  });
+
+  it("preserves sign-up identity fields and focuses the first failure", async () => {
+    const failureAction = async (): Promise<AuthFormState> => ({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
+      message: "Création impossible.",
+    });
+    render(<SignUpForm action={failureAction} next="/direct" />);
+
+    const displayName = screen.getByLabelText("Nom d’affichage");
+    const email = screen.getByLabelText("Adresse e-mail");
+    const password = screen.getByLabelText("Mot de passe");
+    const confirmation = screen.getByLabelText("Confirmer le mot de passe");
+    fireEvent.change(displayName, { target: { value: "Joueur Sûr" } });
+    fireEvent.change(email, { target: { value: "safe@example.test" } });
+    fireEvent.change(password, { target: { value: "password-value" } });
+    fireEvent.change(confirmation, { target: { value: "password-value" } });
+    fireEvent.submit(email.closest("form") as HTMLFormElement);
+
+    await screen.findByText("Création impossible.");
+    expect(displayName).toHaveValue("Joueur Sûr");
+    expect(email).toHaveValue("safe@example.test");
+    expect(displayName).toHaveFocus();
+    for (const input of [displayName, email, password, confirmation]) {
+      expect(input).toHaveAttribute("aria-invalid", "true");
+      expect(input).toHaveAttribute("aria-describedby", "sign-up-error");
+    }
+    expect(document.getElementById("sign-up-error")).toHaveTextContent(
+      "Création impossible.",
+    );
   });
 
   it("replaces sign-up fields with a generic confirmation notice", async () => {
@@ -124,6 +229,7 @@ describe("auth UI", () => {
 
     const button = await screen.findByRole("button", { name: "SE CONNECTER" });
     await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    expect(button).toBeDisabled();
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();
@@ -152,6 +258,7 @@ describe("auth UI", () => {
       name: "CRÉER MON COMPTE",
     });
     await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    expect(button).toBeDisabled();
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();
@@ -172,7 +279,12 @@ describe("auth UI", () => {
     );
 
     expect(screen.getByRole("main")).toBeInTheDocument();
-    expect(screen.getByText("MKBET")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+    ).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+    ).toHaveTextContent("MKBET");
     expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
     expect(screen.getByText("1 000 MKB fictifs")).toBeInTheDocument();
     expect(screen.getByText("Deux votes concordants")).toBeInTheDocument();

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, LoaderCircle } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { AuthFormState } from "@/application/auth/actions";
 import { PasswordField } from "@/components/auth/password-field";
@@ -30,6 +30,16 @@ async function inertAction(): Promise<AuthFormState> {
 
 export function SignInForm({ action = inertAction, next }: SignInFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [email, setEmail] = useState("");
+  const emailRef = useRef<HTMLInputElement>(null);
+  const hasError = !state.ok;
+  const errorId = hasError ? "sign-in-error" : undefined;
+
+  useEffect(() => {
+    if (hasError) {
+      emailRef.current?.focus();
+    }
+  }, [hasError, state]);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -52,18 +62,27 @@ export function SignInForm({ action = inertAction, next }: SignInFormProps) {
           Adresse e-mail
         </label>
         <input
+          aria-describedby={errorId}
+          aria-invalid={hasError || undefined}
           autoComplete="email"
           className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none transition-[border-color,box-shadow,background-color] focus:border-[var(--brand-hover)] focus:bg-black/35 focus:ring-2 focus:ring-[var(--brand-muted)]"
           id="sign-in-email"
+          maxLength={320}
           name="email"
+          onChange={(event) => setEmail(event.target.value)}
+          ref={emailRef}
           required
+          spellCheck={false}
           type="email"
+          value={email}
         />
       </div>
 
       <PasswordField
         autoComplete="current-password"
+        describedBy={errorId}
         id="sign-in-password"
+        invalid={hasError}
         label="Mot de passe"
         name="password"
         required
@@ -79,9 +98,11 @@ export function SignInForm({ action = inertAction, next }: SignInFormProps) {
       </div>
 
       {state.message ? (
-        <InlineNotice tone={state.ok ? "success" : "error"}>
-          {state.message}
-        </InlineNotice>
+        <div id={errorId}>
+          <InlineNotice tone={state.ok ? "success" : "error"}>
+            {state.message}
+          </InlineNotice>
+        </div>
       ) : null}
 
       <Button

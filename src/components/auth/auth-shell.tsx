@@ -41,9 +41,13 @@ export function AuthShell({
       <div className="relative mx-auto grid min-h-dvh w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(24rem,0.75fr)]">
         <section className="flex flex-col gap-6 px-5 pt-7 pb-5 sm:px-8 lg:min-h-dvh lg:justify-between lg:px-14 lg:py-12 xl:px-20 xl:py-16">
           <div className="flex items-center">
-            <span className="inline-flex min-h-11 items-center border-l-4 border-[var(--brand)] pl-3 text-sm font-black tracking-[0.22em]">
+            <Link
+              aria-label="Retour à l’accueil MK Bet"
+              className="inline-flex min-h-11 items-center border-l-4 border-[var(--brand)] pl-3 text-sm font-black tracking-[0.22em]"
+              href="/"
+            >
               MKBET
-            </span>
+            </Link>
           </div>
 
           <p className="text-2xl leading-none font-black tracking-[-0.045em] text-white lg:max-w-[8ch] lg:text-[clamp(4.5rem,8vw,8rem)] lg:leading-[0.86] lg:tracking-[-0.075em]">

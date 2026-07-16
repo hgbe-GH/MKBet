@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, LoaderCircle } from "lucide-react";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { AuthFormState } from "@/application/auth/actions";
 import { PasswordField } from "@/components/auth/password-field";
@@ -29,6 +29,17 @@ async function inertAction(): Promise<AuthFormState> {
 
 export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const displayNameRef = useRef<HTMLInputElement>(null);
+  const hasError = !state.ok;
+  const errorId = hasError ? "sign-up-error" : undefined;
+
+  useEffect(() => {
+    if (hasError) {
+      displayNameRef.current?.focus();
+    }
+  }, [hasError, state]);
 
   if (state.ok && state.message) {
     return (
@@ -67,12 +78,19 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
           Nom d’affichage
         </label>
         <input
+          aria-describedby={errorId}
+          aria-invalid={hasError || undefined}
           autoComplete="nickname"
           className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none transition-[border-color,box-shadow,background-color] focus:border-[var(--brand-hover)] focus:bg-black/35 focus:ring-2 focus:ring-[var(--brand-muted)]"
           id="sign-up-display-name"
+          maxLength={80}
           name="displayName"
+          onChange={(event) => setDisplayName(event.target.value)}
+          ref={displayNameRef}
           required
+          spellCheck={false}
           type="text"
+          value={displayName}
         />
       </div>
 
@@ -84,18 +102,26 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
           Adresse e-mail
         </label>
         <input
+          aria-describedby={errorId}
+          aria-invalid={hasError || undefined}
           autoComplete="email"
           className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none transition-[border-color,box-shadow,background-color] focus:border-[var(--brand-hover)] focus:bg-black/35 focus:ring-2 focus:ring-[var(--brand-muted)]"
           id="sign-up-email"
+          maxLength={320}
           name="email"
+          onChange={(event) => setEmail(event.target.value)}
           required
+          spellCheck={false}
           type="email"
+          value={email}
         />
       </div>
 
       <PasswordField
         autoComplete="new-password"
+        describedBy={errorId}
         id="sign-up-password"
+        invalid={hasError}
         label="Mot de passe"
         minLength={10}
         name="password"
@@ -103,15 +129,20 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
       />
       <PasswordField
         autoComplete="new-password"
+        describedBy={errorId}
         id="sign-up-password-confirmation"
+        invalid={hasError}
         label="Confirmer le mot de passe"
         minLength={10}
         name="passwordConfirmation"
         required
+        visibilityContext="confirmation"
       />
 
       {state.message ? (
-        <InlineNotice tone="error">{state.message}</InlineNotice>
+        <div id={errorId}>
+          <InlineNotice tone="error">{state.message}</InlineNotice>
+        </div>
       ) : null}
 
       <Button
