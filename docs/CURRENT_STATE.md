@@ -1,9 +1,10 @@
 # État actuel
 
-Dernière mise à jour : 15 juillet 2026.
+Dernière mise à jour : 16 juillet 2026.
 
 ## Produit réel
 
+- Les contrats Auth couvrent désormais connexion, inscription, demande de réinitialisation et changement de mot de passe avec normalisation Zod, redirections internes et erreurs françaises génériques.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.

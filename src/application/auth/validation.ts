@@ -16,13 +16,65 @@ const optionalText = z
   }, z.string().min(1).max(500).nullable())
   .default(null);
 
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Adresse email invalide")
+  .max(320);
+
+const passwordSchema = z
+  .string()
+  .min(10, "Le mot de passe doit contenir au moins 10 caractères")
+  .max(128);
+
+const safeNextSchema = z
+  .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())
+  .default("/direct");
+
+export const signInFormSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1).max(128),
+  next: safeNextSchema,
+});
+
+export const signUpFormSchema = z
+  .object({
+    email: emailSchema,
+    displayName: z
+      .string()
+      .transform(normalizeSpaces)
+      .pipe(z.string().min(2).max(80))
+      .refine(
+        (value) => !/[<>]/.test(value),
+        "Le nom ne peut pas contenir HTML",
+      ),
+    password: passwordSchema,
+    passwordConfirmation: passwordSchema,
+    next: safeNextSchema,
+  })
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["passwordConfirmation"],
+  });
+
+export const passwordResetRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const passwordUpdateSchema = z
+  .object({
+    password: passwordSchema,
+    passwordConfirmation: passwordSchema,
+  })
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["passwordConfirmation"],
+  });
+
+/** @deprecated Removed in the password actions task. */
 export const loginFormSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email("Adresse email invalide")
-    .max(320),
+  email: emailSchema,
   displayName: z
     .preprocess((value) => {
       if (typeof value !== "string") {
@@ -32,9 +84,7 @@ export const loginFormSchema = z.object({
       return normalized.length > 0 ? normalized : null;
     }, z.string().min(2).max(80).nullable())
     .default(null),
-  next: z
-    .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())
-    .default("/direct"),
+  next: safeNextSchema,
 });
 
 export const seasonFormSchema = z.object({
@@ -91,6 +141,13 @@ export const updateAccountSchema = z.object({
     .default(null),
 });
 
+export type SignInFormInput = z.infer<typeof signInFormSchema>;
+export type SignUpFormInput = z.infer<typeof signUpFormSchema>;
+export type PasswordResetRequestInput = z.infer<
+  typeof passwordResetRequestSchema
+>;
+export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>;
+/** @deprecated Removed in the password actions task. */
 export type LoginFormInput = z.infer<typeof loginFormSchema>;
 export type SeasonFormInput = z.infer<typeof seasonFormSchema>;
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
