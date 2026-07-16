@@ -6,9 +6,8 @@ import { SupabaseConfigurationError } from "@/lib/supabase/errors";
 
 const {
   createServerSupabaseClient,
+  getClaims,
   getSiteUrl,
-  getUser,
-  headers,
   redirect,
   resetPasswordForEmail,
   rpc,
@@ -18,9 +17,8 @@ const {
   updateUser,
 } = vi.hoisted(() => ({
   createServerSupabaseClient: vi.fn(),
+  getClaims: vi.fn(),
   getSiteUrl: vi.fn(),
-  getUser: vi.fn(),
-  headers: vi.fn(),
   redirect: vi.fn((path: string) => {
     throw new Error(`NEXT_REDIRECT:${path}`);
   }),
@@ -30,10 +28,6 @@ const {
   signOut: vi.fn(),
   signUp: vi.fn(),
   updateUser: vi.fn(),
-}));
-
-vi.mock("next/headers", () => ({
-  headers,
 }));
 
 vi.mock("next/navigation", () => ({ redirect }));
@@ -97,15 +91,9 @@ describe("password authentication actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSiteUrl.mockReturnValue("https://mk-bet.vercel.app");
-    headers.mockResolvedValue(
-      new Headers({
-        host: "localhost.evil.example",
-        origin: "https://evil.example",
-      }),
-    );
     createServerSupabaseClient.mockResolvedValue({
       auth: {
-        getUser,
+        getClaims,
         resetPasswordForEmail,
         signInWithPassword,
         signOut,
@@ -113,8 +101,8 @@ describe("password authentication actions", () => {
         updateUser,
       },
     });
-    getUser.mockResolvedValue({
-      data: { user: { id: "user-id" } },
+    getClaims.mockResolvedValue({
+      data: { claims: { amr: [{ method: "recovery" }] } },
       error: null,
     });
     resetPasswordForEmail.mockResolvedValue({ error: null });
@@ -226,7 +214,7 @@ describe("password authentication actions", () => {
     });
   });
 
-  it("ignores hostile request headers and sanitizes an external sign-up redirect", async () => {
+  it("uses the configured site origin and sanitizes an external sign-up redirect", async () => {
     const unsafeData = validSignUpData();
     unsafeData.set("next", "//evil.example/private");
 
@@ -241,23 +229,31 @@ describe("password authentication actions", () => {
       }),
     );
     expect(getSiteUrl).toHaveBeenCalledOnce();
-    expect(headers).not.toHaveBeenCalled();
   });
 
-  it("does not leak sign-up errors or account state", async () => {
+  it("returns the exact same success for new and already-registered accounts", async () => {
+    const newAccountResult = await signUpWithPasswordAction(
+      initialState,
+      validSignUpData(),
+    );
     signUp.mockResolvedValue({
-      data: { user: { identities: [] } },
-      error: new Error("email already registered"),
+      data: { user: null },
+      error: new Error("User already registered"),
     });
 
-    const result = await signUpWithPasswordAction(
+    const registeredAccountResult = await signUpWithPasswordAction(
       initialState,
       validSignUpData(),
     );
 
-    expect(result).toMatchObject({ ok: false, code: "AUTH_SIGN_UP_FAILED" });
-    expect(JSON.stringify(result)).not.toMatch(
-      /already registered|identities/i,
+    expect(newAccountResult).toEqual({
+      ok: true,
+      message:
+        "Compte créé. Confirme ton adresse depuis l'e-mail reçu avant de te connecter.",
+    });
+    expect(registeredAccountResult).toEqual(newAccountResult);
+    expect(JSON.stringify(registeredAccountResult)).not.toContain(
+      "User already registered",
     );
   });
 
@@ -283,17 +279,17 @@ describe("password authentication actions", () => {
     expect(JSON.stringify(result)).not.toContain("account not found");
   });
 
-  it("checks the recovery session before updating the password", async () => {
+  it("checks recovery claims before updating the password", async () => {
     const result = await updatePasswordAction(
       initialState,
       validPasswordUpdateData(),
     );
 
-    expect(getUser).toHaveBeenCalledOnce();
+    expect(getClaims).toHaveBeenCalledOnce();
     expect(updateUser).toHaveBeenCalledWith({
       password: "nouveau-mot-de-passe",
     });
-    expect(getUser.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(getClaims.mock.invocationCallOrder[0]).toBeLessThan(
       updateUser.mock.invocationCallOrder[0],
     );
     expect(result).toEqual({
@@ -302,10 +298,10 @@ describe("password authentication actions", () => {
     });
   });
 
-  it("rejects a password update without an authenticated recovery session", async () => {
-    getUser.mockResolvedValue({
-      data: { user: null },
-      error: new Error("session expired"),
+  it("rejects an ordinary password session for a recovery update", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { amr: [{ method: "password" }] } },
+      error: null,
     });
 
     const result = await updatePasswordAction(
@@ -315,7 +311,26 @@ describe("password authentication actions", () => {
 
     expect(result).toMatchObject({ ok: false, code: "AUTH_INVALID_SESSION" });
     expect(updateUser).not.toHaveBeenCalled();
-    expect(JSON.stringify(result)).not.toContain("session expired");
+  });
+
+  it.each([
+    ["missing claims", null, null],
+    ["malformed claims", { claims: { amr: "recovery" } }, null],
+    ["claims error", null, new Error("invalid JWT raw")],
+  ])("rejects %s for a recovery update", async (_label, data, error) => {
+    getClaims.mockResolvedValue({ data, error });
+
+    const result = await updatePasswordAction(
+      initialState,
+      validPasswordUpdateData(),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_INVALID_SESSION",
+    });
+    expect(updateUser).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("invalid JWT raw");
   });
 
   it("returns a generic password-update failure without raw details", async () => {

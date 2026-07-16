@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { mapAuthErrorToMessage } from "@/application/auth";
 import {
@@ -28,6 +29,14 @@ const RESET_REQUEST_SUCCESS =
   "Si un compte correspond à cette adresse, un e-mail de récupération vient d'être envoyé.";
 const PASSWORD_UPDATE_SUCCESS =
   "Mot de passe modifié. Tu peux maintenant te connecter.";
+
+const recoveryClaimsSchema = z.object({
+  amr: z.array(
+    z.object({
+      method: z.string(),
+    }),
+  ),
+});
 
 function failure(code: AuthErrorCode): AuthFormState {
   return {
@@ -113,7 +122,7 @@ export async function signUpWithPasswordAction(
     callbackUrl.searchParams.set("intent", "signup");
     callbackUrl.searchParams.set("next", parsed.data.next);
 
-    const { error } = await supabase.auth.signUp({
+    await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -121,10 +130,6 @@ export async function signUpWithPasswordAction(
         emailRedirectTo: callbackUrl.toString(),
       },
     });
-
-    if (error) {
-      return failure("AUTH_SIGN_UP_FAILED");
-    }
 
     return { ok: true, message: SIGN_UP_SUCCESS };
   } catch (error) {
@@ -182,12 +187,14 @@ export async function updatePasswordAction(
 
   try {
     const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const { data, error: claimsError } = await supabase.auth.getClaims();
+    const parsedClaims = recoveryClaimsSchema.safeParse(data?.claims);
 
-    if (userError || !user) {
+    if (
+      claimsError ||
+      !parsedClaims.success ||
+      !parsedClaims.data.amr.some(({ method }) => method === "recovery")
+    ) {
       return failure("AUTH_INVALID_SESSION");
     }
 

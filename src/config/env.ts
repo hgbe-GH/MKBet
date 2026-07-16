@@ -1,7 +1,31 @@
 import { z } from "zod";
 
 const siteUrlSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.string().url(),
+  NEXT_PUBLIC_SITE_URL: z
+    .string()
+    .url()
+    .transform((value, context) => {
+      const url = new URL(value);
+      const usesAllowedProtocol =
+        url.protocol === "https:" ||
+        (url.protocol === "http:" && url.hostname === "localhost");
+      const isPureOrigin =
+        url.username.length === 0 &&
+        url.password.length === 0 &&
+        url.pathname === "/" &&
+        url.search.length === 0 &&
+        url.hash.length === 0;
+
+      if (!usesAllowedProtocol || !isPureOrigin) {
+        context.addIssue({
+          code: "custom",
+          message: "Expected a secure web origin",
+        });
+        return z.NEVER;
+      }
+
+      return url.origin;
+    }),
 });
 
 const publicSupabaseSchema = z
