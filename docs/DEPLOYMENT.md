@@ -13,15 +13,15 @@ MK Bet est publié sur [mk-bet.vercel.app](https://mk-bet.vercel.app). Le projet
 
 ## Environnements et variables
 
-Configurer séparément les variables suivantes dans **Development**, **Preview** et **Production** :
+Configurer séparément les variables suivantes dans **Development**, dans chaque **Preview** testée et dans **Production** :
 
 - `NEXT_PUBLIC_SITE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. Ne pas configurer `SUPABASE_SERVICE_ROLE_KEY` dans Vercel : le parcours déployé n’en a pas besoin.
+`NEXT_PUBLIC_SITE_URL` doit être l’origine publique exacte de l’environnement, sans chemin : `http://localhost:3000` en développement local, `https://<domaine-preview-vercel>` pour une Preview et `https://mk-bet.vercel.app` en Production. Les Server Actions utilisent exclusivement cette valeur pour construire les URLs de confirmation et de récupération ; elles ne déduisent pas l’origine depuis la requête.
 
-Chaque déploiement qui nécessite une URL publique absolue doit utiliser `NEXT_PUBLIC_SITE_URL`. En Preview, le callback Auth peut utiliser l’origine validée de la requête pour fonctionner avec les URLs générées par Vercel.
+`NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` doivent cibler le projet Supabase prévu pour l’environnement. `NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. Ne pas configurer `SUPABASE_SERVICE_ROLE_KEY` dans Vercel : le parcours déployé n’en a pas besoin.
 
 Les secrets ne doivent jamais être committés. `.env.local` reste local. Les seules valeurs Supabase présentes dans Vercel sont l’URL publique et la clé publishable publique.
 
@@ -29,10 +29,12 @@ Les secrets ne doivent jamais être committés. `.env.local` reste local. Les se
 
 Dans **Authentication → URL Configuration**, définir l’URL de site et déclarer les callbacks autorisés :
 
-- local : URL de site `http://localhost:3000`, puis `http://localhost:3000/auth/callback` et `http://127.0.0.1:3000/auth/callback` ;
+- local : URL de site `http://localhost:3000`, puis `http://localhost:3000/**` et `http://127.0.0.1:3000/**` dans la liste locale des redirections ;
 - E2E local : `http://localhost:3100/**` et `http://127.0.0.1:3100/**` ;
-- Preview : `https://<domaine-preview-vercel>/auth/callback` pour chaque domaine Preview effectivement utilisé ;
+- Preview : `https://<domaine-preview-vercel>/auth/callback` exactement, pour chaque domaine Preview effectivement testé et configuré dans `NEXT_PUBLIC_SITE_URL` ;
 - Production : URL de site `https://mk-bet.vercel.app`, puis `https://mk-bet.vercel.app/auth/callback`.
+
+Les wildcards restent limités aux origines locales. Ne pas autoriser `https://*.vercel.app/**` ni un wildcard équivalent sur un domaine externe : chaque callback Preview ou Production est ajouté explicitement.
 
 Les paramètres `next` reçus du client sont limités à des chemins internes.
 
@@ -50,7 +52,7 @@ Avant de déployer une version qui dépend d’une nouvelle migration :
 4. appliquer les mêmes migrations versionnées à Production ;
 5. seulement ensuite promouvoir la version applicative dépendante.
 
-Le build Vercel réussit sans connexion active à PostgreSQL. `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sont configurées séparément sur Vercel pour Development, Preview et Production; `NEXT_PUBLIC_SITE_URL` est configurée pour Production.
+Le build Vercel réussit sans connexion active à PostgreSQL. `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sont configurées séparément sur Vercel pour Development, chaque Preview testée et Production.
 
 ## Vérification après déploiement
 
