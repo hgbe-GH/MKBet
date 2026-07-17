@@ -8,6 +8,7 @@ Dernière mise à jour : 17 juillet 2026.
 - Le portail public `/login` réunit connexion et création de compte par mot de passe dans un shell responsive, sans exposer de donnée privée ni modifier les routes protégées.
 - Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur, conserve des erreurs génériques et ferme la session locale après modification.
 - La finition B3 centralise les durées de mouvement, limite les translations de survol aux pointeurs fins, neutralise les animations avec réduction de mouvement et fournit des surfaces graphite opaques sans transparence ni flou.
+- Le sélecteur connexion/inscription anime son état optimiste uniquement lorsqu’une navigation client démarre ; les clics modifiés ou annulés restent alignés avec l’URL affichée.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.
@@ -32,7 +33,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 244 tests réussis dans 41 fichiers.
+- `pnpm test` : 249 tests réussis dans 41 fichiers.
 - `pnpm test:e2e` : 27 parcours réussis et 3 skips de projet attendus sur 30 cas desktop/mobile.
 - Répétition ciblée `--repeat-each=2` : 4 parcours métier desktop et 2 contrôles mobiles réussis, avec les skips croisés attendus.
 - `db:reset`, génération des types, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : succès.

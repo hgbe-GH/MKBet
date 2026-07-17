@@ -51,7 +51,7 @@ export function AuthModeSwitcher({
             )}
             href={modeHref(itemMode, next)}
             key={itemMode}
-            onClick={() =>
+            onNavigate={() =>
               setSelection({ activeMode: itemMode, serverMode: mode })
             }
           >

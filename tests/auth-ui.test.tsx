@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { RouterContext } from "next/dist/shared/lib/router-context.shared-runtime";
+import type { NextRouter } from "next/router";
+import { describe, expect, it, vi } from "vitest";
 
 import type { AuthFormState } from "@/application/auth/actions";
 import { parseAuthMode } from "@/app/login/page";
@@ -11,10 +13,43 @@ import { SignUpForm } from "@/components/auth/sign-up-form";
 import { InvitationPanel } from "@/components/invitations/invitation-panel";
 import { SeasonSelector } from "@/components/seasons/season-selector";
 
+function createTestRouter(): NextRouter {
+  return {
+    asPath: "/login?next=%2Fmarkets",
+    back: vi.fn(),
+    basePath: "",
+    beforePopState: vi.fn(),
+    defaultLocale: undefined,
+    domainLocales: undefined,
+    events: {
+      emit: vi.fn(),
+      off: vi.fn(),
+      on: vi.fn(),
+    },
+    forward: vi.fn(),
+    isFallback: false,
+    isLocaleDomain: false,
+    isPreview: false,
+    isReady: true,
+    locale: undefined,
+    locales: undefined,
+    pathname: "/login",
+    prefetch: vi.fn(),
+    push: vi.fn().mockResolvedValue(true),
+    query: {},
+    reload: vi.fn(),
+    replace: vi.fn().mockResolvedValue(true),
+    route: "/login",
+  };
+}
+
 describe("auth UI", () => {
-  it("moves the shared mode indicator optimistically and syncs URL props", async () => {
+  it("moves the shared mode indicator when client navigation starts and syncs URL props", async () => {
+    const router = createTestRouter();
     const { rerender } = render(
-      <AuthModeSwitcher mode="login" next="/markets" />,
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
     );
     const navigation = screen.getByRole("navigation", {
       name: "Choisir le mode d’accès",
@@ -29,20 +64,77 @@ describe("auth UI", () => {
       "href",
       "/login?mode=register&next=%2Fmarkets",
     );
-    registerLink.addEventListener("click", (event) => event.preventDefault(), {
-      once: true,
-    });
     fireEvent.click(registerLink);
     expect(navigation).toHaveAttribute("data-auth-mode", "register");
     expect(registerLink).toHaveAttribute("aria-current", "page");
+    expect(router.push).toHaveBeenCalledOnce();
 
-    rerender(<AuthModeSwitcher mode="register" next="/markets" />);
+    rerender(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="register" next="/markets" />
+      </RouterContext.Provider>,
+    );
     expect(navigation.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
 
-    rerender(<AuthModeSwitcher mode="login" next="/markets" />);
+    rerender(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
     await waitFor(() =>
       expect(navigation).toHaveAttribute("data-auth-mode", "login"),
     );
+  });
+
+  it.each([
+    ["Ctrl", { ctrlKey: true }],
+    ["Cmd", { metaKey: true }],
+    ["Shift", { shiftKey: true }],
+    ["middle button", { button: 1, which: 2 }],
+  ])("keeps the current mode on a %s click", (_label, clickInit) => {
+    const router = createTestRouter();
+    render(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    window.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+
+    fireEvent.click(
+      screen.getByRole("link", { name: "Créer un compte" }),
+      clickInit,
+    );
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("keeps the current mode when click navigation is prevented", () => {
+    const router = createTestRouter();
+    render(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    const registerLink = screen.getByRole("link", {
+      name: "Créer un compte",
+    });
+    registerLink.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+
+    fireEvent.click(registerLink);
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("renders the password sign-in controls without magic-link copy", () => {
