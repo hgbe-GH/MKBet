@@ -43,7 +43,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 
 Cette validation prépare la livraison locale B3 et Auth par mot de passe sans fusion, push, modification Supabase distante ni déploiement Vercel. La promotion Production reste à effectuer après revue de la branche.
 
-Avant cette promotion, Supabase Auth Production doit imposer un minimum de 10 caractères, exiger la confirmation des e-mails et autoriser exactement `https://mk-bet.vercel.app/auth/callback`. Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter son callback exact dans Supabase, sans wildcard externe. Vercel doit conserver uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel.
+Avant cette promotion, Supabase Auth Production doit imposer un minimum de 10 caractères, exiger la confirmation des e-mails et autoriser exactement `https://mk-bet.vercel.app/auth/callback`. Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir les paramètres `intent` et `next`. Vercel doit conserver uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel.
 
 ## Limites assumées
 

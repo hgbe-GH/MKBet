@@ -29,12 +29,14 @@ Les secrets ne doivent jamais être committés. `.env.local` reste local. Les se
 
 Dans **Authentication → URL Configuration**, définir l’URL de site et déclarer les callbacks autorisés :
 
-- local : URL de site `http://localhost:3000`, puis `http://localhost:3000/**` et `http://127.0.0.1:3000/**` dans la liste locale des redirections ;
-- E2E local : `http://localhost:3100/**` et `http://127.0.0.1:3100/**` ;
-- Preview : `https://<domaine-preview-vercel>/auth/callback` exactement, pour chaque domaine Preview effectivement testé et configuré dans `NEXT_PUBLIC_SITE_URL` ;
-- Production : URL de site `https://mk-bet.vercel.app`, puis `https://mk-bet.vercel.app/auth/callback`.
+- local : URL de site `http://localhost:3000`, puis `http://localhost:3000/**` et `http://127.0.0.1:3000/**` dans la liste locale des redirections ; ces patterns couvrent `/auth/callback` et ses paramètres de requête ;
+- E2E local : `http://localhost:3100/**` et `http://127.0.0.1:3100/**`, pour la même raison ;
+- Preview : définir `NEXT_PUBLIC_SITE_URL=https://<preview-host>` avec l’origine exacte, puis ajouter `https://<preview-host>/auth/callback**` aux Additional Redirect URLs Supabase pour ce host précis ;
+- Production : conserver l’URL de site `https://mk-bet.vercel.app` et le callback exact `https://mk-bet.vercel.app/auth/callback`.
 
-Les wildcards restent limités aux origines locales. Ne pas autoriser `https://*.vercel.app/**` ni un wildcard équivalent sur un domaine externe : chaque callback Preview ou Production est ajouté explicitement.
+Les Server Actions construisent leur `redirectTo` depuis `NEXT_PUBLIC_SITE_URL`, puis ajoutent `?intent=signup&next=…` ou `?intent=recovery`. Lorsque le Site URL Supabase reste celui de Production, le suffixe `**` du pattern Preview est donc nécessaire pour accepter le callback et sa query string. Selon la [syntaxe officielle Supabase](https://supabase.com/docs/guides/auth/redirect-urls#use-wildcards-in-redirect-urls), `**` couvre toute séquence de caractères ; il reste ici après le chemin fixe `/auth/callback` et ne généralise ni le domaine ni les autres routes.
+
+Ne pas autoriser `https://*.vercel.app/**`, `https://**.vercel.app/**` ni inventer un domaine Preview : chaque host réellement testé est ajouté séparément. En Production, le Site URL et le callback partagent la même origine canonique, donc le callback exact suffit et aucun wildcard externe n’est requis.
 
 Les paramètres `next` reçus du client sont limités à des chemins internes.
 
