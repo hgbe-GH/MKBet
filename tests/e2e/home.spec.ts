@@ -6,10 +6,10 @@ test("opens the permanent Margot and Kévin room", async ({ page }) => {
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "La salle des marchés de la rechute",
+      name: "Tout se joue entre nous.",
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "ENTRER DANS LA SALLE" }),
+    page.getByRole("link", { name: "Entrer dans la salle" }),
   ).toHaveAttribute("href", "/login?next=/direct");
 });

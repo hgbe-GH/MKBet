@@ -18,7 +18,7 @@ test("home exposes brand, metadata, favicon and responsive public content", asyn
   await expect(
     page.getByLabel("MK Bet, aller au contenu principal"),
   ).toBeVisible();
-  await expect(page.getByText("SALLE OUVERTE")).toBeVisible();
+  await expect(page.getByText("Le marché est ouvert")).toBeVisible();
   await expect(page.getByText("100 % monnaie fictive")).toBeVisible();
   const faviconHref = await page
     .locator('link[rel="icon"]')
@@ -41,10 +41,16 @@ test("login is keyboard accessible and exposes password authentication", async (
   await email.focus();
   await expect(email).toBeFocused();
   await expect(email).toHaveCSS("min-height", "48px");
-  await expect(page.getByLabel("Mot de passe")).toBeVisible();
+  await expect(page.getByLabel("Mot de passe", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "SE CONNECTER" }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Créer un compte" }),
+  ).toHaveAttribute("href", "/login?mode=register&next=%2Fdirect");
+  await expect(
+    page.getByRole("link", { name: "Mot de passe oublié ?" }),
+  ).toHaveAttribute("href", "/forgot-password");
   await expectNoHorizontalOverflow(page);
   await expectNoSeriousAxeViolations(page);
 });

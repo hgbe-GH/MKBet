@@ -20,7 +20,7 @@ async function saveBrowserSession(
   const page = await context.newPage();
   await page.goto(`${e2eBaseUrl}/login?next=/direct`);
   await page.getByLabel("Adresse e-mail").fill(email);
-  await page.getByLabel("Mot de passe").fill(e2ePassword);
+  await page.getByLabel("Mot de passe", { exact: true }).fill(e2ePassword);
   await page.getByRole("button", { name: "SE CONNECTER" }).click();
   await page.waitForURL(`${e2eBaseUrl}/direct`, { timeout: 30_000 });
   await context.storageState({ path: statePath });
@@ -65,8 +65,7 @@ export default async function globalSetup() {
       password: e2ePassword,
       user_metadata: { display_name: identity.displayName },
     });
-    if (error)
-      throw new Error(`Unable to create E2E identity: ${error.message}`);
+    if (error) throw new Error("Unable to create an E2E identity.");
   }
 
   await mkdir(path.dirname(e2eAuthState.author), { recursive: true });
