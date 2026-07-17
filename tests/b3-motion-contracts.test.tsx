@@ -233,9 +233,26 @@ describe("B3 motion contracts", () => {
   });
 
   it("keeps ticket selections on a dark surface with AA text tokens", () => {
+    const token = (name: string) =>
+      styles.match(new RegExp(`--${name}:\\s*#([0-9a-f]{6})`, "i"))?.[1];
+    const surface = token("surface");
+
     expect(betSlipSelection).toContain("bg-[var(--surface)]");
     expect(betSlipSelection).not.toMatch(/\bbg-(?:white|stone-100)\b/);
     expect(betSlip).toContain("text-[var(--brand-hover)] uppercase");
+    expect(surface).toBeDefined();
+    for (const textToken of [
+      "text-primary",
+      "text-secondary",
+      "text-muted",
+      "brand-hover",
+    ]) {
+      const text = token(textToken);
+      expect(text).toBeDefined();
+      expect(
+        contrastRatio(text ?? "ffffff", surface ?? "000000"),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it("uses the on-brand token on every bright raspberry control", () => {

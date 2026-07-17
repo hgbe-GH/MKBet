@@ -31,12 +31,12 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Vitest couvre la frontière Zod, les repositories, Server Actions, composants et règles existantes.
 - Le scénario `db:test:single-room` vérifie inscription/crédit idempotents, auto-vote refusé, votes immuables, confirmation, règlement/gain unique, invalidation et réouverture.
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
-- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, le changement de mot de passe et le nettoyage de la session recovery.
+- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, le changement de mot de passe et le nettoyage de la session recovery. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 250 tests réussis dans 41 fichiers.
+- `pnpm test` : 253 tests réussis dans 42 fichiers.
 - Ciblage public + Auth desktop : 5 parcours réussis.
-- Répétition Auth `--repeat-each=2` : 8 parcours réussis sur desktop et mobile, sans collision d’identité.
+- Répétition Auth `--repeat-each=2` : 8 parcours réussis sur desktop et mobile, sans collision ni accumulation d’identité.
 - `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : succès.
 

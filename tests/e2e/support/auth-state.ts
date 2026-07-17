@@ -9,4 +9,9 @@ export const e2eAuthState = {
   opposer: path.join(authDirectory, "opposer.json"),
 } as const;
 
+export const e2eCreatedUsersPath = path.join(
+  authDirectory,
+  "created-users.json",
+);
+
 export const e2eBaseUrl = "http://localhost:3100";
