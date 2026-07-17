@@ -275,7 +275,10 @@ Ajouter :
 
 ```ts
 it("creates a password account with a safe confirmation callback", async () => {
-  signUp.mockResolvedValue({ data: { user: { identities: [{}] } }, error: null });
+  signUp.mockResolvedValue({
+    data: { user: { identities: [{}] } },
+    error: null,
+  });
   const result = await signUpWithPasswordAction(initialState, validSignUpData);
   expect(signUp).toHaveBeenCalledWith({
     email: "alice@example.com",
@@ -327,8 +330,7 @@ import { asRpcClient } from "@/data/supabase/rpc";
 import type { Database } from "@/types/database";
 
 export type AccessInitializationResult =
-  | { ok: true }
-  | { ok: false; stage: "profile" | "room" };
+  { ok: true } | { ok: false; stage: "profile" | "room" };
 
 export async function initializeAuthenticatedAccess(
   client: SupabaseClient<Database>,
@@ -415,22 +417,37 @@ Dans `tests/auth-ui.test.tsx`, remplacer le test `LoginForm` par :
 ```tsx
 it("renders the sign-in mode with a password recovery path", () => {
   render(<SignInForm next="/markets" />);
-  expect(screen.getByRole("heading", { name: "Bon retour dans la salle" })).toBeInTheDocument();
-  expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute("type", "email");
-  expect(screen.getByLabelText("Mot de passe")).toHaveAttribute("type", "password");
-  expect(screen.getByRole("link", { name: "Mot de passe oublié ?" })).toHaveAttribute(
-    "href",
-    "/forgot-password",
+  expect(
+    screen.getByRole("heading", { name: "Bon retour dans la salle" }),
+  ).toBeInTheDocument();
+  expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+    "type",
+    "email",
   );
-  expect(screen.getByRole("button", { name: "SE CONNECTER" })).toBeInTheDocument();
+  expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
+    "type",
+    "password",
+  );
+  expect(
+    screen.getByRole("link", { name: "Mot de passe oublié ?" }),
+  ).toHaveAttribute("href", "/forgot-password");
+  expect(
+    screen.getByRole("button", { name: "SE CONNECTER" }),
+  ).toBeInTheDocument();
 });
 
 it("renders the sign-up mode without exposing private content", () => {
   render(<SignUpForm next="/direct" />);
-  expect(screen.getByRole("heading", { name: "Créer mon compte" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Créer mon compte" }),
+  ).toBeInTheDocument();
   expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
-  expect(screen.getByLabelText("Confirmer le mot de passe")).toBeInTheDocument();
-  expect(document.body.textContent).not.toMatch(/token|service_role|storage\/v1/i);
+  expect(
+    screen.getByLabelText("Confirmer le mot de passe"),
+  ).toBeInTheDocument();
+  expect(document.body.textContent).not.toMatch(
+    /token|service_role|storage\/v1/i,
+  );
 });
 ```
 
@@ -641,12 +658,20 @@ Dans `src/styles/globals.css`, ajouter :
 }
 
 @keyframes mk-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;

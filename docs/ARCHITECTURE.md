@@ -39,7 +39,11 @@ Supabase fournira PostgreSQL, Auth, Realtime et Storage. PostgreSQL sera la sour
 
 Le schéma public est défini par des migrations forward-only et contient les domaines saisons, lives, actions, marchés, paris, portefeuilles, audit et Rechutomètre. Les contraintes relationnelles restent dans PostgreSQL. Les policies RLS métier utilisent `auth.uid()` et des helpers SQL dans le schéma `private`.
 
-Supabase Auth est intégré avec `@supabase/ssr`, un client par requête, `proxy.ts` pour rafraîchir les cookies et `getClaims()` pour vérifier les JWT. La clé de service reste confinée aux modules serveur et n’est pas utilisée dans les parcours utilisateur ordinaires. Le build ne crée aucun client Supabase, n’exécute aucune migration et ne dépend d’aucune variable Supabase.
+Supabase Auth est intégré avec `@supabase/ssr`, un client par requête, `proxy.ts` pour rafraîchir les cookies et `getClaims()` pour vérifier les JWT. L’e-mail est l’identifiant de connexion et l’interface utilise uniquement un mot de passe d’au moins dix caractères : inscription avec confirmation obligatoire, connexion, récupération et changement du mot de passe. Aucun magic link de connexion n’est proposé.
+
+Après une confirmation ou une connexion classique, l’application appelle successivement `ensure_current_profile` et `ensure_single_room_access`. Ces RPC sont idempotentes : elles réparent un profil incomplet sans dupliquer l’adhésion, le portefeuille ou le crédit initial. Une récupération vérifiée par l’AMR `recovery` n’exécute pas cette initialisation métier et ferme sa session après le changement du mot de passe.
+
+Aucune clé `service_role` n’est utilisée ou configurée dans Vercel. Les Server Actions utilisent la session SSR publique et les RPC contrôlent `auth.uid()` ainsi que RLS. Le build ne crée aucun client Supabase, n’exécute aucune migration et ne dépend d’aucune variable Supabase.
 
 ## Compatibilité Vercel
 
