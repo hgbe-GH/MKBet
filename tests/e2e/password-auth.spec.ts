@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { expectNoHorizontalOverflow } from "./support/assertions";
 import { waitForAuthEmailLink } from "./support/mailpit";
@@ -18,6 +18,16 @@ const resetRequestMessage =
 function testEmail(projectName: string, repeatEachIndex: number): string {
   const project = projectName.replace(/[^a-z0-9]/gi, "-").toLowerCase();
   return `auth-${project}-${repeatEachIndex}-${runId}@example.test`;
+}
+
+async function expectVisibleKeyboardFocus(locator: Locator): Promise<void> {
+  await expect(locator).toBeFocused();
+  const outline = await locator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { style: style.outlineStyle, width: style.outlineWidth };
+  });
+  expect(outline.style).not.toBe("none");
+  expect(Number.parseFloat(outline.width)).toBeGreaterThanOrEqual(2);
 }
 
 async function submitSignIn(
@@ -44,7 +54,7 @@ test("creates, confirms and recovers a password account without enumeration", as
   const email = testEmail(testInfo.project.name, testInfo.repeatEachIndex);
   const unknownEmail = `unknown-${testInfo.repeatEachIndex}-${runId}@example.test`;
 
-  await page.goto("/login?mode=register&next=/direct");
+  await page.goto("/login?mode=register&next=/markets");
   await page.getByLabel("Nom d’affichage").fill("Joueuse E2E");
   await page.getByLabel("Adresse e-mail").fill(email);
   await page.getByLabel("Mot de passe", { exact: true }).fill(initialPassword);
@@ -58,7 +68,11 @@ test("creates, confirms and recovers a password account without enumeration", as
   await expect(page.locator("body")).not.toContainText(initialPassword);
 
   await page.goto(await waitForAuthEmailLink(email, "signup"));
-  await expect(page).toHaveURL(/\/direct$/);
+  await expect(page).toHaveURL(/\/markets$/);
+  await expect(
+    page.getByRole("heading", { name: "Tableau des cotes" }),
+  ).toBeVisible();
+  await page.goto("/direct");
   await expect(
     page.getByRole("heading", { name: /Le groupe fait le marché/ }),
   ).toBeVisible();
@@ -72,8 +86,9 @@ test("creates, confirms and recovers a password account without enumeration", as
   await submitSignIn(page, unknownEmail, "incorrect-password");
   await expect(page.getByText(invalidCredentialsMessage)).toBeVisible();
 
+  await page.goto("/login?next=/markets");
   await submitSignIn(page, email, initialPassword);
-  await expect(page).toHaveURL(/\/direct$/);
+  await expect(page).toHaveURL(/\/markets$/);
   await page.goto("/auth/update-password");
   await expect(page).toHaveURL(/\/login$/);
 
@@ -103,14 +118,40 @@ test("creates, confirms and recovers a password account without enumeration", as
     .textContent();
   expect(existingResetMessage).toBe(resetRequestMessage);
 
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(await waitForAuthEmailLink(email, "recovery"));
   await expect(page).toHaveURL(/\/auth\/update-password$/);
-  await page
-    .getByLabel("Nouveau mot de passe", { exact: true })
-    .fill(updatedPassword);
-  await page
-    .getByLabel("Confirmer le nouveau mot de passe")
-    .fill(updatedPassword);
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+  );
+  await page.keyboard.press("Tab");
+  const newPassword = page.getByLabel("Nouveau mot de passe", {
+    exact: true,
+  });
+  await expectVisibleKeyboardFocus(newPassword);
+  await newPassword.fill(updatedPassword);
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("button", { name: "Afficher le mot de passe" }),
+  );
+  await page.keyboard.press("Tab");
+  const newPasswordConfirmation = page.getByLabel(
+    "Confirmer le nouveau mot de passe",
+  );
+  await expectVisibleKeyboardFocus(newPasswordConfirmation);
+  await newPasswordConfirmation.fill(updatedPassword);
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("button", {
+      name: "Afficher la confirmation du mot de passe",
+    }),
+  );
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("button", { name: "MODIFIER LE MOT DE PASSE" }),
+  );
+  await expectNoHorizontalOverflow(page);
   await page.getByRole("button", { name: "MODIFIER LE MOT DE PASSE" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/auth/update-password");
@@ -145,5 +186,18 @@ test("keeps password forms keyboard-safe on mobile with reduced motion", async (
 
   const motion = page.locator('[data-motion="auth-content"]');
   await expect(motion).toHaveCSS("animation-name", "none");
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/forgot-password");
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+  );
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(page.getByLabel("Adresse e-mail"));
+  await page.keyboard.press("Tab");
+  await expectVisibleKeyboardFocus(
+    page.getByRole("button", { name: "ENVOYER L’E-MAIL" }),
+  );
   await expectNoHorizontalOverflow(page);
 });

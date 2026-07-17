@@ -46,6 +46,14 @@ const mobileBetSlip = readFileSync(
   join(process.cwd(), "src/components/sportsbook/mobile-bet-slip.tsx"),
   "utf8",
 );
+const betSlip = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/bet-slip.tsx"),
+  "utf8",
+);
+const betSlipSelection = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/bet-slip-selection.tsx"),
+  "utf8",
+);
 const mobileNavigation = readFileSync(
   join(process.cwd(), "src/components/sportsbook/mobile-bottom-navigation.tsx"),
   "utf8",
@@ -222,6 +230,12 @@ describe("B3 motion contracts", () => {
         contrastRatio(onBrand ?? "000000", background ?? "ffffff"),
       ).toBeGreaterThanOrEqual(4.5);
     }
+  });
+
+  it("keeps ticket selections on a dark surface with AA text tokens", () => {
+    expect(betSlipSelection).toContain("bg-[var(--surface)]");
+    expect(betSlipSelection).not.toMatch(/\bbg-(?:white|stone-100)\b/);
+    expect(betSlip).toContain("text-[var(--brand-hover)] uppercase");
   });
 
   it("uses the on-brand token on every bright raspberry control", () => {

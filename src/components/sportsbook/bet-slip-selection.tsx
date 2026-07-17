@@ -13,7 +13,7 @@ export function BetSlipSelectionItem({
   const betSlip = useBetSlip();
 
   return (
-    <li className="rounded-md border border-[var(--border)] bg-white p-3">
+    <li className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-3">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-black">{selection.marketTitle}</p>
@@ -27,7 +27,7 @@ export function BetSlipSelectionItem({
         </div>
         <button
           aria-label={`Retirer ${selection.outcomeLabel}`}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-stone-100"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-[var(--surface-raised)] hover:text-white"
           onClick={() =>
             betSlip.removeSelection(selection.marketId, selection.outcomeId)
           }

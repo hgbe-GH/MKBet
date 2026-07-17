@@ -125,7 +125,7 @@ export function BetSlip({
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-black tracking-[0.12em] text-[var(--brand)] uppercase">
+          <p className="text-xs font-black tracking-[0.12em] text-[var(--brand-hover)] uppercase">
             Ticket
           </p>
           <h2 className="text-lg font-black">

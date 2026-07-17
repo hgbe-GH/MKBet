@@ -34,10 +34,10 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, le changement de mot de passe et le nettoyage de la session recovery.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 249 tests réussis dans 41 fichiers.
+- `pnpm test` : 250 tests réussis dans 41 fichiers.
 - Ciblage public + Auth desktop : 5 parcours réussis.
 - Répétition Auth `--repeat-each=2` : 8 parcours réussis sur desktop et mobile, sans collision d’identité.
-- `pnpm test:e2e` : 29 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile ; 2 contrôles axe restent en échec sur le contraste du ticket ouvert.
+- `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : succès.
 
 ## Production
