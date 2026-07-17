@@ -193,7 +193,7 @@ describe("password recovery UI", () => {
     expect(container.textContent).not.toContain("private-password");
   });
 
-  it("replaces update fields with the exact success and login link", async () => {
+  it("keeps success confirmation out of the recovery-gated form", async () => {
     const successAction = async (): Promise<AuthFormState> => ({
       ok: true,
       message: "Mot de passe modifié. Tu peux maintenant te connecter.",
@@ -201,21 +201,17 @@ describe("password recovery UI", () => {
     const { container } = render(<UpdatePasswordForm action={successAction} />);
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
 
-    expect(
-      await screen.findByRole("heading", { name: "Mot de passe modifié" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Mot de passe modifié. Tu peux maintenant te connecter.",
-      ),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Se connecter" })).toHaveAttribute(
-      "href",
-      "/login",
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Mot de passe modifié" }),
+      ).not.toBeInTheDocument(),
     );
     expect(
-      screen.queryByLabelText("Nouveau mot de passe"),
-    ).not.toBeInTheDocument();
+      screen.getByRole("heading", {
+        name: "Choisir un nouveau mot de passe",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Se connecter" })).toBeNull();
     expect(container.textContent).not.toMatch(/token|private-password/i);
   });
 

@@ -195,6 +195,7 @@ describe("auth errors", () => {
         "AUTH_SIGN_UP_FAILED",
         "AUTH_PASSWORD_RESET_FAILED",
         "AUTH_PASSWORD_UPDATE_FAILED",
+        "AUTH_RECOVERY_CLEANUP_FAILED",
       ]),
     );
     expect(mapAuthErrorToMessage("AUTH_INVALID_CREDENTIALS")).toBe(
@@ -209,6 +210,9 @@ describe("auth errors", () => {
     expect(mapAuthErrorToMessage("AUTH_PASSWORD_UPDATE_FAILED")).toBe(
       "Le mot de passe n'a pas pu être modifié. Demande un nouveau lien.",
     );
+    expect(mapAuthErrorToMessage("AUTH_RECOVERY_CLEANUP_FAILED")).toBe(
+      "La session de récupération n'a pas pu être fermée en toute sécurité. Ferme cet onglet avant de reprendre la connexion.",
+    );
     expect(mapAuthErrorToMessage("AUTH_CALLBACK_FAILED")).toBe(
       "La demande d'authentification n'a pas pu être validée. Recommence depuis la connexion.",
     );
@@ -217,6 +221,7 @@ describe("auth errors", () => {
       "AUTH_SIGN_UP_FAILED",
       "AUTH_PASSWORD_RESET_FAILED",
       "AUTH_PASSWORD_UPDATE_FAILED",
+      "AUTH_RECOVERY_CLEANUP_FAILED",
       "AUTH_CALLBACK_FAILED",
     ] as const;
     for (const code of genericAuthCodes) {

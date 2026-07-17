@@ -6,8 +6,8 @@ Dernière mise à jour : 17 juillet 2026.
 
 - Les contrats et Server Actions Auth couvrent désormais connexion, inscription, demande de réinitialisation et changement de mot de passe avec normalisation Zod, redirections internes, initialisation idempotente de la salle et erreurs françaises génériques.
 - L’adresse e-mail sert d’identifiant. Le portail public `/login` réunit connexion et création de compte par mot de passe de 10 à 128 caractères dans un shell responsive ; la confirmation de l’adresse est obligatoire et aucun magic link de connexion n’est proposé dans l’interface.
-- Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur, conserve des erreurs génériques et ferme la session locale après modification.
-- La finition B3 centralise les durées de mouvement, limite les translations de survol aux pointeurs fins, neutralise les animations avec réduction de mouvement et fournit des surfaces graphite opaques sans transparence ni flou.
+- Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur. Après modification, il contrôle la fermeture locale de la session puis redirige vers la confirmation publique sûre `/login?notice=password-updated` ; un cleanup retourné en erreur ou levé reste générique et n’annonce jamais de succès.
+- La finition B3 nocturne centralise les durées de mouvement, limite les translations de survol aux pointeurs fins et neutralise les animations avec réduction de mouvement. Le verre interactif reste transparent et flouté sur les petites surfaces compatibles ; les fallbacks, la réduction de transparence et les grands panneaux de lecture utilisent des surfaces graphite opaques.
 - Le sélecteur connexion/inscription anime son état optimiste uniquement lorsqu’une navigation client démarre ; les clics modifiés ou annulés restent alignés avec l’URL affichée.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
@@ -31,10 +31,10 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Vitest couvre la frontière Zod, les repositories, Server Actions, composants et règles existantes.
 - Le scénario `db:test:single-room` vérifie inscription/crédit idempotents, auto-vote refusé, votes immuables, confirmation, règlement/gain unique, invalidation et réouverture.
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
-- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, le changement de mot de passe et le nettoyage de la session recovery. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
+- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 253 tests réussis dans 42 fichiers.
+- `pnpm test` : 256 tests réussis dans 42 fichiers.
 - `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types sans différence après formatage, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : 5 sur 5 réussis.
 - `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build` avec Supabase arrêté et sans variables Supabase, puis `pnpm install --frozen-lockfile` : succès.

@@ -17,6 +17,8 @@ const AUTH_MESSAGES: Record<AuthErrorCode, string> = {
     "La demande n'a pas pu être traitée. Réessaie dans quelques instants.",
   AUTH_PASSWORD_UPDATE_FAILED:
     "Le mot de passe n'a pas pu être modifié. Demande un nouveau lien.",
+  AUTH_RECOVERY_CLEANUP_FAILED:
+    "La session de récupération n'a pas pu être fermée en toute sécurité. Ferme cet onglet avant de reprendre la connexion.",
   SUPABASE_NOT_CONFIGURED:
     "Supabase n'est pas encore configuré pour cet environnement.",
   PROFILE_NOT_FOUND: "Le profil joueur est introuvable.",

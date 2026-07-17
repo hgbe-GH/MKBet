@@ -281,10 +281,9 @@ describe("password authentication actions", () => {
   });
 
   it("checks recovery claims before updating the password", async () => {
-    const result = await updatePasswordAction(
-      initialState,
-      validPasswordUpdateData(),
-    );
+    await expect(
+      updatePasswordAction(initialState, validPasswordUpdateData()),
+    ).rejects.toThrow("NEXT_REDIRECT:/login?notice=password-updated");
 
     expect(getClaims).toHaveBeenCalledOnce();
     expect(updateUser).toHaveBeenCalledWith({
@@ -297,14 +296,11 @@ describe("password authentication actions", () => {
     expect(updateUser.mock.invocationCallOrder[0]).toBeLessThan(
       signOut.mock.invocationCallOrder[0],
     );
-    expect(result).toEqual({
-      ok: true,
-      message: "Mot de passe modifié. Tu peux maintenant te connecter.",
-    });
     expect(signOut).toHaveBeenCalledWith({ scope: "local" });
+    expect(redirect).toHaveBeenCalledWith("/login?notice=password-updated");
   });
 
-  it("keeps a successful password update successful when local sign-out cleanup fails", async () => {
+  it("does not announce success when local sign-out cleanup throws", async () => {
     signOut.mockRejectedValue(new Error("sensitive cleanup detail"));
 
     const result = await updatePasswordAction(
@@ -312,12 +308,33 @@ describe("password authentication actions", () => {
       validPasswordUpdateData(),
     );
 
-    expect(result).toEqual({
-      ok: true,
-      message: "Mot de passe modifié. Tu peux maintenant te connecter.",
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_RECOVERY_CLEANUP_FAILED",
     });
     expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(JSON.stringify(result)).not.toContain("sensitive cleanup detail");
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("does not announce success when local sign-out cleanup returns an error", async () => {
+    signOut.mockResolvedValue({
+      error: new Error("sensitive cleanup result detail"),
+    });
+
+    const result = await updatePasswordAction(
+      initialState,
+      validPasswordUpdateData(),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_RECOVERY_CLEANUP_FAILED",
+    });
+    expect(JSON.stringify(result)).not.toContain(
+      "sensitive cleanup result detail",
+    );
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("accepts a recovery AMR represented as a string", async () => {
@@ -326,17 +343,12 @@ describe("password authentication actions", () => {
       error: null,
     });
 
-    const result = await updatePasswordAction(
-      initialState,
-      validPasswordUpdateData(),
-    );
+    await expect(
+      updatePasswordAction(initialState, validPasswordUpdateData()),
+    ).rejects.toThrow("NEXT_REDIRECT:/login?notice=password-updated");
 
     expect(updateUser).toHaveBeenCalledWith({
       password: "nouveau-mot-de-passe",
-    });
-    expect(result).toEqual({
-      ok: true,
-      message: "Mot de passe modifié. Tu peux maintenant te connecter.",
     });
   });
 

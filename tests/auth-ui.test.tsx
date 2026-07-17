@@ -4,7 +4,7 @@ import type { NextRouter } from "next/router";
 import { describe, expect, it, vi } from "vitest";
 
 import type { AuthFormState } from "@/application/auth/actions";
-import { parseAuthMode } from "@/app/login/page";
+import { hasPasswordUpdatedNotice, parseAuthMode } from "@/app/login/page";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { AuthModeSwitcher } from "@/components/auth/auth-mode-switcher";
 import { PasswordField } from "@/components/auth/password-field";
@@ -168,6 +168,24 @@ describe("auth UI", () => {
     );
     expect(screen.getByDisplayValue("/direct")).toHaveAttribute("name", "next");
     expect(screen.queryByText(/lien d’accès/i)).not.toBeInTheDocument();
+  });
+
+  it("renders a safe public password-update confirmation with the sign-in form", async () => {
+    const LoginPage = (await import("@/app/login/page")).default;
+    render(
+      await LoginPage({
+        searchParams: Promise.resolve({ notice: "password-updated" }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Mot de passe modifié" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Tu peux maintenant te connecter."),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse e-mail")).toBeInTheDocument();
+    expect(screen.getByLabelText("Mot de passe")).toBeInTheDocument();
   });
 
   it("renders the complete password sign-up controls without secrets", () => {
@@ -445,6 +463,13 @@ describe("auth UI", () => {
     expect(parseAuthMode("REGISTER")).toBe("login");
     expect(parseAuthMode(["register"])).toBe("login");
     expect(parseAuthMode(undefined)).toBe("login");
+  });
+
+  it("accepts only the exact public password-update notice", () => {
+    expect(hasPasswordUpdatedNotice("password-updated")).toBe(true);
+    expect(hasPasswordUpdatedNotice("PASSWORD-UPDATED")).toBe(false);
+    expect(hasPasswordUpdatedNotice(["password-updated"])).toBe(false);
+    expect(hasPasswordUpdatedNotice(undefined)).toBe(false);
   });
 
   it("renders invitation previews without leaking the raw token", () => {

@@ -27,8 +27,6 @@ const SIGN_UP_SUCCESS =
   "Compte créé. Confirme ton adresse depuis l'e-mail reçu avant de te connecter.";
 const RESET_REQUEST_SUCCESS =
   "Si un compte correspond à cette adresse, un e-mail de récupération vient d'être envoyé.";
-const PASSWORD_UPDATE_SUCCESS =
-  "Mot de passe modifié. Tu peux maintenant te connecter.";
 
 function failure(code: AuthErrorCode): AuthFormState {
   return {
@@ -190,18 +188,23 @@ export async function updatePasswordAction(
     }
 
     try {
-      await supabase.auth.signOut({ scope: "local" });
+      const { error: signOutError } = await supabase.auth.signOut({
+        scope: "local",
+      });
+      if (signOutError) {
+        return failure("AUTH_RECOVERY_CLEANUP_FAILED");
+      }
     } catch {
-      // The password change is authoritative; local cleanup is best effort.
+      return failure("AUTH_RECOVERY_CLEANUP_FAILED");
     }
-
-    return { ok: true, message: PASSWORD_UPDATE_SUCCESS };
   } catch (error) {
     if (toSupabaseConfigurationError(error)) {
       return failure("SUPABASE_NOT_CONFIGURED");
     }
     return failure("AUTH_PASSWORD_UPDATE_FAILED");
   }
+
+  redirect("/login?notice=password-updated");
 }
 
 export async function signOut() {

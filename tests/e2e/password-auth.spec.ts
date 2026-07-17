@@ -237,7 +237,15 @@ test("creates, confirms and recovers a password account without enumeration", as
   );
   await expectNoHorizontalOverflow(page);
   await page.getByRole("button", { name: "MODIFIER LE MOT DE PASSE" }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login\?notice=password-updated$/);
+  await expect(
+    page.getByRole("heading", { name: "Mot de passe modifié" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Tu peux maintenant te connecter."),
+  ).toBeVisible();
+  await expect(page.getByLabel("Adresse e-mail")).toBeVisible();
+  await expect(page.getByLabel("Mot de passe", { exact: true })).toBeVisible();
   await page.goto("/auth/update-password");
   await expect(page).toHaveURL(/\/login$/);
   await submitSignIn(page, email, initialPassword);

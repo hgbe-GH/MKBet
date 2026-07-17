@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { useActionState, useEffect, useRef } from "react";
 
@@ -33,23 +32,6 @@ export function UpdatePasswordForm({ action }: UpdatePasswordFormProps) {
       passwordRef.current?.focus();
     }
   }, [hasError, state]);
-
-  if (state.ok && state.message) {
-    return (
-      <InlineNotice className="space-y-4 p-5 sm:p-6" tone="success">
-        <h1 className="text-3xl font-black tracking-[-0.04em] text-white">
-          Mot de passe modifié
-        </h1>
-        <p className="leading-6">{state.message}</p>
-        <Link
-          className="inline-flex min-h-11 items-center font-bold text-white underline underline-offset-4"
-          href="/login"
-        >
-          Se connecter
-        </Link>
-      </InlineNotice>
-    );
-  }
 
   return (
     <form action={formAction} className="space-y-5" ref={formRef}>
