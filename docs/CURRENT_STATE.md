@@ -1,6 +1,6 @@
 # État actuel
 
-Dernière mise à jour : 17 juillet 2026.
+Dernière mise à jour : 20 juillet 2026.
 
 ## Produit réel
 
@@ -41,9 +41,9 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 
 ## Production
 
-Cette validation prépare la livraison locale B3 et Auth par mot de passe sans fusion, push, modification Supabase distante ni déploiement Vercel. La promotion Production reste à effectuer après revue de la branche.
+La branche de refonte a été fusionnée dans `main`, puis poussée sur GitHub le 20 juillet 2026. Supabase Auth Production impose désormais un minimum de 10 caractères et autorise le callback exact `https://mk-bet.vercel.app/auth/callback`. Le déploiement Vercel correspondant est actif : `/`, `/login` et `/api/health` répondent en HTTP 200, l’interface de connexion par mot de passe est servie et une requête anonyme vers `/direct` revient vers la connexion.
 
-Avant cette promotion, Supabase Auth Production doit imposer un minimum de 10 caractères, exiger la confirmation des e-mails et autoriser exactement `https://mk-bet.vercel.app/auth/callback`. Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir les paramètres `intent` et `next`. Vercel doit conserver uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel.
+Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir les paramètres `intent` et `next`. Vercel conserve uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel. La réception réelle des e-mails de confirmation et de récupération reste à vérifier manuellement avec une adresse membre après cette promotion.
 
 ## Limites assumées
 
