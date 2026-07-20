@@ -50,15 +50,16 @@ enabled = false
 enabled = true
 site_url = "https://mk-bet.vercel.app"
 additional_redirect_urls = [
-  "http://127.0.0.1:3000",
+  "http://localhost:3000/**",
+  "http://127.0.0.1:3000/**",
   "http://localhost:3100/**",
   "http://127.0.0.1:3100/**",
-  "https://mk-bet.vercel.app/**"
+  "https://mk-bet.vercel.app/auth/callback"
 ]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false
-minimum_password_length = 8
+minimum_password_length = 10
 
 [auth.rate_limit]
 email_sent = 100

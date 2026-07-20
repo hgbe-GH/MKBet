@@ -1,23 +1,48 @@
-import { LoginForm } from "@/components/auth/login-form";
-import { requestLoginLink } from "@/application/auth/actions";
+import {
+  signInWithPasswordAction,
+  signUpWithPasswordAction,
+} from "@/application/auth/actions";
 import { sanitizeInternalRedirectPath } from "@/application/auth";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignUpForm } from "@/components/auth/sign-up-form";
+import { InlineNotice } from "@/components/ui/inline-notice";
 
 interface LoginPageProps {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
+export function parseAuthMode(value: unknown): "login" | "register" {
+  return value === "register" ? "register" : "login";
+}
+
+export function hasPasswordUpdatedNotice(value: unknown): boolean {
+  return value === "password-updated";
+}
+
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const next = sanitizeInternalRedirectPath(params?.next);
+  const mode = parseAuthMode(params?.mode);
+  const showPasswordUpdatedNotice = hasPasswordUpdatedNotice(params?.notice);
 
   return (
-    <main className="grid min-h-screen place-items-center bg-stone-100 px-5 py-12 text-stone-950">
-      <section className="w-full max-w-md border-t-4 border-red-900 bg-white p-7 shadow-[0_18px_50px_rgba(41,37,36,0.08)] sm:p-10">
-        <p className="mb-4 text-xs font-black tracking-[0.18em] text-red-800 uppercase">
-          MK BET
-        </p>
-        <LoginForm action={requestLoginLink} next={next} />
-      </section>
-    </main>
+    <AuthShell mode={mode} next={next}>
+      {mode === "register" ? (
+        <SignUpForm action={signUpWithPasswordAction} next={next} />
+      ) : (
+        <div className="space-y-5">
+          {showPasswordUpdatedNotice ? (
+            <InlineNotice className="space-y-1" tone="success">
+              <h2 className="text-lg font-black text-white">
+                Mot de passe modifié
+              </h2>
+              <p>Tu peux maintenant te connecter.</p>
+            </InlineNotice>
+          ) : null}
+          <SignInForm action={signInWithPasswordAction} next={next} />
+        </div>
+      )}
+    </AuthShell>
   );
 }

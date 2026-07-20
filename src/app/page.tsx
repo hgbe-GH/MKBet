@@ -1,56 +1,52 @@
+import Link from "next/link";
+
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
-import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-stone-100">
+    <div className="flex min-h-dvh flex-col text-white">
       <SiteHeader />
       <main
-        className="relative isolate flex flex-1 items-center overflow-hidden px-5 py-12 sm:px-8 sm:py-16"
+        className="relative isolate flex flex-1 items-center overflow-hidden px-5 py-12 sm:px-8"
+        data-public-aurora
         id="main-content"
       >
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,rgba(120,113,108,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(120,113,108,0.08)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:linear-gradient(to_bottom,black,transparent_82%)]"
+          className="absolute top-[12%] right-[-8rem] -z-10 h-80 w-80 rounded-full bg-[var(--brand)]/25 blur-3xl"
         />
-        <section className="mk-enter mx-auto w-full max-w-3xl overflow-hidden bg-white shadow-[0_28px_80px_rgba(41,37,36,0.12)]">
-          <div className="h-1.5 bg-red-900" />
-          <div className="p-7 sm:p-12 lg:p-14">
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-stone-200 pb-7">
-              <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-[0.68rem] font-black tracking-[0.15em] text-red-900 uppercase">
-                <span
-                  aria-hidden="true"
-                  className="mk-status-dot h-2 w-2 rounded-full bg-red-700"
-                />
-                SALLE OUVERTE
-              </span>
-              <span className="text-[0.68rem] font-bold tracking-[0.16em] text-stone-500 uppercase">
-                Margot × Kévin
-              </span>
-            </div>
-
-            <div className="py-9 sm:py-12">
-              <p className="mb-3 text-sm font-bold tracking-[0.14em] text-red-800 uppercase">
-                Saison post-rupture
-              </p>
-              <h1 className="max-w-2xl text-4xl leading-[0.98] font-black tracking-[-0.055em] text-stone-950 sm:text-6xl">
-                La salle des marchés de la rechute
-              </h1>
-              <p className="mt-6 max-w-lg text-lg leading-8 text-stone-600">
-                Parie en MKB, partage un fait et laisse le groupe trancher.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-5 border-t border-stone-200 pt-7 sm:flex-row sm:items-center sm:justify-between">
-              <Button asChild>
-                <Link href="/login?next=/direct">ENTRER DANS LA SALLE</Link>
-              </Button>
-              <p className="flex items-center gap-2 text-xs font-bold tracking-[0.08em] text-stone-500 uppercase">
-                <span aria-hidden="true">●</span>
-                100 % monnaie fictive
-              </p>
-            </div>
+        <section className="mk-enter mx-auto grid w-full max-w-6xl gap-12 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+          <div>
+            <p className="mk-eyebrow">Salle privée · 7 membres</p>
+            <p className="mt-5 text-sm font-black tracking-[0.12em] text-[var(--text-secondary)] uppercase">
+              Margot × Kévin
+            </p>
+            <h1 className="mt-4 max-w-4xl text-5xl leading-[0.9] font-black tracking-[-0.07em] text-balance sm:text-7xl lg:text-[6.5rem]">
+              Tout se joue{" "}
+              <span className="text-[var(--brand)]">entre nous.</span>
+            </h1>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-[var(--text-secondary)]">
+              Une preuve, deux votes, une décision. Suis l’histoire de Margot et
+              Kévin en MKB fictifs.
+            </p>
+          </div>
+          <div className="mk-glass-subtle rounded-2xl p-5 sm:p-6">
+            <p className="text-xs font-black tracking-[0.12em] text-[var(--brand-hover)] uppercase">
+              Le marché est ouvert
+            </p>
+            <p className="mt-3 text-2xl font-black tracking-[-0.04em]">
+              Entre dans la salle.
+            </p>
+            <Link
+              className="mk-primary-action mt-6 w-full"
+              href="/login?next=/direct"
+            >
+              Entrer dans la salle
+            </Link>
+            <p className="mt-4 text-xs font-bold tracking-[0.08em] text-[var(--text-muted)] uppercase">
+              100 % monnaie fictive
+            </p>
           </div>
         </section>
       </main>
@@ -58,4 +54,3 @@ export default function Home() {
     </div>
   );
 }
-import Link from "next/link";

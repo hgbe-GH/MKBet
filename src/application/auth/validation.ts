@@ -16,26 +16,61 @@ const optionalText = z
   }, z.string().min(1).max(500).nullable())
   .default(null);
 
-export const loginFormSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email("Adresse email invalide")
-    .max(320),
-  displayName: z
-    .preprocess((value) => {
-      if (typeof value !== "string") {
-        return null;
-      }
-      const normalized = normalizeSpaces(value);
-      return normalized.length > 0 ? normalized : null;
-    }, z.string().min(2).max(80).nullable())
-    .default(null),
-  next: z
-    .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())
-    .default("/direct"),
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email("Adresse email invalide")
+  .max(320);
+
+const passwordSchema = z
+  .string()
+  .min(10, "Le mot de passe doit contenir au moins 10 caractères")
+  .max(128, "Le mot de passe est trop long");
+
+const safeNextSchema = z
+  .preprocess((value) => sanitizeInternalRedirectPath(value), z.string())
+  .default("/direct");
+
+export const signInFormSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1).max(128),
+  next: safeNextSchema,
 });
+
+export const signUpFormSchema = z
+  .object({
+    email: emailSchema,
+    displayName: z
+      .string()
+      .transform(normalizeSpaces)
+      .pipe(z.string().min(2).max(80))
+      .refine(
+        (value) => !/[<>]/.test(value),
+        "Le nom ne peut pas contenir HTML",
+      ),
+    password: passwordSchema,
+    passwordConfirmation: passwordSchema,
+    next: safeNextSchema,
+  })
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["passwordConfirmation"],
+  });
+
+export const passwordResetRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const passwordUpdateSchema = z
+  .object({
+    password: passwordSchema,
+    passwordConfirmation: passwordSchema,
+  })
+  .refine((value) => value.password === value.passwordConfirmation, {
+    message: "Les mots de passe ne correspondent pas",
+    path: ["passwordConfirmation"],
+  });
 
 export const seasonFormSchema = z.object({
   title: z.string().transform(normalizeSpaces).pipe(z.string().min(2).max(120)),
@@ -91,7 +126,12 @@ export const updateAccountSchema = z.object({
     .default(null),
 });
 
-export type LoginFormInput = z.infer<typeof loginFormSchema>;
+export type SignInFormInput = z.infer<typeof signInFormSchema>;
+export type SignUpFormInput = z.infer<typeof signUpFormSchema>;
+export type PasswordResetRequestInput = z.infer<
+  typeof passwordResetRequestSchema
+>;
+export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>;
 export type SeasonFormInput = z.infer<typeof seasonFormSchema>;
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
 export type UpdateAccountInput = z.infer<typeof updateAccountSchema>;

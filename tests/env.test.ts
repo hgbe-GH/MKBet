@@ -16,10 +16,30 @@ describe("environment validation", () => {
     );
   });
 
-  it("returns a validated absolute site URL", () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://mk-bet.vercel.app");
+  it.each([
+    ["https://MK-BET.vercel.app:443/", "https://mk-bet.vercel.app"],
+    ["http://localhost:3100/", "http://localhost:3100"],
+  ])("normalizes the valid site origin %s", (configured, expected) => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", configured);
 
-    expect(getSiteUrl()).toBe("https://mk-bet.vercel.app");
+    expect(getSiteUrl()).toBe(expected);
+  });
+
+  it.each([
+    "http://mk-bet.vercel.app",
+    "http://localhost.evil.example",
+    "ftp://mk-bet.vercel.app",
+    "javascript:alert(1)",
+    "https://user:password@mk-bet.vercel.app",
+    "https://mk-bet.vercel.app/auth/callback",
+    "https://mk-bet.vercel.app/?intent=signup",
+    "https://mk-bet.vercel.app/#fragment",
+  ])("rejects the non-origin site URL %s", (configured) => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", configured);
+
+    expect(() => getSiteUrl()).toThrowError(
+      /NEXT_PUBLIC_SITE_URL is missing or invalid/,
+    );
   });
 
   it("reports missing public Supabase configuration clearly", () => {

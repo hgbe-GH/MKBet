@@ -28,7 +28,7 @@ export function MobileBetSlip({
   }, [open]);
 
   return (
-    <div className="fixed inset-x-3 bottom-20 z-30 overflow-hidden rounded-lg border border-[var(--border)] bg-white shadow-[0_14px_40px_rgba(28,25,23,0.18)] lg:bottom-4 xl:hidden">
+    <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-30 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-raised)] shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:right-3 lg:bottom-4 lg:left-3 xl:hidden">
       <button
         aria-controls="mobile-bet-slip-panel"
         aria-expanded={open}
@@ -38,16 +38,21 @@ export function MobileBetSlip({
         type="button"
       >
         <span>{open ? "Fermer le ticket" : "Ouvrir le ticket"}</span>
-        <span className="rounded-sm bg-[var(--brand-muted)] px-2 py-1 text-xs text-[var(--brand-active)] tabular-nums">
+        <span className="rounded-md bg-[var(--brand)] px-2 py-1 text-xs text-[var(--on-brand)] tabular-nums">
           {betSlip.selections.length}
         </span>
       </button>
       {open ? (
         <div
           className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-[var(--border)]"
+          data-motion="ticket"
           id="mobile-bet-slip-panel"
         >
-          <BetSlip balanceMkb={balanceMkb} seasonId={seasonId} />
+          <BetSlip
+            balanceMkb={balanceMkb}
+            seasonId={seasonId}
+            surface="opaque"
+          />
         </div>
       ) : null}
     </div>

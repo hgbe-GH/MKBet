@@ -3,6 +3,8 @@ import { OddsMovement } from "@/components/sportsbook/odds-movement";
 import { StatusBadge } from "@/components/sportsbook/status-badge";
 import { EmptyState } from "@/components/states/empty-state";
 import { listCurrentUserBets } from "@/data/supabase/betting/bet-repository";
+import { PageIntro } from "@/components/ui/page-intro";
+import { SegmentedFilter } from "@/components/ui/segmented-filter";
 
 export const dynamic = "force-dynamic";
 
@@ -23,37 +25,27 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
 
   return (
     <div className="space-y-5">
-      <header>
-        <p className="text-xs font-black tracking-[0.14em] text-[var(--brand)] uppercase">
-          Mes paris
-        </p>
-        <h1 className="mt-1 text-3xl font-black tracking-[-0.04em]">
-          Tickets enregistrés
-        </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          Les cotes affichées sur chaque jambe sont celles figées au placement.
-        </p>
-      </header>
-      <nav aria-label="Filtrer les tickets" className="flex gap-2">
-        <a
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
-          href="/bets"
-        >
-          Ouverts
-        </a>
-        <a
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
-          href="/bets?status=settled"
-        >
-          Réglés
-        </a>
-        <a
-          className="inline-flex min-h-11 items-center rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-bold"
-          href="/bets?status=all"
-        >
-          Tous
-        </a>
-      </nav>
+      <PageIntro
+        eyebrow="Mes paris"
+        title="Tickets enregistrés"
+        description="Les cotes de chaque sélection sont figées au placement."
+      />
+      <SegmentedFilter
+        ariaLabel="Filtrer les tickets"
+        items={[
+          { href: "/bets", label: "Ouverts", active: status === "OPEN" },
+          {
+            href: "/bets?status=settled",
+            label: "Réglés",
+            active: requested === "settled",
+          },
+          {
+            href: "/bets?status=all",
+            label: "Tous",
+            active: requested === "all",
+          },
+        ]}
+      />
       {bets.length === 0 ? (
         <EmptyState
           title="Aucun ticket"
@@ -62,10 +54,7 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
       ) : (
         <div className="grid gap-4">
           {bets.map((bet) => (
-            <article
-              className="rounded-lg border border-[var(--border)] bg-white p-5"
-              key={bet.id}
-            >
+            <article className="mk-surface-opaque rounded-2xl p-5" key={bet.id}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-black">{bet.type}</p>
@@ -91,7 +80,7 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
               <ul className="mt-4 grid gap-2">
                 {bet.legs.map((leg) => (
                   <li
-                    className="rounded-md bg-stone-50 p-3"
+                    className="rounded-lg bg-white/[0.055] p-3"
                     key={`${leg.marketTitle}:${leg.outcomeLabel}`}
                   >
                     <p className="font-bold">

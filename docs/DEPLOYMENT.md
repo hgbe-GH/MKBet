@@ -13,29 +13,34 @@ MK Bet est publié sur [mk-bet.vercel.app](https://mk-bet.vercel.app). Le projet
 
 ## Environnements et variables
 
-Configurer séparément les variables suivantes dans **Development**, **Preview** et **Production** :
+Configurer séparément les variables suivantes dans **Development**, dans chaque **Preview** testée et dans **Production** :
 
 - `NEXT_PUBLIC_SITE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. `SUPABASE_SERVICE_ROLE_KEY` ne doit être ajoutée dans Vercel que lorsqu’une future fonctionnalité serveur l’exige réellement.
+`NEXT_PUBLIC_SITE_URL` doit être l’origine publique exacte de l’environnement, sans chemin : `http://localhost:3000` en développement local, `https://<domaine-preview-vercel>` pour une Preview et `https://mk-bet.vercel.app` en Production. Les Server Actions utilisent exclusivement cette valeur pour construire les URLs de confirmation et de récupération ; elles ne déduisent pas l’origine depuis la requête.
 
-Chaque déploiement qui nécessite une URL publique absolue doit utiliser `NEXT_PUBLIC_SITE_URL`. En Preview, le callback Auth peut utiliser l’origine validée de la requête pour fonctionner avec les URLs générées par Vercel.
+`NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` doivent cibler le projet Supabase prévu pour l’environnement. `NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. Ne pas configurer `SUPABASE_SERVICE_ROLE_KEY` dans Vercel : le parcours déployé n’en a pas besoin.
 
-Les secrets ne doivent jamais être committés. `.env.local` reste local et la clé de service ne doit être disponible que dans le runtime serveur.
+Les secrets ne doivent jamais être committés. `.env.local` reste local. Les seules valeurs Supabase présentes dans Vercel sont l’URL publique et la clé publishable publique.
 
 ## Redirections Supabase
 
-Déclarer dans Supabase Auth les URLs de redirection autorisées pour :
+Dans **Authentication → URL Configuration**, définir l’URL de site et déclarer les callbacks autorisés :
 
-- local : `http://localhost:3000/auth/callback` et `http://127.0.0.1:3000/auth/callback` ;
-- Preview : les domaines Preview utilisés par le projet, sans coder de domaine inventé ;
-- Production : `https://mk-bet.vercel.app/auth/callback`.
+- local : URL de site `http://localhost:3000`, puis `http://localhost:3000/**` et `http://127.0.0.1:3000/**` dans la liste locale des redirections ; ces patterns couvrent `/auth/callback` et ses paramètres de requête ;
+- E2E local : `http://localhost:3100/**` et `http://127.0.0.1:3100/**`, pour la même raison ;
+- Preview : définir `NEXT_PUBLIC_SITE_URL=https://<preview-host>` avec l’origine exacte, puis ajouter `https://<preview-host>/auth/callback**` aux Additional Redirect URLs Supabase pour ce host précis ;
+- Production : conserver l’URL de site `https://mk-bet.vercel.app` et le callback exact `https://mk-bet.vercel.app/auth/callback`.
+
+Les Server Actions construisent leur `redirectTo` depuis `NEXT_PUBLIC_SITE_URL`, puis ajoutent `?intent=signup&next=…` ou `?intent=recovery`. Lorsque le Site URL Supabase reste celui de Production, le suffixe `**` du pattern Preview est donc nécessaire pour accepter le callback et sa query string. Selon la [syntaxe officielle Supabase](https://supabase.com/docs/guides/auth/redirect-urls#use-wildcards-in-redirect-urls), `**` couvre toute séquence de caractères ; il reste ici après le chemin fixe `/auth/callback` et ne généralise ni le domaine ni les autres routes.
+
+Ne pas autoriser `https://*.vercel.app/**`, `https://**.vercel.app/**` ni inventer un domaine Preview : chaque host réellement testé est ajouté séparément. En Production, le Site URL et le callback partagent la même origine canonique, donc le callback exact suffit et aucun wildcard externe n’est requis.
 
 Les paramètres `next` reçus du client sont limités à des chemins internes.
 
-La configuration Auth Production actuellement appliquée utilise `https://mk-bet.vercel.app` comme `site_url` et autorise son callback. Les URLs Preview ne sont ajoutées que lorsqu’un domaine Preview concret doit accepter des magic links.
+Activer la confirmation des e-mails et fixer la longueur minimale du mot de passe à 10 dans Supabase Auth pour chaque projet. Les mêmes callbacks servent aux confirmations d’inscription et aux récupérations de mot de passe ; le magic link de connexion n’est pas exposé dans l’interface. Les URLs Preview ne sont ajoutées que lorsqu’un domaine concret doit recevoir ces e-mails.
 
 ## Migrations Supabase
 
@@ -49,7 +54,7 @@ Avant de déployer une version qui dépend d’une nouvelle migration :
 4. appliquer les mêmes migrations versionnées à Production ;
 5. seulement ensuite promouvoir la version applicative dépendante.
 
-Le build Vercel réussit sans connexion active à PostgreSQL. `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sont configurées séparément sur Vercel pour Development, Preview et Production; `NEXT_PUBLIC_SITE_URL` est configurée pour Production.
+Le build Vercel réussit sans connexion active à PostgreSQL. `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sont configurées séparément sur Vercel pour Development, chaque Preview testée et Production.
 
 ## Vérification après déploiement
 
@@ -67,7 +72,7 @@ Chromium sert exclusivement au développement et aux tests end-to-end locaux. Le
 
 La suite E2E utilise Supabase local, Mailpit et un build isolé `.next-e2e` sur le port 3100. Les cookies et états Auth sont générés à chaque exécution dans `tests/e2e/.auth`, dossier ignoré. Aucun navigateur n’est lancé par `pnpm build`, aucune variable Vercel supplémentaire n’est requise et les snapshots ne dépendent d’aucune URL distante.
 
-Le parcours normal n’utilise pas `SUPABASE_SERVICE_ROLE_KEY`. Les Server Actions utilisent la session SSR de l’utilisateur et les RPC contrôlent `auth.uid()` ainsi que les rôles. Aucun timer serveur n’assure l’expiration des devis : PostgreSQL valide `expires_at` lors du placement.
+Le parcours normal n’utilise pas `SUPABASE_SERVICE_ROLE_KEY`, qui reste absent de Vercel. Les Server Actions utilisent la session SSR de l’utilisateur et les RPC contrôlent `auth.uid()` ainsi que les rôles. Aucun timer serveur n’assure l’expiration des devis : PostgreSQL valide `expires_at` lors du placement.
 
 ## Rollback
 

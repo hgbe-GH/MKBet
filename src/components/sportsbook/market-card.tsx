@@ -29,7 +29,7 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
   const betSlip = useBetSlip();
 
   return (
-    <article className="mk-slide-up rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[0_10px_30px_rgba(28,25,23,0.05)]">
+    <article className="mk-slide-up mk-surface-opaque rounded-2xl p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -74,12 +74,12 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
         {market.description}
       </p>
       {market.lastAction ? (
-        <p className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-900">
+        <p className="mt-3 rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/10 p-3 text-sm text-[#ffc3cd]">
           Dernier signal : {market.lastAction}
         </p>
       ) : null}
       {market.suspensionReason ? (
-        <p className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+        <p className="mt-3 rounded-lg border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-3 text-sm text-[#ffe0aa]">
           Suspension : {market.suspensionReason}
         </p>
       ) : null}

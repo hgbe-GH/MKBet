@@ -2,6 +2,7 @@ import { updateAccount } from "@/application/auth/actions";
 import { getCurrentUser } from "@/auth/get-current-user";
 import { AccountForm } from "@/components/account/account-form";
 import { Button } from "@/components/ui/button";
+import { PageIntro } from "@/components/ui/page-intro";
 
 export const dynamic = "force-dynamic";
 
@@ -14,16 +15,9 @@ export default async function AccountPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <p className="text-sm font-black tracking-[0.14em] text-red-800 uppercase">
-          Compte
-        </p>
-        <h1 className="mt-2 text-3xl font-black tracking-[-0.035em]">
-          Paramètres du compte
-        </h1>
-      </div>
-      <section className="space-y-6 rounded-md border border-stone-200 bg-white p-6">
-        <p className="text-sm text-stone-600">
+      <PageIntro eyebrow="Compte" title="Ton profil" />
+      <section className="mk-surface-opaque space-y-6 rounded-2xl p-6">
+        <p className="text-sm text-[var(--text-secondary)]">
           Email :{" "}
           <span className="font-bold">{user?.email ?? "non disponible"}</span>
         </p>

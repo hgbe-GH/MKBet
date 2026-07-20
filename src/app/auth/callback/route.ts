@@ -1,11 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { sanitizeInternalRedirectPath } from "@/application/auth";
-import { asRpcClient } from "@/data/supabase/rpc";
+import {
+  hasRecoveryAuthenticationMethod,
+  hasValidAuthenticationMethods,
+} from "@/application/auth/recovery-claims";
+import { initializeAuthenticatedAccess } from "@/application/auth/initialize-access";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type AuthCallbackFailureStage =
-  "exchange" | "missing_code" | "profile" | "room";
+  "claims" | "exchange" | "missing_code" | "profile" | "recovery" | "room";
 
 function redirectToAuthError(
   request: NextRequest,
@@ -20,6 +24,7 @@ function redirectToAuthError(
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const intent = requestUrl.searchParams.get("intent");
   const next = sanitizeInternalRedirectPath(
     requestUrl.searchParams.get("next"),
   );
@@ -28,25 +33,48 @@ export async function GET(request: NextRequest) {
     return redirectToAuthError(request, "missing_code");
   }
 
-  const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  let supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
+  try {
+    supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
+    if (error) {
+      return redirectToAuthError(request, "exchange");
+    }
+  } catch {
     return redirectToAuthError(request, "exchange");
   }
 
-  const { error: profileError } = await asRpcClient(supabase).rpc(
-    "ensure_current_profile",
-  );
-  if (profileError) {
+  let claims: unknown;
+  try {
+    const { data: claimsData, error: claimsError } =
+      await supabase.auth.getClaims();
+    claims = claimsData?.claims;
+
+    if (claimsError || !hasValidAuthenticationMethods(claims)) {
+      return redirectToAuthError(request, "claims");
+    }
+  } catch {
+    return redirectToAuthError(request, "claims");
+  }
+
+  if (hasRecoveryAuthenticationMethod(claims)) {
+    return NextResponse.redirect(new URL("/auth/update-password", request.url));
+  }
+
+  if (intent === "recovery") {
+    return redirectToAuthError(request, "recovery");
+  }
+
+  let initialization: Awaited<ReturnType<typeof initializeAuthenticatedAccess>>;
+  try {
+    initialization = await initializeAuthenticatedAccess(supabase);
+  } catch {
     return redirectToAuthError(request, "profile");
   }
 
-  const { error: roomError } = await asRpcClient(supabase).rpc(
-    "ensure_single_room_access",
-  );
-  if (roomError) {
-    return redirectToAuthError(request, "room");
+  if (!initialization.ok) {
+    return redirectToAuthError(request, initialization.stage);
   }
 
   return NextResponse.redirect(new URL(next || "/direct", request.url));

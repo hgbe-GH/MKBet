@@ -8,7 +8,17 @@ const AUTH_MESSAGES: Record<AuthErrorCode, string> = {
   AUTH_EMAIL_SEND_FAILED:
     "Impossible d'envoyer le lien d'accès. Réessaie dans quelques instants.",
   AUTH_CALLBACK_FAILED:
-    "Le lien d'accès n'a pas pu être validé. Demande un nouveau lien.",
+    "La demande d'authentification n'a pas pu être validée. Recommence depuis la connexion.",
+  AUTH_INVALID_CREDENTIALS:
+    "Connexion impossible. Vérifie tes informations ou réinitialise ton mot de passe.",
+  AUTH_SIGN_UP_FAILED:
+    "Impossible de créer le compte. Vérifie les informations et réessaie.",
+  AUTH_PASSWORD_RESET_FAILED:
+    "La demande n'a pas pu être traitée. Réessaie dans quelques instants.",
+  AUTH_PASSWORD_UPDATE_FAILED:
+    "Le mot de passe n'a pas pu être modifié. Demande un nouveau lien.",
+  AUTH_RECOVERY_CLEANUP_FAILED:
+    "La session de récupération n'a pas pu être fermée en toute sécurité. Ferme cet onglet avant de reprendre la connexion.",
   SUPABASE_NOT_CONFIGURED:
     "Supabase n'est pas encore configuré pour cet environnement.",
   PROFILE_NOT_FOUND: "Le profil joueur est introuvable.",

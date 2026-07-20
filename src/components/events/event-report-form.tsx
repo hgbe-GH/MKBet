@@ -26,12 +26,15 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
       <input name="idempotencyKey" type="hidden" value={idempotencyKey} />
       <input name="occurredAt" type="hidden" value={occurredAt} />
 
-      <div className="grid gap-2">
+      <fieldset aria-label="1. Événement" className="mk-form-step grid gap-2">
+        <legend className="mb-3 text-sm font-black text-[var(--brand-hover)]">
+          <span aria-hidden="true">01 · </span>Événement
+        </legend>
         <label className="text-sm font-black" htmlFor="report-type">
           Type d’événement
         </label>
         <select
-          className="min-h-12 rounded-md border border-[var(--border-strong)] bg-white px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+          className="min-h-12 rounded-lg border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3 text-base text-white"
           id="report-type"
           name="reportType"
           required
@@ -42,14 +45,17 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
             </option>
           ))}
         </select>
-      </div>
+      </fieldset>
 
-      <div className="grid gap-2">
+      <fieldset aria-label="2. Moment" className="mk-form-step grid gap-2">
+        <legend className="mb-3 text-sm font-black text-[var(--brand-hover)]">
+          <span aria-hidden="true">02 · </span>Moment
+        </legend>
         <label className="text-sm font-black" htmlFor="occurred-at-local">
           Date et heure réelles
         </label>
         <input
-          className="min-h-12 rounded-md border border-[var(--border-strong)] bg-white px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+          className="min-h-12 rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-3 text-base text-white"
           id="occurred-at-local"
           max={new Date().toISOString().slice(0, 16)}
           onChange={(event) =>
@@ -65,14 +71,14 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
         <p className="text-sm text-[var(--text-secondary)]">
           Saisis l’heure locale affichée sur ton appareil.
         </p>
-      </div>
+      </fieldset>
 
       <div className="grid gap-2">
         <label className="text-sm font-black" htmlFor="report-note">
           Ce qui s’est passé
         </label>
         <textarea
-          className="min-h-32 rounded-md border border-[var(--border-strong)] bg-white p-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+          className="min-h-32 rounded-lg border border-[var(--border-strong)] bg-white/[0.07] p-3 text-base text-white"
           id="report-note"
           maxLength={500}
           name="note"
@@ -80,12 +86,18 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
         />
       </div>
 
-      <div className="grid gap-2">
+      <fieldset
+        aria-label="3. Marché concerné"
+        className="mk-form-step grid gap-2"
+      >
+        <legend className="mb-3 text-sm font-black text-[var(--brand-hover)]">
+          <span aria-hidden="true">03 · </span>Marché concerné
+        </legend>
         <label className="text-sm font-black" htmlFor="report-market">
           Marché concerné
         </label>
         <select
-          className="min-h-12 rounded-md border border-[var(--border-strong)] bg-white px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
+          className="min-h-12 rounded-lg border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3 text-base text-white"
           id="report-market"
           name="marketId"
           onChange={(event) => setMarketId(event.currentTarget.value)}
@@ -98,35 +110,41 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
             </option>
           ))}
         </select>
-      </div>
 
-      {selectedMarket ? (
-        <div className="grid gap-2">
-          <label className="text-sm font-black" htmlFor="report-outcome">
-            Issue observée
-          </label>
-          <select
-            className="min-h-12 rounded-md border border-[var(--border-strong)] bg-white px-3 text-base focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)]"
-            id="report-outcome"
-            name="outcomeId"
-            required
-          >
-            {selectedMarket.outcomes.map((outcome) => (
-              <option key={outcome.id} value={outcome.id}>
-                {outcome.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
+        {selectedMarket ? (
+          <div className="grid gap-2">
+            <label className="text-sm font-black" htmlFor="report-outcome">
+              Issue observée
+            </label>
+            <select
+              className="min-h-12 rounded-lg border border-[var(--border-strong)] bg-[var(--surface-raised)] px-3 text-base text-white"
+              id="report-outcome"
+              name="outcomeId"
+              required
+            >
+              {selectedMarket.outcomes.map((outcome) => (
+                <option key={outcome.id} value={outcome.id}>
+                  {outcome.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+      </fieldset>
 
-      <div className="grid gap-2">
+      <fieldset
+        aria-label="4. Preuves privées"
+        className="mk-form-step grid gap-2"
+      >
+        <legend className="mb-3 text-sm font-black text-[var(--brand-hover)]">
+          <span aria-hidden="true">04 · </span>Preuves privées
+        </legend>
         <label className="text-sm font-black" htmlFor="report-files">
           Preuves privées
         </label>
         <input
           accept="image/jpeg,image/png,image/webp"
-          className="min-h-12 rounded-md border border-dashed border-[var(--border-strong)] bg-[var(--surface-muted)] p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand)] file:px-3 file:py-2 file:font-bold file:text-white"
+          className="min-h-12 rounded-lg border border-dashed border-[var(--border-strong)] bg-white/[0.05] p-3 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-[var(--brand)] file:px-3 file:py-2 file:font-bold file:text-[var(--on-brand)]"
           id="report-files"
           multiple
           name="files"
@@ -135,10 +153,10 @@ export function EventReportForm({ markets }: { markets: ReportableMarket[] }) {
         <p className="text-sm text-[var(--text-secondary)]">
           Jusqu’à cinq images, visibles uniquement par les comptes connectés.
         </p>
-      </div>
+      </fieldset>
 
       <button
-        className="min-h-12 rounded-md bg-[var(--brand)] px-5 py-3 font-black text-white transition-transform active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+        className="mk-primary-action w-full disabled:cursor-wait disabled:opacity-60"
         disabled={isPending}
         type="submit"
       >

@@ -2,7 +2,7 @@
 
 ## Direction
 
-L’interface reprend les conventions génériques d’un sportsbook privé : densité lisible, cotes rectangulaires, surfaces blanches, fond gris très clair et rouge profond MK Bet. Elle ne copie ni logo, ni asset, ni composition Betclic.
+L’interface B3 « Halo nocturne » reprend les conventions génériques d’un sportsbook privé : densité lisible, cotes rectangulaires, fond presque noir, surfaces graphite et accents framboise MK Bet. Les halos restent contextuels et sobres. Elle ne copie ni logo, ni asset, ni composition Betclic.
 
 ## Tokens
 
@@ -13,7 +13,7 @@ Les tokens sont centralisés dans `src/styles/globals.css` :
 - texte : `text-primary`, `text-secondary`, `text-muted` ;
 - états : `positive`, `negative`, `warning`, `live`, `selected-odds`, `suspended`.
 
-L’application reste en thème clair. Aucun asset externe, police distante ou librairie de chart n’est nécessaire pour cette étape.
+L’application reste en thème nocturne. Le verre interactif est réservé aux petites surfaces et conserve transparence, bordure lumineuse et flou lorsque le navigateur le permet. Les grands panneaux de lecture restent opaques ; les navigateurs sans `backdrop-filter` et la préférence de réduction de transparence reçoivent également un fallback graphite opaque. Aucun asset externe, police distante ou librairie de chart n’est nécessaire pour cette étape.
 
 ## Composants
 

@@ -84,15 +84,17 @@ export function OddsButton({
         suspended ? "suspendu" : "marché ouvert"
       }, ${movementText(movement)}${detail ? `, ${detail}` : ""}`}
       aria-pressed={selected}
+      data-interactive="lift"
       data-market-id={marketId}
       data-outcome-id={outcomeId}
       className={cn(
-        "min-h-12 rounded-md border px-3 py-2 text-left transition hover:border-[var(--brand)] focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2",
+        "min-h-14 rounded-xl border px-3 py-2 text-left hover:border-[var(--brand)] focus-visible:ring-2 focus-visible:ring-[var(--brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]",
         "flex items-center justify-between gap-3",
         selected
-          ? "border-[var(--brand)] bg-[var(--selected-odds)] text-[var(--brand-active)] shadow-sm"
-          : "border-[var(--border)] bg-white text-[var(--text-primary)]",
-        disabled && "cursor-not-allowed bg-stone-100 text-stone-500",
+          ? "-translate-y-0.5 border-[var(--brand)] bg-[var(--selected-odds)] text-white shadow-[0_0_24px_rgba(255,52,83,0.28)]"
+          : "border-[var(--border)] bg-white/[0.06] text-[var(--text-primary)] hover:bg-white/[0.1]",
+        disabled &&
+          "cursor-not-allowed bg-white/[0.035] text-[var(--text-muted)] opacity-60",
       )}
       disabled={disabled}
       onClick={() => betSlip?.toggleSelection(selection)}

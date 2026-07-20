@@ -7,10 +7,10 @@ test("public home and health remain accessible without auth", async ({
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: "La salle des marchés de la rechute" }),
+    page.getByRole("heading", { name: "Tout se joue entre nous." }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "ENTRER DANS LA SALLE" }),
+    page.getByRole("link", { name: "Entrer dans la salle" }),
   ).toHaveAttribute("href", "/login?next=/direct");
 
   const response = await request.get("/api/health");

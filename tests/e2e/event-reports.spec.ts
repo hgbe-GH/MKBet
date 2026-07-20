@@ -15,7 +15,9 @@ async function voteWith(
   const page = await context.newPage();
   await page.goto("/direct");
   const report = page.getByRole("article").filter({ hasText: note });
-  await report.getByRole("button", { name: decision, exact: true }).click();
+  await report
+    .getByRole("button", { name: `${decision} ce fait`, exact: true })
+    .click();
   await expect(report).toContainText(
     decision === "Valider"
       ? "Ton vote : validation."
@@ -62,9 +64,9 @@ test("a private proof is confirmed by two members and settles the bet", async ({
     .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
   await page.getByLabel("Ce qui s’est passé").fill(note);
   await page
-    .getByLabel("Marché concerné")
+    .getByLabel("Marché concerné", { exact: true })
     .selectOption({ label: "Premier bisou post-rupture" });
-  await page.getByLabel("Preuves privées").setInputFiles({
+  await page.getByLabel("Preuves privées", { exact: true }).setInputFiles({
     buffer: png,
     mimeType: "image/png",
     name: "preuve-baiser.png",
@@ -120,7 +122,7 @@ test("two invalidations reject the report and reopen its market", async ({
     .fill(new Date(Date.now() - 60_000).toISOString().slice(0, 16));
   await page.getByLabel("Ce qui s’est passé").fill(note);
   await page
-    .getByLabel("Marché concerné")
+    .getByLabel("Marché concerné", { exact: true })
     .selectOption({ label: "Retour officiel en couple" });
   await page.getByRole("button", { name: "Envoyer au vote" }).click();
   await expect(
@@ -149,7 +151,7 @@ test("the direct feed and report form fit a mobile viewport", async ({
   test.skip(testInfo.project.name !== "chromium-mobile");
   await page.goto("/direct");
   await expect(
-    page.getByRole("heading", { name: "Margot × Kévin - Direct" }),
+    page.getByRole("heading", { name: /Le groupe fait le marché/ }),
   ).toBeVisible();
   await expect(
     page.getByRole("navigation", { name: "Navigation mobile" }),

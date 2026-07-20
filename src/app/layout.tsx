@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
 import "@/styles/globals.css";
@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description:
     "La salle privée des marchés fictifs de la saison post-rupture Margot × Kévin.",
   applicationName: "MK Bet",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#08080b",
 };
 
 interface RootLayoutProps {

@@ -1,23 +1,475 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { RouterContext } from "next/dist/shared/lib/router-context.shared-runtime";
+import type { NextRouter } from "next/router";
+import { describe, expect, it, vi } from "vitest";
 
-import { LoginForm } from "@/components/auth/login-form";
+import type { AuthFormState } from "@/application/auth/actions";
+import { hasPasswordUpdatedNotice, parseAuthMode } from "@/app/login/page";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthModeSwitcher } from "@/components/auth/auth-mode-switcher";
+import { PasswordField } from "@/components/auth/password-field";
+import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignUpForm } from "@/components/auth/sign-up-form";
 import { InvitationPanel } from "@/components/invitations/invitation-panel";
 import { SeasonSelector } from "@/components/seasons/season-selector";
 
+function createTestRouter(): NextRouter {
+  return {
+    asPath: "/login?next=%2Fmarkets",
+    back: vi.fn(),
+    basePath: "",
+    beforePopState: vi.fn(),
+    defaultLocale: undefined,
+    domainLocales: undefined,
+    events: {
+      emit: vi.fn(),
+      off: vi.fn(),
+      on: vi.fn(),
+    },
+    forward: vi.fn(),
+    isFallback: false,
+    isLocaleDomain: false,
+    isPreview: false,
+    isReady: true,
+    locale: undefined,
+    locales: undefined,
+    pathname: "/login",
+    prefetch: vi.fn(),
+    push: vi.fn().mockResolvedValue(true),
+    query: {},
+    reload: vi.fn(),
+    replace: vi.fn().mockResolvedValue(true),
+    route: "/login",
+  };
+}
+
 describe("auth UI", () => {
-  it("renders the login form without exposing user enumeration details", () => {
-    render(<LoginForm next="/direct" />);
+  it("moves the shared mode indicator when client navigation starts and syncs URL props", async () => {
+    const router = createTestRouter();
+    const { rerender } = render(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    const indicator = navigation.querySelector(".mk-auth-mode-indicator");
+    const registerLink = screen.getByRole("link", {
+      name: "Créer un compte",
+    });
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(registerLink).toHaveAttribute(
+      "href",
+      "/login?mode=register&next=%2Fmarkets",
+    );
+    fireEvent.click(registerLink);
+    expect(navigation).toHaveAttribute("data-auth-mode", "register");
+    expect(registerLink).toHaveAttribute("aria-current", "page");
+    expect(router.push).toHaveBeenCalledOnce();
+
+    rerender(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="register" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    expect(navigation.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+
+    rerender(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    await waitFor(() =>
+      expect(navigation).toHaveAttribute("data-auth-mode", "login"),
+    );
+  });
+
+  it.each([
+    ["Ctrl", { ctrlKey: true }],
+    ["Cmd", { metaKey: true }],
+    ["Shift", { shiftKey: true }],
+    ["middle button", { button: 1, which: 2 }],
+  ])("keeps the current mode on a %s click", (_label, clickInit) => {
+    const router = createTestRouter();
+    render(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    window.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+
+    fireEvent.click(
+      screen.getByRole("link", { name: "Créer un compte" }),
+      clickInit,
+    );
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("keeps the current mode when click navigation is prevented", () => {
+    const router = createTestRouter();
+    render(
+      <RouterContext.Provider value={router}>
+        <AuthModeSwitcher mode="login" next="/markets" />
+      </RouterContext.Provider>,
+    );
+    const navigation = screen.getByRole("navigation", {
+      name: "Choisir le mode d’accès",
+    });
+    const registerLink = screen.getByRole("link", {
+      name: "Créer un compte",
+    });
+    registerLink.addEventListener("click", (event) => event.preventDefault(), {
+      once: true,
+    });
+
+    fireEvent.click(registerLink);
+
+    expect(navigation).toHaveAttribute("data-auth-mode", "login");
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("renders the password sign-in controls without magic-link copy", () => {
+    render(<SignInForm next="/direct" />);
 
     expect(
-      screen.getByRole("heading", { name: "Rejoindre Margot × Kévin" }),
+      screen.getByRole("heading", { name: "Bon retour dans la salle" }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
-    expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
+    expect(screen.getByText("Accès membre")).toHaveClass("mk-kicker");
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "type",
+      "email",
+    );
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "maxlength",
+      "320",
+    );
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "spellcheck",
+      "false",
+    );
+    expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
+      "type",
+      "password",
+    );
     expect(
-      screen.getByRole("button", { name: "RECEVOIR MON LIEN D’ACCÈS" }),
+      screen.getByRole("link", { name: "Mot de passe oublié ?" }),
+    ).toHaveAttribute("href", "/forgot-password");
+    expect(screen.getByRole("button", { name: "SE CONNECTER" })).toHaveClass(
+      "text-[#08080b]",
+    );
+    expect(screen.getByDisplayValue("/direct")).toHaveAttribute("name", "next");
+    expect(screen.queryByText(/lien d’accès/i)).not.toBeInTheDocument();
+  });
+
+  it("renders a safe public password-update confirmation with the sign-in form", async () => {
+    const LoginPage = (await import("@/app/login/page")).default;
+    render(
+      await LoginPage({
+        searchParams: Promise.resolve({ notice: "password-updated" }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Mot de passe modifié" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/1 000 MKB fictifs/)).toBeInTheDocument();
+    expect(
+      screen.getByText("Tu peux maintenant te connecter."),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse e-mail")).toBeInTheDocument();
+    expect(screen.getByLabelText("Mot de passe")).toBeInTheDocument();
+  });
+
+  it("renders the complete password sign-up controls without secrets", () => {
+    const { container } = render(<SignUpForm next="/markets" />);
+
+    expect(
+      screen.getByRole("heading", { name: "Créer mon compte" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Nouveau joueur")).toHaveClass("mk-kicker");
+    expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
+    expect(screen.getByLabelText("Nom d’affichage")).toHaveAttribute(
+      "maxlength",
+      "80",
+    );
+    expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
+      "type",
+      "email",
+    );
+    expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
+      "minlength",
+      "10",
+    );
+    expect(screen.getByLabelText("Confirmer le mot de passe")).toHaveAttribute(
+      "minlength",
+      "10",
+    );
+    expect(screen.getByLabelText("Mot de passe")).toHaveAttribute(
+      "maxlength",
+      "128",
+    );
+    expect(
+      screen.getByRole("button", { name: "CRÉER MON COMPTE" }),
+    ).toHaveClass("text-[#08080b]");
+    expect(container.innerHTML).not.toMatch(/token|secret|supabase\.co/i);
+  });
+
+  it("toggles password visibility without controlling the input value", () => {
+    render(
+      <PasswordField
+        autoComplete="current-password"
+        id="member-password"
+        label="Mot de passe"
+        name="password"
+      />,
+    );
+
+    const input = screen.getByLabelText("Mot de passe");
+    expect(input).toHaveAttribute("type", "password");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Afficher le mot de passe" }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Masquer le mot de passe" }),
+    ).toHaveAttribute("aria-controls", "member-password");
+    expect(input).toHaveAttribute("type", "text");
+    expect(
+      screen.getByRole("button", { name: "Masquer le mot de passe" }),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Masquer le mot de passe" }),
+    );
+    expect(input).toHaveAttribute("type", "password");
+  });
+
+  it("exposes independent password toggles throughout sign-up", () => {
+    render(<SignUpForm next="/direct" />);
+
+    const password = screen.getByLabelText("Mot de passe");
+    const confirmation = screen.getByLabelText("Confirmer le mot de passe");
+    const showPassword = screen.getByRole("button", {
+      name: "Afficher le mot de passe",
+    });
+    const showConfirmation = screen.getByRole("button", {
+      name: "Afficher la confirmation du mot de passe",
+    });
+
+    expect(showPassword).toHaveAttribute("aria-controls", "sign-up-password");
+    expect(showConfirmation).toHaveAttribute(
+      "aria-controls",
+      "sign-up-password-confirmation",
+    );
+
+    fireEvent.click(showConfirmation);
+    expect(confirmation).toHaveAttribute("type", "text");
+    expect(password).toHaveAttribute("type", "password");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Masquer la confirmation du mot de passe",
+      }),
+    );
+    expect(confirmation).toHaveAttribute("type", "password");
+  });
+
+  it("preserves sign-in email and associates the generic failure", async () => {
+    const failureAction = async (): Promise<AuthFormState> => ({
+      ok: false,
+      code: "AUTH_INVALID_CREDENTIALS",
+      message: "Connexion impossible.",
+    });
+    render(<SignInForm action={failureAction} next="/direct" />);
+
+    const email = screen.getByLabelText("Adresse e-mail");
+    const password = screen.getByLabelText("Mot de passe");
+    fireEvent.change(email, { target: { value: "safe@example.test" } });
+    fireEvent.change(password, { target: { value: "password-value" } });
+    fireEvent.submit(email.closest("form") as HTMLFormElement);
+
+    await screen.findByText("Connexion impossible.");
+    expect(email).toHaveValue("safe@example.test");
+    await waitFor(() => expect(email).toHaveFocus());
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAttribute("aria-describedby", "sign-in-error");
+    expect(password).toHaveAttribute("aria-invalid", "true");
+    expect(password).toHaveAttribute("aria-describedby", "sign-in-error");
+    expect(document.getElementById("sign-in-error")).toHaveTextContent(
+      "Connexion impossible.",
+    );
+  });
+
+  it("preserves sign-up identity fields and focuses the first failure", async () => {
+    const failureAction = async (): Promise<AuthFormState> => ({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
+      message: "Création impossible.",
+    });
+    render(<SignUpForm action={failureAction} next="/direct" />);
+
+    const displayName = screen.getByLabelText("Nom d’affichage");
+    const email = screen.getByLabelText("Adresse e-mail");
+    const password = screen.getByLabelText("Mot de passe");
+    const confirmation = screen.getByLabelText("Confirmer le mot de passe");
+    fireEvent.change(displayName, { target: { value: "Joueur Sûr" } });
+    fireEvent.change(email, { target: { value: "safe@example.test" } });
+    fireEvent.change(password, { target: { value: "password-value" } });
+    fireEvent.change(confirmation, { target: { value: "password-value" } });
+    fireEvent.submit(email.closest("form") as HTMLFormElement);
+
+    await screen.findByText("Création impossible.");
+    expect(displayName).toHaveValue("Joueur Sûr");
+    expect(email).toHaveValue("safe@example.test");
+    await waitFor(() => expect(displayName).toHaveFocus());
+    for (const input of [displayName, email, password, confirmation]) {
+      expect(input).toHaveAttribute("aria-invalid", "true");
+      expect(input).toHaveAttribute("aria-describedby", "sign-up-error");
+    }
+    expect(document.getElementById("sign-up-error")).toHaveTextContent(
+      "Création impossible.",
+    );
+  });
+
+  it("replaces sign-up fields with a generic confirmation notice", async () => {
+    const successAction = async (): Promise<AuthFormState> => ({
+      ok: true,
+      message: "Compte créé. Consulte l’e-mail reçu pour confirmer ton compte.",
+    });
+
+    const { container } = render(
+      <SignUpForm action={successAction} next="/direct" />,
+    );
+
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Confirme ton adresse" }),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/member@example\.com|token/i);
+  });
+
+  it("keeps the sign-in label stable while submission is pending", async () => {
+    let resolveAction: ((state: AuthFormState) => void) | undefined;
+    const pendingAction = (): Promise<AuthFormState> =>
+      new Promise((resolve) => {
+        resolveAction = resolve;
+      });
+
+    const { container } = render(
+      <SignInForm action={pendingAction} next="/direct" />,
+    );
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+
+    const button = await screen.findByRole("button", { name: "SE CONNECTER" });
+    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    expect(button).toBeDisabled();
+    expect(
+      button.querySelector('[data-pending-indicator="true"]'),
+    ).not.toBeNull();
+
+    resolveAction?.({
+      ok: false,
+      code: "AUTH_INVALID_CREDENTIALS",
+      message: "Connexion impossible.",
+    });
+    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "false"));
+  });
+
+  it("keeps the sign-up label stable while submission is pending", async () => {
+    let resolveAction: ((state: AuthFormState) => void) | undefined;
+    const pendingAction = (): Promise<AuthFormState> =>
+      new Promise((resolve) => {
+        resolveAction = resolve;
+      });
+
+    const { container } = render(
+      <SignUpForm action={pendingAction} next="/direct" />,
+    );
+    fireEvent.submit(container.querySelector("form") as HTMLFormElement);
+
+    const button = await screen.findByRole("button", {
+      name: "CRÉER MON COMPTE",
+    });
+    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    expect(button).toBeDisabled();
+    expect(
+      button.querySelector('[data-pending-indicator="true"]'),
+    ).not.toBeNull();
+
+    resolveAction?.({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
+      message: "Création impossible.",
+    });
+    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "false"));
+  });
+
+  it("presents only useful public context and safe mode navigation", () => {
+    const { container } = render(
+      <AuthShell mode="register" next="/markets">
+        <p>Formulaire public</p>
+      </AuthShell>,
+    );
+
+    expect(screen.getByRole("main")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+    ).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("link", { name: "Retour à l’accueil MK Bet" }),
+    ).toHaveTextContent("MKBET");
+    expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
+    expect(screen.getByText("1 000 MKB fictifs")).toBeInTheDocument();
+    expect(screen.getByText("Deux votes concordants")).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(
+      /Une histoire|salle à sept|Aucun pari en argent réel/i,
+    );
+    expect(
+      container.querySelector('[data-auth-editorial-details="true"]'),
+    ).toHaveClass("hidden");
+    for (const halo of container.querySelectorAll(
+      '[data-auth-decoration="halo"]',
+    )) {
+      expect(halo).toHaveClass("hidden");
+    }
+
+    expect(screen.getByRole("link", { name: "Connexion" })).toHaveAttribute(
+      "href",
+      "/login?next=%2Fmarkets",
+    );
+    expect(
+      screen.getByRole("link", { name: "Créer un compte" }),
+    ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
+    expect(
+      screen.getByRole("link", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/[\w.+-]+@[\w.-]+/);
+  });
+
+  it("selects registration only for the exact register mode", () => {
+    expect(parseAuthMode("register")).toBe("register");
+    expect(parseAuthMode("REGISTER")).toBe("login");
+    expect(parseAuthMode(["register"])).toBe("login");
+    expect(parseAuthMode(undefined)).toBe("login");
+  });
+
+  it("accepts only the exact public password-update notice", () => {
+    expect(hasPasswordUpdatedNotice("password-updated")).toBe(true);
+    expect(hasPasswordUpdatedNotice("PASSWORD-UPDATED")).toBe(false);
+    expect(hasPasswordUpdatedNotice(["password-updated"])).toBe(false);
+    expect(hasPasswordUpdatedNotice(undefined)).toBe(false);
   });
 
   it("renders invitation previews without leaking the raw token", () => {

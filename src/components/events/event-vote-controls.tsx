@@ -35,7 +35,9 @@ export function EventVoteControls({ reportId }: { reportId: string }) {
     <div className="mt-5 border-t border-[var(--border)] pt-4">
       <div className="grid grid-cols-2 gap-2">
         <button
-          className="min-h-11 rounded-md bg-[var(--brand)] px-4 py-2.5 text-sm font-black text-white transition-transform active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+          aria-label="Valider ce fait"
+          className="min-h-11 rounded-lg bg-[var(--brand)] px-4 py-2.5 text-sm font-black text-[var(--on-brand)] shadow-[0_0_24px_rgba(255,52,83,0.3)] hover:bg-[var(--brand-hover)] active:scale-[0.98] active:bg-[var(--brand-active)] disabled:cursor-wait disabled:opacity-60"
+          data-interactive="lift"
           disabled={isPending}
           onClick={() => vote("CONFIRM")}
           type="button"
@@ -43,7 +45,9 @@ export function EventVoteControls({ reportId }: { reportId: string }) {
           Valider
         </button>
         <button
-          className="min-h-11 rounded-md border border-[var(--border-strong)] bg-white px-4 py-2.5 text-sm font-black text-[var(--text-primary)] transition-transform active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+          aria-label="Invalider ce fait"
+          className="min-h-11 rounded-lg border border-[var(--border-strong)] bg-white/[0.07] px-4 py-2.5 text-sm font-black text-[var(--text-primary)] active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+          data-interactive="lift"
           disabled={isPending}
           onClick={() => vote("REJECT")}
           type="button"

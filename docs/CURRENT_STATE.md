@@ -1,9 +1,14 @@
 # État actuel
 
-Dernière mise à jour : 15 juillet 2026.
+Dernière mise à jour : 17 juillet 2026.
 
 ## Produit réel
 
+- Les contrats et Server Actions Auth couvrent désormais connexion, inscription, demande de réinitialisation et changement de mot de passe avec normalisation Zod, redirections internes, initialisation idempotente de la salle et erreurs françaises génériques.
+- L’adresse e-mail sert d’identifiant. Le portail public `/login` réunit connexion et création de compte par mot de passe de 10 à 128 caractères dans un shell responsive ; la confirmation de l’adresse est obligatoire et aucun magic link de connexion n’est proposé dans l’interface.
+- Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur. Après modification, il contrôle la fermeture locale de la session puis redirige vers la confirmation publique sûre `/login?notice=password-updated` ; un cleanup retourné en erreur ou levé reste générique et n’annonce jamais de succès.
+- La finition B3 nocturne centralise les durées de mouvement, limite les translations de survol aux pointeurs fins et neutralise les animations avec réduction de mouvement. Le verre interactif reste transparent et flouté sur les petites surfaces compatibles ; les fallbacks, la réduction de transparence et les grands panneaux de lecture utilisent des surfaces graphite opaques.
+- Le sélecteur connexion/inscription anime son état optimiste uniquement lorsqu’une navigation client démarre ; les clics modifiés ou annulés restent alignés avec l’URL affichée.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.
@@ -17,7 +22,7 @@ Dernière mise à jour : 15 juillet 2026.
 
 ## Base et sécurité
 
-Quinze migrations forward-only sont présentes. Les quatre migrations datées du 15 juillet ajoutent la salle unique, les rapports, la résolution atomique et leurs policies RLS. Les migrations historiques et `src/domain/odds` restent inchangés.
+Quinze migrations forward-only sont présentes. Les quatre migrations datées du 15 juillet ajoutent la salle unique, les rapports, la résolution atomique et leurs policies RLS. La longueur minimale du mot de passe local est configurée à 10 dans `supabase/config.toml` et ne constitue pas une migration. Les migrations historiques et `src/domain/odds` restent inchangés.
 
 Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()` et des objets qualifiés. Le client ne transmet jamais de rôle, solde, cote finale, gain ou statut de règlement. Les transactions de portefeuille et journaux d’audit restent immuables.
 
@@ -26,18 +31,19 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Vitest couvre la frontière Zod, les repositories, Server Actions, composants et règles existantes.
 - Le scénario `db:test:single-room` vérifie inscription/crédit idempotents, auto-vote refusé, votes immuables, confirmation, règlement/gain unique, invalidation et réouverture.
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
+- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 133 tests réussis dans 36 fichiers.
-- `pnpm test:e2e` : 27 parcours réussis et 3 skips de projet attendus sur 30 cas desktop/mobile.
-- Répétition ciblée `--repeat-each=2` : 4 parcours métier desktop et 2 contrôles mobiles réussis, avec les skips croisés attendus.
-- `db:reset`, génération des types, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : succès.
+- `pnpm test` : 256 tests réussis dans 42 fichiers.
+- `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
+- `db:reset`, génération des types sans différence après formatage, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : 5 sur 5 réussis.
+- `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build` avec Supabase arrêté et sans variables Supabase, puis `pnpm install --frozen-lockfile` : succès.
 
 ## Production
 
-La refonte est disponible sur [mk-bet.vercel.app](https://mk-bet.vercel.app) et liée au projet Supabase Production. Les quinze migrations locales et distantes sont alignées ; les quatre migrations de salle unique ont été appliquées avant le déploiement Vercel. `/`, `/login` et `/api/health` répondent en Production, et une requête anonyme vers `/direct` est redirigée vers `/login?next=/direct`. Aucune migration n’est exécutée par Vercel.
+Cette validation prépare la livraison locale B3 et Auth par mot de passe sans fusion, push, modification Supabase distante ni déploiement Vercel. La promotion Production reste à effectuer après revue de la branche.
 
-La validation authentifiée complète a été exécutée localement avec de vraies sessions Supabase. Le magic link Production a aussi été validé manuellement le 15 juillet 2026 : le callback crée la session puis `/direct`, `/markets`, `/report`, `/bets` et `/leaderboard` répondent sous session authentifiée. Les échecs du callback sont journalisés uniquement avec une étape stable, sans adresse, jeton ni détail Supabase.
+Avant cette promotion, Supabase Auth Production doit imposer un minimum de 10 caractères, exiger la confirmation des e-mails et autoriser exactement `https://mk-bet.vercel.app/auth/callback`. Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir les paramètres `intent` et `next`. Vercel doit conserver uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel.
 
 ## Limites assumées
 

@@ -20,7 +20,7 @@ export function MobileBottomNavigation() {
   return (
     <nav
       aria-label="Navigation mobile"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-8px_24px_rgba(28,25,23,0.08)] backdrop-blur lg:hidden"
+      className="mk-mobile-nav mk-fallback-opaque fixed right-[max(0.5rem,env(safe-area-inset-right))] bottom-[max(env(safe-area-inset-bottom),0.5rem)] left-[max(0.5rem,env(safe-area-inset-left))] z-40 rounded-2xl border border-white/15 bg-white/[0.08] px-2 pb-2 pt-2 shadow-[0_18px_50px_rgba(0,0,0,0.42)] backdrop-blur-2xl lg:hidden"
     >
       <div className="grid grid-cols-5 gap-1">
         {items.slice(0, 5).map((item) => (

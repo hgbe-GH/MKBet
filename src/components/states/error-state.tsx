@@ -8,10 +8,13 @@ export function ErrorState({
   description: string;
 }) {
   return (
-    <section className="rounded-lg border border-red-200 bg-red-50 p-6">
-      <AlertTriangle aria-hidden="true" className="h-6 w-6 text-red-700" />
-      <h2 className="mt-3 text-xl font-black text-red-950">{title}</h2>
-      <p className="mt-2 text-sm leading-6 text-red-900">{description}</p>
+    <section className="rounded-2xl border border-[var(--negative)]/35 bg-[var(--negative)]/10 p-6">
+      <AlertTriangle
+        aria-hidden="true"
+        className="h-6 w-6 text-[var(--negative)]"
+      />
+      <h2 className="mt-3 text-xl font-black text-white">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-[#ffc3c8]">{description}</p>
     </section>
   );
 }

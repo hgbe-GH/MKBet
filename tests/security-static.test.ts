@@ -14,13 +14,16 @@ function read(relativePath: string): string {
 describe("security static checks", () => {
   it("does not import the admin Supabase client from client components", () => {
     const clientSources = [
-      "src/components/auth/login-form.tsx",
+      "src/components/auth/password-field.tsx",
+      "src/components/auth/sign-in-form.tsx",
+      "src/components/auth/sign-up-form.tsx",
       "src/components/invitations/invitation-panel.tsx",
       "src/components/seasons/season-selector.tsx",
     ];
 
     for (const source of clientSources) {
       expect(read(source)).not.toContain("@/lib/supabase/admin");
+      expect(read(source)).not.toContain("SUPABASE_SERVICE_ROLE_KEY");
     }
   });
 
