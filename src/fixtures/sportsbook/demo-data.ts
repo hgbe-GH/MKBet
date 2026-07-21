@@ -368,6 +368,7 @@ export const demoTimeline: TimelineEvent[] = [
 
 export const demoLeaderboard: LeaderboardRow[] = [
   {
+    userId: "demo-emma",
     rank: 1,
     playerName: "Emma",
     capitalMkb: 1540,
@@ -377,6 +378,7 @@ export const demoLeaderboard: LeaderboardRow[] = [
     badge: "Oracle du malaise",
   },
   {
+    userId: "demo-david",
     rank: 2,
     playerName: "David",
     capitalMkb: 1315,
@@ -386,6 +388,7 @@ export const demoLeaderboard: LeaderboardRow[] = [
     badge: "Gestion prudentielle",
   },
   {
+    userId: "demo-chloe",
     rank: 3,
     playerName: "Chloé",
     capitalMkb: 1180,

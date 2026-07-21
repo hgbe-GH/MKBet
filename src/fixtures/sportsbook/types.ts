@@ -124,6 +124,7 @@ export interface TimelineEvent {
 }
 
 export interface LeaderboardRow {
+  userId: string;
   rank: number;
   playerName: string;
   avatarUrl?: string | null;

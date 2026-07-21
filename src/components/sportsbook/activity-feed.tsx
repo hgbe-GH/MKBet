@@ -1,15 +1,36 @@
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+
 import { ActivityFeedItem } from "@/components/sportsbook/activity-feed-item";
 import type { TimelineEvent } from "@/fixtures/sportsbook/types";
 
 export function ActivityFeed({ events }: { events: TimelineEvent[] }) {
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-      <h2 className="text-xl font-black">Dernières actions</h2>
-      <ol className="mt-3">
-        {events.map((event) => (
-          <ActivityFeedItem event={event} key={event.id} />
-        ))}
-      </ol>
+    <section aria-labelledby="recent-activity-title">
+      <Card padding={5}>
+        <VStack gap={3}>
+          <div>
+            <Heading id="recent-activity-title" level={2}>
+              Activité récente
+            </Heading>
+            <Text color="secondary" type="supporting">
+              Les dernières modifications de marchés consignées dans la salle.
+            </Text>
+          </div>
+          {events.length > 0 ? (
+            <List density="compact" hasDividers>
+              {events.map((event) => (
+                <ActivityFeedItem event={event} key={event.id} />
+              ))}
+            </List>
+          ) : (
+            <Text color="secondary">Aucune activité de marché récente.</Text>
+          )}
+        </VStack>
+      </Card>
     </section>
   );
 }
