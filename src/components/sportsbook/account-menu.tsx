@@ -4,6 +4,7 @@ import { Avatar } from "@astryxdesign/core/Avatar";
 import { Badge } from "@astryxdesign/core/Badge";
 import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
 import Link from "next/link";
+import { useState } from "react";
 
 import { canSeeAdministration } from "@/application/sportsbook/navigation";
 import type { SeasonMemberRole } from "@/domain/database/enums";
@@ -25,6 +26,8 @@ const menuItemClassName =
   "flex min-h-11 w-full items-center rounded-md px-3 py-2 text-left text-sm font-semibold hover:bg-white/10";
 
 export function AccountMenu({ seasonTitle, roles }: AccountMenuProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <DropdownMenu
       button={{
@@ -35,7 +38,9 @@ export function AccountMenu({ seasonTitle, roles }: AccountMenuProps) {
         style: { minHeight: 44, minWidth: 44 },
         variant: "ghost",
       }}
+      isMenuOpen={isMenuOpen}
       menuWidth={256}
+      onOpenChange={setIsMenuOpen}
       placement="below"
     >
       <div className="space-y-2 px-3 py-2" role="presentation">
@@ -49,6 +54,7 @@ export function AccountMenu({ seasonTitle, roles }: AccountMenuProps) {
       <Link
         className={menuItemClassName}
         href="/settings/account"
+        onClick={() => setIsMenuOpen(false)}
         role="menuitem"
         tabIndex={-1}
       >
@@ -58,6 +64,7 @@ export function AccountMenu({ seasonTitle, roles }: AccountMenuProps) {
         <Link
           className={menuItemClassName}
           href="/admin"
+          onClick={() => setIsMenuOpen(false)}
           role="menuitem"
           tabIndex={-1}
         >
@@ -67,6 +74,7 @@ export function AccountMenu({ seasonTitle, roles }: AccountMenuProps) {
       <form action="/logout" method="post">
         <button
           className={menuItemClassName}
+          onClick={() => setIsMenuOpen(false)}
           role="menuitem"
           tabIndex={-1}
           type="submit"

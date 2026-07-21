@@ -28,7 +28,7 @@ export function MobileBetSlip({
   }, [open]);
 
   return (
-    <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-30 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-raised)] shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:right-3 lg:bottom-4 lg:left-3 xl:hidden">
+    <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-30 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-raised)] shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:right-3 lg:left-3 xl:hidden">
       <button
         aria-controls="mobile-bet-slip-panel"
         aria-expanded={open}

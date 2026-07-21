@@ -1,5 +1,4 @@
 import { AppShell as AstryxAppShell } from "@astryxdesign/core/AppShell";
-import { MobileNav } from "@astryxdesign/core/MobileNav";
 import type { ReactNode } from "react";
 
 import { AppNavigation } from "@/components/sportsbook/app-navigation";
@@ -26,27 +25,21 @@ export function AppShell({ children, season }: AppShellProps) {
       <AstryxAppShell
         contentPadding={0}
         height="auto"
-        mobileNav={{
-          breakpoint: "lg",
-          content: (
-            <MobileNav header="Navigation" label="Navigation mobile">
-              <AppNavigation mode="mobile" roles={season.roles} />
-            </MobileNav>
-          ),
-        }}
+        mobileNav={{ breakpoint: "lg" }}
         sideNav={<AppNavigation mode="desktop" roles={season.roles} />}
         topNav={<TopHeader season={season} />}
         variant="elevated"
       >
-        <div className="mx-auto grid w-full max-w-[96rem] gap-6 px-4 py-5 pb-36 sm:px-6 lg:pb-8 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        {/* Reserve room for the collapsed mobile ticket until the xl desktop ticket takes over. */}
+        <div className="mx-auto grid w-full max-w-[96rem] gap-6 px-4 py-5 pb-24 sm:px-6 xl:grid-cols-[minmax(0,1fr)_20rem] xl:pb-8">
           <div className="min-w-0" id="main-content" tabIndex={-1}>
             {children}
           </div>
-          <aside aria-label="Ticket de pari" className="hidden xl:block">
+          <div className="hidden xl:block">
             <div className="sticky top-24">
               <BetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />
             </div>
-          </aside>
+          </div>
         </div>
       </AstryxAppShell>
       <MobileBetSlip balanceMkb={season.balanceMkb} seasonId={season.id} />

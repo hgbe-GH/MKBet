@@ -1,3 +1,5 @@
+import type { SeasonMemberRole } from "@/domain/database/enums";
+
 export const primaryNavigation = [
   { href: "/direct", label: "Aujourd’hui", icon: "home" },
   { href: "/markets", label: "Marchés", icon: "chart" },
@@ -12,6 +14,6 @@ export function isNavigationItemActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function canSeeAdministration(roles: readonly string[]) {
+export function canSeeAdministration(roles: readonly SeasonMemberRole[]) {
   return roles.includes("ADMIN") || roles.includes("LIVE_HOST");
 }

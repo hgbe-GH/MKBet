@@ -116,6 +116,12 @@ describe("sportsbook UI components", () => {
     );
 
     expect(container.firstElementChild).not.toHaveClass("mk-glass-interactive");
+    expect(container.firstElementChild).toHaveClass(
+      "bottom-[max(0.75rem,env(safe-area-inset-bottom))]",
+    );
+    expect(container.firstElementChild).not.toHaveClass(
+      "bottom-[calc(5.5rem+env(safe-area-inset-bottom))]",
+    );
     fireEvent.click(screen.getByRole("button", { name: /^Ouvrir le ticket/ }));
     expect(
       screen.getByRole("complementary", { name: "Ticket de pari" }),
