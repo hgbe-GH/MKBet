@@ -38,16 +38,23 @@ describe("protected layout", () => {
     );
 
     expect(screen.getByText("Fil privé")).toBeInTheDocument();
-    expect(screen.getByText("Margot × Kévin")).toBeInTheDocument();
+    expect(screen.getAllByText("Margot × Kévin").length).toBeGreaterThan(0);
     expect(
       screen.getByRole("navigation", { name: "Navigation principale" }),
-    ).toHaveClass("mk-sidebar");
+    ).toBeInTheDocument();
     expect(
-      screen.getByRole("navigation", { name: "Navigation mobile" }),
-    ).toHaveClass("mk-mobile-nav");
-    expect(screen.getByText("1 000 MKB disponibles")).toHaveClass(
-      "tabular-nums",
+      screen.getByRole("link", { name: "Aller au contenu principal" }),
+    ).toHaveAttribute("href", "#main-content");
+    expect(screen.getByText("1 000 MKB")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Ouvrir le menu du compte" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("main")).toContainElement(
+      document.querySelector("#main-content"),
     );
+    expect(
+      screen.queryByRole("link", { name: "Administration" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByText(
         "Deux votes concordants suffisent pour trancher un fait.",

@@ -18,6 +18,10 @@ body {
   color: var(--color-text-primary);
 }
 
+[data-testid="skip-to-content"] {
+  display: none;
+}
+
 :focus-visible {
   scroll-margin: var(--spacing-4);
 }

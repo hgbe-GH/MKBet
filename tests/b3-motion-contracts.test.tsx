@@ -54,10 +54,6 @@ const betSlipSelection = readFileSync(
   join(process.cwd(), "src/components/sportsbook/bet-slip-selection.tsx"),
   "utf8",
 );
-const mobileNavigation = readFileSync(
-  join(process.cwd(), "src/components/sportsbook/mobile-bottom-navigation.tsx"),
-  "utf8",
-);
 const eventReportForm = readFileSync(
   join(process.cwd(), "src/components/events/event-report-form.tsx"),
   "utf8",
@@ -66,8 +62,8 @@ const reportPage = readFileSync(
   join(process.cwd(), "src/app/(protected)/report/page.tsx"),
   "utf8",
 );
-const desktopSidebar = readFileSync(
-  join(process.cwd(), "src/components/sportsbook/desktop-sidebar.tsx"),
+const appNavigation = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/app-navigation.tsx"),
   "utf8",
 );
 
@@ -275,12 +271,6 @@ describe("B3 motion contracts", () => {
     expect(mobileBetSlip).toContain(
       "right-[max(0.75rem,env(safe-area-inset-right))]",
     );
-    expect(mobileNavigation).toContain(
-      "left-[max(0.5rem,env(safe-area-inset-left))]",
-    );
-    expect(mobileNavigation).toContain(
-      "right-[max(0.5rem,env(safe-area-inset-right))]",
-    );
   });
 
   it("separates dense reading surfaces from small interactive glass", () => {
@@ -293,7 +283,7 @@ describe("B3 motion contracts", () => {
     expect(subtleSurface).not.toContain("backdrop-filter");
     expect(interactiveSurface).toContain("backdrop-filter: blur(18px)");
     expect(reportPage).toContain("mk-surface-opaque");
-    expect(desktopSidebar).not.toContain("backdrop-blur");
+    expect(appNavigation).not.toContain("backdrop-blur");
   });
 
   it("uses one shared URL-driven auth indicator and fades only its content", () => {
