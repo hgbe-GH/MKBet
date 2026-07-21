@@ -1,7 +1,9 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { useState, type Ref } from "react";
+import { useCallback, useState, type Ref, type RefObject } from "react";
+
+import { AuthTextInput } from "@/components/auth/auth-text-input";
 
 interface PasswordFieldProps {
   autoComplete: string;
@@ -13,7 +15,18 @@ interface PasswordFieldProps {
   minLength?: number;
   name: string;
   required?: boolean;
+  resetSignal?: object;
   visibilityContext?: "confirmation" | "password";
+}
+
+function assignRef<T>(ref: Ref<T> | undefined, value: T | null): void {
+  if (typeof ref === "function") {
+    ref(value);
+    return;
+  }
+  if (ref) {
+    (ref as RefObject<T | null>).current = value;
+  }
 }
 
 export function PasswordField({
@@ -26,9 +39,27 @@ export function PasswordField({
   minLength,
   name,
   required = false,
+  resetSignal,
   visibilityContext = "password",
 }: PasswordFieldProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [fieldState, setFieldState] = useState({
+    resetSignal,
+    value: "",
+  });
+  const [controlId, setControlId] = useState<string>();
+  const localRef = useCallback(
+    (input: HTMLInputElement | null) => {
+      assignRef(inputRef, input);
+      setControlId(input?.id);
+    },
+    [inputRef],
+  );
+
+  if (fieldState.resetSignal !== resetSignal) {
+    setFieldState({ resetSignal, value: "" });
+  }
+
   const visibilityLabel =
     visibilityContext === "confirmation"
       ? isVisible
@@ -40,32 +71,30 @@ export function PasswordField({
   const VisibilityIcon = isVisible ? EyeOff : Eye;
 
   return (
-    <div className="space-y-2">
-      <label
-        className="block text-sm font-bold text-[var(--text-primary)]"
-        htmlFor={id}
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          aria-describedby={describedBy}
-          aria-invalid={invalid || undefined}
-          autoComplete={autoComplete}
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 pr-14 text-base text-white outline-none placeholder:text-[var(--text-muted)] focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
-          id={id}
-          maxLength={128}
-          minLength={minLength}
-          name={name}
-          ref={inputRef}
-          required={required}
-          spellCheck={false}
-          type={isVisible ? "text" : "password"}
-        />
+    <div className="relative" data-auth-password-field={id}>
+      <AuthTextInput
+        autoComplete={autoComplete}
+        className="pr-12"
+        describedBy={describedBy}
+        htmlName={name}
+        label={label}
+        maxLength={128}
+        minLength={minLength}
+        onChange={(value) => setFieldState({ resetSignal, value })}
+        ref={localRef}
+        required={required}
+        size="lg"
+        spellCheck={false}
+        status={invalid ? { type: "error" } : undefined}
+        type={isVisible ? "text" : "password"}
+        value={fieldState.value}
+        width="100%"
+      />
+      <div className="absolute right-0 bottom-0 flex h-11 items-center">
         <button
-          aria-controls={id}
+          aria-controls={controlId}
           aria-label={visibilityLabel}
-          className="absolute top-1/2 right-1 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-hover)]"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[var(--color-text-secondary)] hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
           onClick={() => setIsVisible((visible) => !visible)}
           type="button"
         >

@@ -1,12 +1,17 @@
 "use client";
 
-import { ArrowRight, LoaderCircle } from "lucide-react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { LoaderCircle } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { AuthFormState } from "@/application/auth/actions";
+import { AuthTextInput } from "@/components/auth/auth-text-input";
 import { PasswordField } from "@/components/auth/password-field";
-import { Button } from "@/components/ui/button";
-import { InlineNotice } from "@/components/ui/inline-notice";
 
 interface SignUpFormProps {
   action?: AuthFormAction;
@@ -32,6 +37,7 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const displayNameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const hasError = !state.ok;
   const errorId = hasError ? "sign-up-error" : undefined;
 
@@ -43,130 +49,122 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
 
   if (state.ok && state.message) {
     return (
-      <InlineNotice className="space-y-3 p-5 sm:p-6" tone="success">
-        <p className="mk-eyebrow">Compte presque prêt</p>
-        <h1 className="text-3xl font-black tracking-[-0.04em] text-white">
-          Confirme ton adresse
-        </h1>
-        <p className="leading-6">{state.message}</p>
-        <p className="border-t border-emerald-300/20 pt-3 text-sm leading-6">
-          Après confirmation, 1 000 MKB fictifs t’attendent dans la salle. Aucun
-          pari en argent réel.
-        </p>
-      </InlineNotice>
+      <Card data-status="success" padding={6} role="status" variant="green">
+        <VStack gap={3}>
+          <Text color="secondary" type="label">
+            Compte presque prêt
+          </Text>
+          <Heading level={1}>Confirme ton adresse</Heading>
+          <Text as="p">{state.message}</Text>
+          <Text as="p" color="secondary" type="supporting">
+            Après confirmation, 1 000 MKB fictifs t’attendent dans la salle.
+            Aucun pari en argent réel.
+          </Text>
+        </VStack>
+      </Card>
     );
   }
 
+  const status = pending ? "pending" : hasError ? "error" : "idling";
+
   return (
-    <form action={formAction} className="space-y-5">
-      <header className="space-y-2 pb-1">
-        <p className="mk-kicker text-xs font-black tracking-[0.16em] text-[var(--brand-hover)] uppercase">
-          Nouveau joueur
-        </p>
-        <h1 className="text-3xl leading-[1.02] font-black tracking-[-0.045em] text-white sm:text-4xl">
-          Créer mon compte
-        </h1>
-      </header>
+    <form action={formAction} aria-busy={pending} data-status={status}>
+      <VStack gap={5}>
+        <header className="space-y-2 pb-1">
+          <Text color="secondary" type="label">
+            Nouveau joueur
+          </Text>
+          <Heading level={1}>Créer mon compte</Heading>
+        </header>
 
-      <input name="next" type="hidden" value={next} />
+        <input name="next" type="hidden" value={next} />
 
-      <div className="space-y-2">
-        <label
-          className="block text-sm font-bold text-[var(--text-primary)]"
-          htmlFor="sign-up-display-name"
-        >
-          Nom d’affichage
-        </label>
-        <input
-          aria-describedby={errorId}
-          aria-invalid={hasError || undefined}
+        <AuthTextInput
           autoComplete="nickname"
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
-          id="sign-up-display-name"
+          describedBy={errorId}
+          htmlName="displayName"
+          label="Nom d’affichage"
           maxLength={80}
-          name="displayName"
-          onChange={(event) => setDisplayName(event.target.value)}
+          onChange={setDisplayName}
           ref={displayNameRef}
           required
+          size="lg"
           spellCheck={false}
+          status={hasError ? { type: "error" } : undefined}
           type="text"
           value={displayName}
+          width="100%"
         />
-      </div>
 
-      <div className="space-y-2">
-        <label
-          className="block text-sm font-bold text-[var(--text-primary)]"
-          htmlFor="sign-up-email"
-        >
-          Adresse e-mail
-        </label>
-        <input
-          aria-describedby={errorId}
-          aria-invalid={hasError || undefined}
+        <AuthTextInput
           autoComplete="email"
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
-          id="sign-up-email"
+          describedBy={errorId}
+          htmlName="email"
+          label="Adresse e-mail"
           maxLength={320}
-          name="email"
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={setEmail}
+          ref={emailRef}
           required
+          size="lg"
           spellCheck={false}
+          status={hasError ? { type: "error" } : undefined}
           type="email"
           value={email}
+          width="100%"
         />
-      </div>
 
-      <PasswordField
-        autoComplete="new-password"
-        describedBy={errorId}
-        id="sign-up-password"
-        invalid={hasError}
-        label="Mot de passe"
-        minLength={10}
-        name="password"
-        required
-      />
-      <PasswordField
-        autoComplete="new-password"
-        describedBy={errorId}
-        id="sign-up-password-confirmation"
-        invalid={hasError}
-        label="Confirmer le mot de passe"
-        minLength={10}
-        name="passwordConfirmation"
-        required
-        visibilityContext="confirmation"
-      />
+        <PasswordField
+          autoComplete="new-password"
+          describedBy={errorId}
+          id="sign-up-password"
+          invalid={hasError}
+          label="Mot de passe"
+          minLength={10}
+          name="password"
+          required
+        />
+        <PasswordField
+          autoComplete="new-password"
+          describedBy={errorId}
+          id="sign-up-password-confirmation"
+          invalid={hasError}
+          label="Confirmer le mot de passe"
+          minLength={10}
+          name="passwordConfirmation"
+          required
+          visibilityContext="confirmation"
+        />
 
-      {state.message ? (
-        <div id={errorId}>
-          <InlineNotice tone="error">{state.message}</InlineNotice>
-        </div>
-      ) : null}
+        {state.message ? (
+          <Banner id={errorId} status="error" title={state.message} />
+        ) : null}
 
-      <Button
-        aria-busy={pending}
-        className="w-full text-[#08080b]"
-        disabled={pending}
-        type="submit"
-      >
-        <span>CRÉER MON COMPTE</span>
-        {pending ? (
-          <LoaderCircle
-            aria-hidden="true"
-            className="animate-spin"
-            data-pending-indicator="true"
-            size={17}
-          />
-        ) : (
-          <ArrowRight aria-hidden="true" size={17} />
-        )}
-      </Button>
+        <Button
+          endContent={
+            pending ? (
+              <LoaderCircle
+                aria-hidden="true"
+                className="animate-spin"
+                data-pending-indicator="true"
+                size={17}
+              />
+            ) : undefined
+          }
+          isDisabled={pending}
+          label="Créer mon compte"
+          size="lg"
+          type="submit"
+          variant="primary"
+          width="100%"
+        />
+        <span aria-live="polite" className="sr-only" role="status">
+          {pending ? "Création du compte en cours." : ""}
+        </span>
 
-      <p className="text-sm leading-6 text-[var(--text-secondary)]">
-        Ton compte reçoit 1 000 MKB fictifs. Aucun pari en argent réel.
-      </p>
+        <Text as="p" color="secondary" type="supporting">
+          Ton compte reçoit 1 000 MKB fictifs. Aucun pari en argent réel.
+        </Text>
+      </VStack>
     </form>
   );
 }

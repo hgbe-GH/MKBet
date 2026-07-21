@@ -10,7 +10,8 @@ Dernière mise à jour : 21 juillet 2026.
 - La finition B3 nocturne centralise les durées de mouvement, limite les translations de survol aux pointeurs fins et neutralise les animations avec réduction de mouvement. Le verre interactif reste transparent et flouté sur les petites surfaces compatibles ; les fallbacks, la réduction de transparence et les grands panneaux de lecture utilisent des surfaces graphite opaques.
 - Le shell privé utilise désormais les slots Astryx 0.1.7 (`AppShell`, `TopNav`, `SideNav` et `MobileNav`) avec cinq destinations principales partagées entre desktop et mobile. L’administration reste dans une zone secondaire visible uniquement pour `ADMIN` et `LIVE_HOST`, tandis que le compte, les rôles, la saison et la déconnexion sont regroupés dans le menu de compte.
 - Les en-têtes des pages privées et leurs états asynchrones partagés composent désormais les primitives Astryx (`Heading`, `Text`, `Stack`, `Skeleton` et `EmptyState`) avec des contrats TypeScript stricts. Les anciens composants B3 dupliqués ont été retirés, sans changement des textes, actions ou lectures métier.
-- Le sélecteur connexion/inscription anime son état optimiste uniquement lorsqu’une navigation client démarre ; les clics modifiés ou annulés restent alignés avec l’URL affichée.
+- L’accueil, les surfaces publiques, les formulaires d’authentification, les invitations et le formulaire de création de saison composent désormais les primitives Astryx. Le sélecteur connexion/inscription utilise un contrôle segmenté accessible piloté par l’URL ; les actions serveur, validations Zod, redirections internes sûres et appels Supabase restent inchangés.
+- Les formulaires d’authentification exposent explicitement les états `idling`, `pending`, `success` et `error`, conservent les champs natifs attendus par les Server Actions et annoncent les attentes et erreurs aux technologies d’assistance.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.
@@ -36,10 +37,11 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 270 tests réussis dans 44 fichiers.
+- `pnpm test` : 271 tests réussis dans 46 fichiers.
 - `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types sans différence après formatage, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : 5 sur 5 réussis.
 - `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build` avec Supabase arrêté et sans variables Supabase, puis `pnpm install --frozen-lockfile` : succès.
+- Pour la migration Astryx publique et Auth : `pnpm lint`, `pnpm typecheck`, `pnpm test` et `pnpm build` réussissent ; Prettier valide tous les fichiers modifiés. Le contrôle de format global signale uniquement `pnpm-workspace.yaml`, déjà non conforme et non modifié par ce lot.
 
 ## Production
 

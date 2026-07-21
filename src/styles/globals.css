@@ -337,48 +337,14 @@ a {
   }
 }
 
-.mk-auth-shell {
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-}
-
-.mk-brand-link:hover {
-  border-color: var(--brand-hover);
-  color: var(--brand-hover);
-}
-
 [data-interactive="lift"] {
   transition:
     transform var(--motion-fast) var(--ease-out),
     opacity var(--motion-fast) ease;
 }
 
-.mk-auth-mode-indicator {
-  position: absolute;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  left: 0.25rem;
-  width: calc(50% - 0.375rem);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 -2px var(--brand);
-  pointer-events: none;
-  transition: transform var(--motion-medium) var(--ease-out);
-}
-
-[data-auth-mode="register"] .mk-auth-mode-indicator {
-  transform: translateX(calc(100% + 0.25rem));
-}
-
 [data-motion="auth-content"] {
   animation: mk-auth-content var(--motion-medium) var(--ease-out) both;
-}
-
-.mk-auth-mode-content {
-  min-block-size: 40rem;
 }
 
 @keyframes mk-auth-content {
@@ -420,11 +386,6 @@ a {
     transform: none;
     transition-duration: 0.01ms;
   }
-
-  .mk-auth-mode-indicator {
-    transition-duration: 0.01ms;
-  }
-
   *,
   *::before,
   *::after {

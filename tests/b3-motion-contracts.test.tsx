@@ -2,13 +2,17 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import { OddsButton } from "@/components/sportsbook/odds-button";
 import { SegmentedFilter } from "@/components/ui/segmented-filter";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 const styles = readFileSync(
   join(process.cwd(), "src/styles/globals.css"),
@@ -183,7 +187,7 @@ describe("B3 motion contracts", () => {
     expect(reducedMotion).toContain("transform: none");
     expect(reducedMotion).toContain("animation: none");
     expect(reducedMotion).toMatch(
-      /\.mk-auth-mode-indicator\s*\{[^}]*transition-duration:\s*0\.01ms/,
+      /\[data-motion\],[\s\S]*transition-duration:\s*0\.01ms/,
     );
   });
 
@@ -286,7 +290,7 @@ describe("B3 motion contracts", () => {
     expect(appNavigation).not.toContain("backdrop-blur");
   });
 
-  it("uses one shared URL-driven auth indicator and fades only its content", () => {
+  it("uses one URL-driven Astryx selector and fades only its content", () => {
     const { container } = render(
       <AuthShell mode="register" next="/markets">
         <p>Inscription</p>
@@ -297,23 +301,20 @@ describe("B3 motion contracts", () => {
       name: "Choisir le mode d’accès",
     });
     expect(navigation).toHaveAttribute("data-auth-mode", "register");
-    expect(navigation.querySelectorAll(".mk-auth-mode-indicator")).toHaveLength(
-      1,
+    expect(
+      screen.getByRole("radio", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "Connexion" })).toHaveAttribute(
+      "aria-checked",
+      "false",
     );
     expect(
       screen.getByText("Inscription").closest("[data-motion]"),
     ).toHaveAttribute("data-motion", "auth-content");
     expect(
-      screen.getByText("Inscription").closest("[data-surface]"),
-    ).toHaveAttribute("data-surface", "opaque");
+      screen.getByText("Inscription").closest(".astryx-card"),
+    ).not.toBeNull();
     expect(container.querySelector('[data-motion="enter"]')).toBeNull();
-    expect(screen.getByRole("link", { name: "Connexion" })).toHaveAttribute(
-      "href",
-      "/login?next=%2Fmarkets",
-    );
-    expect(
-      screen.getByRole("link", { name: "Créer un compte" }),
-    ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
   });
 
   it("remounts only the bounded auth content when the URL mode changes", () => {
@@ -325,15 +326,9 @@ describe("B3 motion contracts", () => {
     const loginContent = screen
       .getByText("Contenu connexion")
       .closest('[data-motion="auth-content"]');
-    const indicator = document.querySelector(".mk-auth-mode-indicator");
-
-    expect(loginContent).toHaveClass("mk-auth-mode-content");
-    expect(styles).toMatch(
-      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*40rem/,
-    );
-    expect(styles).not.toMatch(
-      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*34rem/,
-    );
+    const selector = screen.getByRole("radiogroup", {
+      name: "Choisir le mode d’accès",
+    });
 
     rerender(
       <AuthShell mode="register">
@@ -345,7 +340,12 @@ describe("B3 motion contracts", () => {
       .getByText("Contenu inscription")
       .closest('[data-motion="auth-content"]');
     expect(registerContent).not.toBe(loginContent);
-    expect(document.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+    expect(
+      screen.getByRole("radiogroup", { name: "Choisir le mode d’accès" }),
+    ).toBe(selector);
+    expect(
+      screen.getByRole("radio", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-checked", "true");
     expect(
       screen.getByRole("navigation", { name: "Choisir le mode d’accès" }),
     ).toHaveAttribute("data-auth-mode", "register");
