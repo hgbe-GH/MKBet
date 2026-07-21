@@ -1,6 +1,6 @@
 # État actuel
 
-Dernière mise à jour : 20 juillet 2026.
+Dernière mise à jour : 21 juillet 2026.
 
 ## Produit réel
 
@@ -8,6 +8,7 @@ Dernière mise à jour : 20 juillet 2026.
 - L’adresse e-mail sert d’identifiant. Le portail public `/login` réunit connexion et création de compte par mot de passe de 10 à 128 caractères dans un shell responsive ; la confirmation de l’adresse est obligatoire et aucun magic link de connexion n’est proposé dans l’interface.
 - Le parcours de récupération `/forgot-password` → callback Auth → `/auth/update-password` vérifie l’AMR `recovery` côté serveur. Après modification, il contrôle la fermeture locale de la session puis redirige vers la confirmation publique sûre `/login?notice=password-updated` ; un cleanup retourné en erreur ou levé reste générique et n’annonce jamais de succès.
 - La finition B3 nocturne centralise les durées de mouvement, limite les translations de survol aux pointeurs fins et neutralise les animations avec réduction de mouvement. Le verre interactif reste transparent et flouté sur les petites surfaces compatibles ; les fallbacks, la réduction de transparence et les grands panneaux de lecture utilisent des surfaces graphite opaques.
+- La fondation Astryx 0.1.7 Neutral sombre est installée : le thème, l’internationalisation française, l’adaptateur `next/link` et le viewport de notifications sont montés sous le layout racine. Les composants B3 restent temporairement inchangés pendant la migration progressive.
 - Le sélecteur connexion/inscription anime son état optimiste uniquement lorsqu’une navigation client démarre ; les clics modifiés ou annulés restent alignés avec l’URL affichée.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
 - Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.

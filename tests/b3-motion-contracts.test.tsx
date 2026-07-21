@@ -203,7 +203,7 @@ describe("B3 motion contracts", () => {
   });
 
   it("declares the nocturnal browser chrome theme", () => {
-    expect(rootLayout).toContain('themeColor: "#08080b"');
+    expect(rootLayout).toContain('themeColor: "#1b1b1b"');
   });
 
   it("uses focus-visible replacements on auth fields", () => {
