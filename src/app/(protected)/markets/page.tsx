@@ -1,9 +1,9 @@
 import { parseMarketSearchParams } from "@/application/sportsbook/market-query";
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
+import { PageHeading } from "@/components/astryx/page-heading";
 import { CategoryTabs } from "@/components/sportsbook/category-tabs";
 import { MarketGroup } from "@/components/sportsbook/market-group";
 import { listSeasonMarkets } from "@/data/supabase/markets/market-repository";
-import { PageIntro } from "@/components/ui/page-intro";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
 
   return (
     <div className="space-y-5">
-      <PageIntro
+      <PageHeading
         eyebrow="Marchés réels"
         title="Tableau des cotes"
         description={`Cotes officielles de ${season.title}. Vérifie ton devis avant de confirmer.`}

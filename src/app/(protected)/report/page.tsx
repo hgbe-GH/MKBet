@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import { requireAuth } from "@/auth/require-auth";
+import { PageHeading } from "@/components/astryx/page-heading";
 import { EventReportForm } from "@/components/events/event-report-form";
 import { listReportableMarkets } from "@/data/supabase/events/repository";
-import { PageIntro } from "@/components/ui/page-intro";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export default async function ReportPage() {
       >
         Retour au direct
       </Link>
-      <PageIntro
+      <PageHeading
         eyebrow="Nouveau signalement"
         title="Déclarer un événement"
         description="Décris uniquement ce que tu as observé. Les preuves restent privées et le groupe tranche."

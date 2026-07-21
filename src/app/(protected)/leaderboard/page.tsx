@@ -1,7 +1,7 @@
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
-import { EmptyState } from "@/components/states/empty-state";
+import { AsyncState } from "@/components/astryx/async-state";
+import { PageHeading } from "@/components/astryx/page-heading";
 import { GlassSurface } from "@/components/ui/glass-surface";
-import { PageIntro } from "@/components/ui/page-intro";
 import { listSeasonLeaderboard } from "@/data/supabase/leaderboard/leaderboard-repository";
 
 export const dynamic = "force-dynamic";
@@ -13,13 +13,14 @@ export default async function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro
+      <PageHeading
         description="Capital et performances fictives du groupe. Les transactions détaillées restent privées."
         eyebrow="Classement réel"
         title="Performance MKB"
       />
       {rows.length === 0 ? (
-        <EmptyState
+        <AsyncState
+          kind="empty"
           description="Aucun portefeuille joueur actif dans cette saison."
           title="Classement vide"
         />

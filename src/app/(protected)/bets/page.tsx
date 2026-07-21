@@ -1,9 +1,9 @@
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
+import { AsyncState } from "@/components/astryx/async-state";
+import { PageHeading } from "@/components/astryx/page-heading";
 import { OddsMovement } from "@/components/sportsbook/odds-movement";
 import { StatusBadge } from "@/components/sportsbook/status-badge";
-import { EmptyState } from "@/components/states/empty-state";
 import { listCurrentUserBets } from "@/data/supabase/betting/bet-repository";
-import { PageIntro } from "@/components/ui/page-intro";
 import { SegmentedFilter } from "@/components/ui/segmented-filter";
 
 export const dynamic = "force-dynamic";
@@ -25,7 +25,7 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
 
   return (
     <div className="space-y-5">
-      <PageIntro
+      <PageHeading
         eyebrow="Mes paris"
         title="Tickets enregistrés"
         description="Les cotes de chaque sélection sont figées au placement."
@@ -47,7 +47,8 @@ export default async function BetsPage({ searchParams }: BetsPageProps = {}) {
         ]}
       />
       {bets.length === 0 ? (
-        <EmptyState
+        <AsyncState
+          kind="empty"
           title="Aucun ticket"
           description="Aucun pronostic ne correspond à ce filtre."
         />

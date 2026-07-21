@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 import { requireAuth } from "@/auth/require-auth";
+import { AsyncState } from "@/components/astryx/async-state";
+import { PageHeading } from "@/components/astryx/page-heading";
 import { EventReportCard } from "@/components/events/event-report-card";
-import { EmptyState } from "@/components/states/empty-state";
-import { PageIntro } from "@/components/ui/page-intro";
 import { SegmentedFilter } from "@/components/ui/segmented-filter";
 import { listEventReports } from "@/data/supabase/events/repository";
 import type { EventReportStatus } from "@/domain/events/types";
@@ -33,7 +33,7 @@ export default async function DirectPage({ searchParams }: DirectPageProps) {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
-      <PageIntro
+      <PageHeading
         action={
           <Link className="mk-primary-action" href="/report">
             + Déclarer
@@ -41,12 +41,7 @@ export default async function DirectPage({ searchParams }: DirectPageProps) {
         }
         description="Une preuve, deux votes, une décision. Tout se joue entre nous."
         eyebrow="Salle privée · 7 membres"
-        title={
-          <>
-            Le groupe fait{" "}
-            <span className="text-[var(--brand)]">le marché.</span>
-          </>
-        }
+        title="Le groupe fait le marché."
       />
 
       <SegmentedFilter
@@ -59,7 +54,8 @@ export default async function DirectPage({ searchParams }: DirectPageProps) {
       />
 
       {reports.length === 0 ? (
-        <EmptyState
+        <AsyncState
+          kind="empty"
           title={`Aucun événement ${activeFilter.label.toLocaleLowerCase("fr-FR")}`}
           description="Le fil se remplira dès qu’un membre partagera un fait avec le groupe."
         />

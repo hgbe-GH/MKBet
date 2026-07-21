@@ -1,4 +1,4 @@
-import { EmptyState } from "@/components/states/empty-state";
+import { AsyncState } from "@/components/astryx/async-state";
 import { MarketCard } from "@/components/sportsbook/market-card";
 import type { SportsbookMarket } from "@/fixtures/sportsbook/types";
 
@@ -12,7 +12,13 @@ export function MarketGroup({
   emptyDescription?: string;
 }) {
   if (markets.length === 0) {
-    return <EmptyState description={emptyDescription} title="Aucun marché" />;
+    return (
+      <AsyncState
+        description={emptyDescription}
+        kind="empty"
+        title="Aucun marché"
+      />
+    );
   }
 
   return (

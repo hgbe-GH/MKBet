@@ -65,7 +65,10 @@ describe("sportsbook pages", () => {
   it("renders the permanent direct room without demonstration content", async () => {
     render(await DirectPage({ searchParams: Promise.resolve({}) }));
     expect(
-      screen.getByRole("heading", { name: "Le groupe fait le marché." }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Le groupe fait le marché.",
+      }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "+ Déclarer" })).toHaveAttribute(
       "href",
@@ -73,6 +76,7 @@ describe("sportsbook pages", () => {
     );
     expect(screen.queryByText(/données de démonstration/i)).toBeNull();
     expect(screen.queryByText(/service_role/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Aucun événement à vérifier")).toBeVisible();
   });
 
   it("renders market filters from sanitized search params", async () => {
@@ -89,7 +93,7 @@ describe("sportsbook pages", () => {
       </BetSlipProvider>,
     );
     expect(
-      screen.getByRole("heading", { name: "Tableau des cotes" }),
+      screen.getByRole("heading", { level: 1, name: "Tableau des cotes" }),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("lit")).toBeInTheDocument();
     expect(
