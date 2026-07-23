@@ -62,6 +62,9 @@ export interface SportsbookMarket {
   type: MarketType;
   status: MarketStatus;
   deadline: string;
+  opensAt: string;
+  closesAt: string;
+  deadlineAt: string | null;
   betCount: number;
   variationLabel: string;
   oddsVersion: number;
