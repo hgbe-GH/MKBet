@@ -2,7 +2,6 @@
 
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
-import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -46,24 +45,6 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
       displayNameRef.current?.focus();
     }
   }, [hasError, state]);
-
-  if (state.ok && state.message) {
-    return (
-      <Card data-status="success" padding={6} role="status" variant="green">
-        <VStack gap={3}>
-          <Text color="secondary" type="label">
-            Compte presque prêt
-          </Text>
-          <Heading level={1}>Confirme ton adresse</Heading>
-          <Text as="p">{state.message}</Text>
-          <Text as="p" color="secondary" type="supporting">
-            Après confirmation, 1 000 MKB fictifs t’attendent dans la salle.
-            Aucun pari en argent réel.
-          </Text>
-        </VStack>
-      </Card>
-    );
-  }
 
   const status = pending ? "pending" : hasError ? "error" : "idling";
 
@@ -135,7 +116,7 @@ export function SignUpForm({ action = inertAction, next }: SignUpFormProps) {
           visibilityContext="confirmation"
         />
 
-        {state.message ? (
+        {hasError && state.message ? (
           <Banner id={errorId} status="error" title={state.message} />
         ) : null}
 

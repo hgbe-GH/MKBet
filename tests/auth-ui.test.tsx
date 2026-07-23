@@ -263,11 +263,11 @@ describe("auth UI", () => {
     );
   });
 
-  it("replaces sign-up fields with a generic confirmation notice", async () => {
-    const successAction = async (): Promise<AuthFormState> => ({
+  it("keeps sign-up fields visible when an action returns success without redirecting", async () => {
+    const successAction = vi.fn(async (): Promise<AuthFormState> => ({
       ok: true,
       message: "Compte créé. Consulte l’e-mail reçu pour confirmer ton compte.",
-    });
+    }));
 
     const { container } = render(
       <SignUpForm action={successAction} next="/direct" />,
@@ -275,13 +275,17 @@ describe("auth UI", () => {
 
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Confirme ton adresse" }),
-      ).toBeInTheDocument(),
-    );
-    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/member@example\.com|token/i);
+    await waitFor(() => expect(successAction).toHaveBeenCalledOnce());
+    expect(
+      screen.getByRole("heading", { name: "Créer mon compte" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse e-mail")).toBeInTheDocument();
+    expect(screen.queryByText("Confirme ton adresse")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Compte créé. Consulte l’e-mail reçu pour confirmer ton compte.",
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the sign-in label stable while submission is pending", async () => {
