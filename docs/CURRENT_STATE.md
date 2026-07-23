@@ -49,7 +49,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 
 ## Production
 
-La branche de refonte a été fusionnée dans `main`, puis poussée sur GitHub le 20 juillet 2026. Supabase Auth Production impose désormais un minimum de 10 caractères et autorise le callback exact `https://mk-bet.vercel.app/auth/callback`. Le déploiement Vercel correspondant est actif : `/`, `/login` et `/api/health` répondent en HTTP 200, l’interface de connexion par mot de passe est servie et une requête anonyme vers `/direct` revient vers la connexion.
+La branche Astryx, l’accès immédiat et le calendrier ont été fusionnés dans `main` puis poussés sur GitHub le 23 juillet 2026. Supabase Auth Production impose un minimum de 10 caractères, désactive désormais `Confirm email` et autorise le callback exact `https://mk-bet.vercel.app/auth/callback` pour la récupération. Vercel a reçu la mise à jour : `/` et `/api/health` répondent en HTTP 200, avec le contrat de santé attendu. La création d’un compte Production de contrôle n’a pas été automatisée afin de ne pas créer de compte tiers sans nécessité ; elle reste le dernier contrôle manuel du parcours de redirection directe vers `/direct`.
 
 Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir le callback de récupération. Vercel conserve uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel. La récupération par e-mail reste à vérifier manuellement avec une adresse membre après cette promotion.
 
