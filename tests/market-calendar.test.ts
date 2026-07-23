@@ -53,6 +53,15 @@ describe("market calendar", () => {
     });
   });
 
+  it("preserves ISO week years below 0100", () => {
+    expect(
+      parseMarketCalendarSearchParams(
+        { week: "0099-12-31" },
+        new Date("2026-07-23T12:00:00.000Z"),
+      ).weekStart,
+    ).toEqual(new Date("0099-12-28T00:00:00.000Z"));
+  });
+
   it("uses only the first scalar value of repeated calendar query parameters", () => {
     expect(
       parseMarketCalendarSearchParams(

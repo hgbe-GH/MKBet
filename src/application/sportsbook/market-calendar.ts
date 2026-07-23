@@ -17,13 +17,13 @@ export function getUtcWeekStart(date: Date): Date {
   if (Number.isNaN(timestamp)) throw new RangeError("INVALID_DATE");
 
   const weekdayOffset = (date.getUTCDay() + 6) % 7;
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate() - weekdayOffset,
-    ),
+  const weekStart = new Date(0);
+  weekStart.setUTCFullYear(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate() - weekdayOffset,
   );
+  return weekStart;
 }
 
 function getOperationalAt(market: SportsbookMarket): string {
