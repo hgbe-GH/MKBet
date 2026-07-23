@@ -15,7 +15,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { useToast } from "@astryxdesign/core/Toast";
 import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 
 import { createBetQuoteAction } from "@/application/betting/create-bet-quote-action";
 import { placeBetAction } from "@/application/betting/place-bet-action";
@@ -49,6 +49,8 @@ export function BetSlip({
   const [displayedBalance, setDisplayedBalance] = useState(balanceMkb);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const stakeId = useId();
+  const stakeDescriptionId = `${stakeId}-description`;
   const stakeNumber = Number(stake);
   const stakeValid =
     Number.isInteger(stakeNumber) &&
@@ -214,13 +216,13 @@ export function BetSlip({
           )}
 
           <div className="space-y-1">
-            <label className="font-semibold" htmlFor="bet-stake">
+            <label className="font-semibold" htmlFor={stakeId}>
               Mise en MKB
             </label>
             <input
-              aria-describedby="bet-stake-description"
+              aria-describedby={stakeDescriptionId}
               className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-              id="bet-stake"
+              id={stakeId}
               inputMode="decimal"
               max={displayedBalance}
               min="5"
@@ -237,7 +239,7 @@ export function BetSlip({
                 stakeValid ? undefined : "text-[var(--color-text-warning)]"
               }
               color="secondary"
-              id="bet-stake-description"
+              id={stakeDescriptionId}
               type="supporting"
             >
               {stakeValid

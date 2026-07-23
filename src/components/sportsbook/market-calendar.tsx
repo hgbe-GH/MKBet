@@ -23,6 +23,7 @@ const dateTimeFormatter = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
   minute: "2-digit",
   timeZone: "UTC",
+  timeZoneName: "short",
 });
 
 function formatDate(date: Date | string) {
@@ -60,28 +61,76 @@ export function MarketCalendarControls({
   const nextWeek = toWeekParam(weekStart, 1);
 
   return (
-    <nav
-      aria-label="Navigation hebdomadaire du calendrier"
-      className="flex items-center justify-between gap-3"
-    >
-      <Link
-        aria-label={`Semaine précédente : ${formatDate(previousWeek)}`}
-        className="rounded-md px-3 py-2 font-semibold underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        href={calendarHref(previousWeek, category, status)}
+    <div className="space-y-4">
+      <nav
+        aria-label="Navigation hebdomadaire du calendrier"
+        className="flex items-center justify-between gap-3"
       >
-        Semaine précédente
-      </Link>
-      <Text as="p" type="supporting">
-        Semaine du {formatDate(weekStart)}
-      </Text>
-      <Link
-        aria-label={`Semaine suivante : ${formatDate(nextWeek)}`}
-        className="rounded-md px-3 py-2 font-semibold underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-        href={calendarHref(nextWeek, category, status)}
+        <Link
+          aria-label={`Semaine précédente : ${formatDate(previousWeek)}`}
+          className="rounded-md px-3 py-2 font-semibold underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          href={calendarHref(previousWeek, category, status)}
+        >
+          Semaine précédente
+        </Link>
+        <Text as="p" type="supporting">
+          Semaine du {formatDate(weekStart)}
+        </Text>
+        <Link
+          aria-label={`Semaine suivante : ${formatDate(nextWeek)}`}
+          className="rounded-md px-3 py-2 font-semibold underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          href={calendarHref(nextWeek, category, status)}
+        >
+          Semaine suivante
+        </Link>
+      </nav>
+      <form
+        action="/markets/calendar"
+        className="grid gap-3 sm:grid-cols-3 sm:items-end"
       >
-        Semaine suivante
-      </Link>
-    </nav>
+        <input
+          name="week"
+          type="hidden"
+          value={weekStart.toISOString().slice(0, 10)}
+        />
+        <label className="grid gap-1 font-semibold">
+          Catégorie
+          <select
+            className="rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2"
+            name="category"
+            defaultValue={category}
+          >
+            <option value="ALL">Toutes</option>
+            <option value="CONTACT">Contact</option>
+            <option value="PHYSICAL">Physique</option>
+            <option value="SEXUAL">Cul</option>
+            <option value="RELATIONSHIP">Relation</option>
+            <option value="STATUS">Statut</option>
+            <option value="CONFLICT">Conflits</option>
+            <option value="LONG_TERM">Long terme</option>
+          </select>
+        </label>
+        <label className="grid gap-1 font-semibold">
+          Statut
+          <select
+            className="rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2"
+            name="status"
+            defaultValue={status}
+          >
+            <option value="ALL">Tous</option>
+            <option value="OPEN">Ouverts</option>
+            <option value="SUSPENDED">Suspendus</option>
+            <option value="CLOSED">Clos</option>
+          </select>
+        </label>
+        <button
+          className="rounded-md bg-[var(--color-accent)] px-3 py-2 font-semibold text-[var(--color-text-on-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          type="submit"
+        >
+          Filtrer
+        </button>
+      </form>
+    </div>
   );
 }
 

@@ -189,6 +189,12 @@ describe("sportsbook pages", () => {
       "href",
       "/markets/calendar?week=2026-07-20&category=CONTACT&status=OPEN",
     );
+    expect(screen.getByLabelText("Catégorie")).toHaveValue("CONTACT");
+    expect(screen.getByLabelText("Statut")).toHaveValue("OPEN");
+    expect(screen.getByDisplayValue("2026-07-13")).toHaveAttribute(
+      "name",
+      "week",
+    );
     expect(
       screen.getByRole("heading", { level: 2, name: /14 juillet 2026/i }),
     ).toBeInTheDocument();
@@ -196,6 +202,7 @@ describe("sportsbook pages", () => {
     expect(screen.getByText("Fermeture des mises")).toBeVisible();
     expect(screen.getByText("Échéance du fait")).toBeVisible();
     expect(screen.getByText("Mises fermées")).toBeVisible();
+    expect(screen.getAllByText(/UTC/).length).toBeGreaterThan(0);
     expect(
       screen.getByRole("link", { name: /Un bisou avant J\+30/i }),
     ).toHaveAttribute("href", `/markets/${demoMarkets[0].id}`);

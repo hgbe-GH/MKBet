@@ -142,6 +142,20 @@ describe("transactional bet slip", () => {
     ).toBeInTheDocument();
   });
 
+  it("uses unique stake input IDs when multiple ticket surfaces are mounted", () => {
+    render(
+      <BetSlipProvider>
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+      </BetSlipProvider>,
+    );
+
+    const stakeInputs = screen.getAllByRole("spinbutton");
+    expect(new Set(stakeInputs.map((input) => input.id)).size).toBe(
+      stakeInputs.length,
+    );
+  });
+
   it("explains singles, accumulator legs, and the authoritative correlated quote", async () => {
     createQuoteMock.mockResolvedValueOnce({
       ok: true,
