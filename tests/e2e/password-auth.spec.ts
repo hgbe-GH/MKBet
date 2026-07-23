@@ -135,38 +135,29 @@ test.afterEach(async ({}, testInfo) => {
   }
 });
 
-test("creates, confirms and recovers a password account without enumeration", async ({
+test("creates an immediately accessible password account and recovers it without enumeration", async ({
   page,
 }, testInfo) => {
   test.setTimeout(120_000);
   const email = testEmail(testInfo.project.name, testInfo.repeatEachIndex);
   const unknownEmail = `unknown-${testInfo.repeatEachIndex}-${runId}@example.test`;
 
-  await page.goto("/login?mode=register&next=/markets");
+  await page.goto("/login?mode=register&next=/direct");
   await page.getByLabel("Nom d’affichage").fill("Joueuse E2E");
   await page.getByLabel("Adresse e-mail").fill(email);
   await page.getByLabel("Mot de passe", { exact: true }).fill(initialPassword);
   await page.getByLabel("Confirmer le mot de passe").fill(initialPassword);
   await page.getByRole("button", { name: "CRÉER MON COMPTE" }).click();
 
+  await expect(page).toHaveURL(/\/direct$/);
   await expect(
-    page.getByRole("heading", { name: "Confirme ton adresse" }),
+    page.getByRole("heading", { name: /Le groupe fait le marché/ }),
   ).toBeVisible();
   const createdUserId = await findLocalPasswordAuthTestUserId(email);
   expect(createdUserId).not.toBeNull();
   trackedUserIds.set(email, createdUserId ?? "");
   await expect(page.locator("body")).not.toContainText(email);
   await expect(page.locator("body")).not.toContainText(initialPassword);
-
-  await page.goto(await waitForAuthEmailLink(email, "signup"));
-  await expect(page).toHaveURL(/\/markets$/);
-  await expect(
-    page.getByRole("heading", { name: "Tableau des cotes" }),
-  ).toBeVisible();
-  await page.goto("/direct");
-  await expect(
-    page.getByRole("heading", { name: /Le groupe fait le marché/ }),
-  ).toBeVisible();
 
   await page.goto("/settings/account");
   await page.getByRole("button", { name: "Déconnexion" }).click();

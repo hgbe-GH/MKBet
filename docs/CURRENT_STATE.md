@@ -14,7 +14,7 @@ Dernière mise à jour : 23 juillet 2026.
 - L’accueil, les surfaces publiques, les formulaires d’authentification, les invitations et le formulaire de création de saison composent désormais les primitives Astryx. Le sélecteur connexion/inscription utilise un contrôle segmenté accessible piloté par l’URL ; les actions serveur, validations Zod, redirections internes sûres et appels Supabase restent inchangés.
 - Les formulaires d’authentification exposent explicitement les états `idling`, `pending`, `success` et `error`, conservent les champs natifs attendus par les Server Actions et annoncent les attentes et erreurs aux technologies d’assistance.
 - Une salle permanente Margot × Kévin remplace les saisons sélectionnables.
-- Tout compte confirmé rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
+- Toute session créée par inscription ou connexion rejoint automatiquement la salle avec le rôle `PLAYER`, un portefeuille unique et 1 000 MKB crédités exactement une fois.
 - Deux marchés Supabase sont proposés : premier bisou post-rupture et retour officiel en couple.
 - Les devis, placements, débits, cotes figées, tickets et classement sont autoritaires et transactionnels côté PostgreSQL.
 - Tout membre peut signaler un bisou ou un couple officiel avec l’heure réelle, une description, un marché lié et jusqu’à cinq preuves privées.
@@ -35,10 +35,10 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Vitest couvre la frontière Zod, les repositories, Server Actions, composants et règles existantes.
 - Le scénario `db:test:single-room` vérifie inscription/crédit idempotents, auto-vote refusé, votes immuables, confirmation, règlement/gain unique, invalidation et réouverture.
 - Playwright couvre le pari réel, l’upload d’une preuve, le vote de deux membres, le règlement visible, le refus anonyme du média, l’invalidation et les vues desktop/mobile.
-- Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
+- Playwright couvre aussi l’inscription par mot de passe avec accès direct à `/direct`, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération Mailpit via callback PKCE, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 276 tests réussis dans 47 fichiers.
+- `pnpm test` : 277 tests réussis dans 47 fichiers.
 - `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types sans différence après formatage, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : 5 sur 5 réussis.
 - `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build` avec Supabase arrêté et sans variables Supabase, puis `pnpm install --frozen-lockfile` : succès.
@@ -48,7 +48,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 
 La branche de refonte a été fusionnée dans `main`, puis poussée sur GitHub le 20 juillet 2026. Supabase Auth Production impose désormais un minimum de 10 caractères et autorise le callback exact `https://mk-bet.vercel.app/auth/callback`. Le déploiement Vercel correspondant est actif : `/`, `/login` et `/api/health` répondent en HTTP 200, l’interface de connexion par mot de passe est servie et une requête anonyme vers `/direct` revient vers la connexion.
 
-Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir les paramètres `intent` et `next`. Vercel conserve uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel. La réception réelle des e-mails de confirmation et de récupération reste à vérifier manuellement avec une adresse membre après cette promotion.
+Chaque Preview testée doit définir `NEXT_PUBLIC_SITE_URL` à son origine exacte et ajouter dans Supabase le pattern `https://<preview-host>/auth/callback**`, limité à ce host et à ce chemin afin de couvrir le callback de récupération. Vercel conserve uniquement `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` ; aucune clé `service_role` n’est nécessaire. Aucune migration n’est exécutée par Vercel. La récupération par e-mail reste à vérifier manuellement avec une adresse membre après cette promotion.
 
 ## Limites assumées
 

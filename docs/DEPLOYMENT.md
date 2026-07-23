@@ -19,7 +19,7 @@ Configurer séparément les variables suivantes dans **Development**, dans chaqu
 - `NEXT_PUBLIC_SUPABASE_URL` ;
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-`NEXT_PUBLIC_SITE_URL` doit être l’origine publique exacte de l’environnement, sans chemin : `http://localhost:3000` en développement local, `https://<domaine-preview-vercel>` pour une Preview et `https://mk-bet.vercel.app` en Production. Les Server Actions utilisent exclusivement cette valeur pour construire les URLs de confirmation et de récupération ; elles ne déduisent pas l’origine depuis la requête.
+`NEXT_PUBLIC_SITE_URL` doit être l’origine publique exacte de l’environnement, sans chemin : `http://localhost:3000` en développement local, `https://<domaine-preview-vercel>` pour une Preview et `https://mk-bet.vercel.app` en Production. Les Server Actions utilisent exclusivement cette valeur pour construire les URLs de récupération ; elles ne déduisent pas l’origine depuis la requête.
 
 `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` doivent cibler le projet Supabase prévu pour l’environnement. `NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement en local mais ne doit pas être la référence des nouveaux environnements. Ne pas configurer `SUPABASE_SERVICE_ROLE_KEY` dans Vercel : le parcours déployé n’en a pas besoin.
 
@@ -34,13 +34,13 @@ Dans **Authentication → URL Configuration**, définir l’URL de site et décl
 - Preview : définir `NEXT_PUBLIC_SITE_URL=https://<preview-host>` avec l’origine exacte, puis ajouter `https://<preview-host>/auth/callback**` aux Additional Redirect URLs Supabase pour ce host précis ;
 - Production : conserver l’URL de site `https://mk-bet.vercel.app` et le callback exact `https://mk-bet.vercel.app/auth/callback`.
 
-Les Server Actions construisent leur `redirectTo` depuis `NEXT_PUBLIC_SITE_URL`, puis ajoutent `?intent=signup&next=…` ou `?intent=recovery`. Lorsque le Site URL Supabase reste celui de Production, le suffixe `**` du pattern Preview est donc nécessaire pour accepter le callback et sa query string. Selon la [syntaxe officielle Supabase](https://supabase.com/docs/guides/auth/redirect-urls#use-wildcards-in-redirect-urls), `**` couvre toute séquence de caractères ; il reste ici après le chemin fixe `/auth/callback` et ne généralise ni le domaine ni les autres routes.
+La demande de récupération construit son `redirectTo` depuis `NEXT_PUBLIC_SITE_URL`, puis ajoute `?intent=recovery`. Lorsque le Site URL Supabase reste celui de Production, le suffixe `**` du pattern Preview est donc nécessaire pour accepter le callback et sa query string. Selon la [syntaxe officielle Supabase](https://supabase.com/docs/guides/auth/redirect-urls#use-wildcards-in-redirect-urls), `**` couvre toute séquence de caractères ; il reste ici après le chemin fixe `/auth/callback` et ne généralise ni le domaine ni les autres routes.
 
 Ne pas autoriser `https://*.vercel.app/**`, `https://**.vercel.app/**` ni inventer un domaine Preview : chaque host réellement testé est ajouté séparément. En Production, le Site URL et le callback partagent la même origine canonique, donc le callback exact suffit et aucun wildcard externe n’est requis.
 
 Les paramètres `next` reçus du client sont limités à des chemins internes.
 
-Activer la confirmation des e-mails et fixer la longueur minimale du mot de passe à 10 dans Supabase Auth pour chaque projet. Les mêmes callbacks servent aux confirmations d’inscription et aux récupérations de mot de passe ; le magic link de connexion n’est pas exposé dans l’interface. Les URLs Preview ne sont ajoutées que lorsqu’un domaine concret doit recevoir ces e-mails.
+Désactiver la confirmation des e-mails et fixer la longueur minimale du mot de passe à 10 dans Supabase Auth pour chaque projet. Le callback sert à la récupération de mot de passe ; le magic link de connexion n’est pas exposé dans l’interface. Les URLs Preview ne sont ajoutées que lorsqu’un domaine concret doit recevoir ces e-mails.
 
 ## Migrations Supabase
 

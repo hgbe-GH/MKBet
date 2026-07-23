@@ -252,6 +252,26 @@ describe("password authentication actions", () => {
     expect(JSON.stringify(result)).not.toContain("User already registered");
   });
 
+  it("signs out without initialization when sign-up returns no session or error", async () => {
+    signUp.mockResolvedValue({
+      data: { session: null, user: {} },
+      error: null,
+    });
+
+    const result = await signUpWithPasswordAction(
+      initialState,
+      validSignUpData(),
+    );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
+    });
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(rpc).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
   it("signs out and reports a database failure when immediate access initialization fails", async () => {
     signUp.mockResolvedValue({
       data: { session: { access_token: "session-token" } },

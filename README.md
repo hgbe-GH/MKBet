@@ -2,9 +2,9 @@
 
 MK Bet est une application web privée de paris fictifs entre amis autour de la saison post-rupture Margot × Kévin. Son ton reprend avec humour les codes d’un sportsbook, mais elle n’utilise que la monnaie fictive MKB et ne permet aucun pari en argent réel.
 
-Cette version recentre tout le produit sur une salle permanente Margot × Kévin. L’adresse e-mail sert d’identifiant : l’utilisateur crée un mot de passe d’au moins dix caractères, confirme son adresse, puis peut se connecter ou utiliser « Mot de passe oublié ». Le magic link n’est plus proposé dans l’interface.
+Cette version recentre tout le produit sur une salle permanente Margot × Kévin. L’adresse e-mail sert d’identifiant : l’utilisateur crée un mot de passe d’au moins dix caractères et accède immédiatement à la salle. Il peut ensuite utiliser « Mot de passe oublié » si nécessaire. Le magic link n’est pas proposé dans l’interface.
 
-Chaque compte confirmé rejoint automatiquement la salle, reçoit 1 000 MKB fictifs exactement une fois et peut parier sur deux questions : le prochain bisou et le retour officiel en couple. Chaque membre peut aussi déclarer un fait avec des preuves privées. Deux votes concordants le confirment ou l’invalident ; une confirmation règle atomiquement le marché et les tickets liés.
+Chaque compte authentifié rejoint automatiquement la salle, reçoit 1 000 MKB fictifs exactement une fois et peut parier sur deux questions : le prochain bisou et le retour officiel en couple. Chaque membre peut aussi déclarer un fait avec des preuves privées. Deux votes concordants le confirment ou l’invalident ; une confirmation règle atomiquement le marché et les tickets liés.
 
 ## Prérequis
 
@@ -94,4 +94,4 @@ La procédure complète se trouve dans [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md
 
 ## État actuel
 
-La page publique, l’Auth SSR par e-mail et mot de passe, la confirmation, la récupération, la salle unique, les deux marchés, le ticket, le classement et le fil de validation sont implémentés. Les preuves sont converties en WebP sans métadonnées, stockées dans un bucket privé et servies par une route authentifiée sans URL Storage. Le règlement MKB lié aux faits confirmés est réel, idempotent et audité. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
+La page publique, l’Auth SSR par e-mail et mot de passe avec accès immédiat, la récupération, la salle unique, les deux marchés, le ticket, le classement et le fil de validation sont implémentés. Les preuves sont converties en WebP sans métadonnées, stockées dans un bucket privé et servies par une route authentifiée sans URL Storage. Le règlement MKB lié aux faits confirmés est réel, idempotent et audité. Voir [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md).
