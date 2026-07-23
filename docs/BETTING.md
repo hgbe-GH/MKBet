@@ -16,7 +16,7 @@ Les devis sont uniques par `(user_id, idempotency_key)`. Les placements sont uni
 
 ## Simples, combinés et rendement potentiel
 
-Un pari simple reprend la cote courante de l’issue. Un combiné contient deux ou trois marchés distincts et exige une règle exacte dans `accumulator_correlation_rules`. PostgreSQL multiplie les probabilités équitables, applique le coefficient de corrélation, borne le résultat entre `0,001` et `0,95`, puis applique une seule fois la marge maximale des marchés. Aucune combinaison arbitraire n’est tarifée comme indépendante.
+Un pari simple reprend la cote courante de l’issue. Un combiné contient exactement deux ou trois marchés distincts et exige une règle de corrélation exacte dans `accumulator_correlation_rules`. PostgreSQL est la seule autorité du devis : il multiplie les probabilités équitables, applique le coefficient de corrélation, borne le résultat entre `0,001` et `0,95`, puis applique une seule fois la marge maximale des marchés. Le navigateur ne calcule ni une cote ni une corrélation ; aucune combinaison arbitraire n’est tarifée comme indépendante.
 
 Le retour potentiel inclut la mise :
 

@@ -12,6 +12,7 @@ export async function listSeasonLeaderboard(
   });
   if (error) throw new Error("DATABASE_OPERATION_FAILED");
   return (data ?? []).map((row) => ({
+    userId: row.user_id,
     rank: row.rank,
     playerName: row.display_name,
     avatarUrl: row.avatar_url,

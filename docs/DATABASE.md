@@ -19,7 +19,7 @@ Les migrations sont forward-only et ne sont jamais exécutées par Next.js, Verc
 
 ## Salle permanente
 
-La migration `20260715170000_single_room.sql` installe la saison Margot × Kévin et ses deux marchés binaires. `ensure_single_room_access` inscrit chaque compte confirmé, attribue `PLAYER`, crée un portefeuille unique et crédite une seule transaction initiale de 1 000 MKB.
+La migration `20260715170000_single_room.sql` installe la saison Margot × Kévin et ses deux marchés binaires. `ensure_single_room_access` inscrit chaque compte authentifié, attribue `PLAYER`, crée un portefeuille unique et crédite une seule transaction initiale de 1 000 MKB.
 
 Les migrations `20260715170001` à `20260715170003` ajoutent les signalements, votes, preuves privées, résolution financière et policies RLS. Une déclaration suspend son marché lié. Deux validations déclenchent dans une transaction la confirmation, le règlement du marché, le statut des paris, les gains et l’audit. Deux invalidations rejettent la déclaration et rouvrent le marché. L’auteur ne vote jamais sur son propre signalement et la contrainte unique `(report_id, voter_user_id)` rend chaque décision définitive.
 

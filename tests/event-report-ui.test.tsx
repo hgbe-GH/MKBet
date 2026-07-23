@@ -46,6 +46,8 @@ describe("EventReportCard", () => {
     );
     expect(screen.getByText("1 validation sur 2")).toBeInTheDocument();
     expect(screen.getByText("0 invalidation sur 2")).toBeInTheDocument();
+    expect(screen.getByText(/Événement du/)).toBeInTheDocument();
+    expect(screen.getByText(/Déclaré le/)).toBeInTheDocument();
     expect(screen.getByRole("article")).toHaveAttribute(
       "data-report-status",
       "PENDING",
@@ -79,6 +81,10 @@ describe("EventVoteControls", () => {
     render(<EventVoteControls reportId="report-1" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Invalider ce fait" }));
+    expect(
+      screen.getByRole("alertdialog", { name: "Invalider ce fait ?" }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Confirmer" }));
 
     await waitFor(() =>
       expect(screen.getByText("Ton vote : invalidation.")).toBeInTheDocument(),

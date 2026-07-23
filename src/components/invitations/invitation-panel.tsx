@@ -1,10 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import { useActionState } from "react";
 
 import type { InvitationFormState } from "@/application/invitations/actions";
-import { Button } from "@/components/ui/button";
 import type { InvitationPreview } from "@/application/invitations/types";
 
 interface InvitationPanelProps {
@@ -48,62 +53,94 @@ export function InvitationPanel({
   action = inertAction,
 }: InvitationPanelProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const status = pending
+    ? "pending"
+    : state.message
+      ? state.ok
+        ? "success"
+        : "error"
+      : "idling";
 
   if (!preview.isValid) {
     return (
-      <section className="space-y-4 rounded-md border border-stone-200 bg-white p-6">
-        <h1 className="text-2xl font-black text-stone-950">
-          Invitation indisponible
-        </h1>
-        <p className="text-stone-600">{invalidMessage(preview.reason)}</p>
-      </section>
+      <Card data-status="error" padding={6} variant="muted">
+        <VStack gap={4}>
+          <Badge label="Invitation privée" variant="error" />
+          <Heading level={1}>Invitation indisponible</Heading>
+          <Text as="p" color="secondary">
+            {invalidMessage(preview.reason)}
+          </Text>
+        </VStack>
+      </Card>
     );
   }
 
   return (
-    <section className="space-y-5 rounded-md border border-stone-200 bg-white p-6">
-      <p className="text-sm font-black tracking-[0.14em] text-red-800 uppercase">
-        Invitation privée
-      </p>
-      <h1 className="text-2xl font-black text-stone-950">
-        Tu as été convoqué dans la salle des marchés.
-      </h1>
-      <dl className="grid gap-2 text-sm text-stone-700">
-        <div>
-          <dt className="font-bold">Saison</dt>
-          <dd>{preview.seasonTitle}</dd>
-        </div>
-        <div>
-          <dt className="font-bold">Rôle proposé</dt>
-          <dd>
-            {preview.proposedRole}
-            {preview.proposedSubjectKey ? ` ${preview.proposedSubjectKey}` : ""}
-          </dd>
-        </div>
-        {preview.maskedEmail ? (
+    <Card data-status={status} padding={6}>
+      <VStack gap={5}>
+        <Badge label="Invitation privée" variant="red" />
+        <Heading level={1}>
+          Tu as été convoqué dans la salle des marchés.
+        </Heading>
+        <dl className="grid gap-3 text-sm">
           <div>
-            <dt className="font-bold">Email réservé</dt>
-            <dd>{preview.maskedEmail}</dd>
+            <dt className="font-bold text-[var(--color-text-secondary)]">
+              Saison
+            </dt>
+            <dd>{preview.seasonTitle}</dd>
           </div>
-        ) : null}
-      </dl>
-      {isAuthenticated ? (
-        <form action={formAction}>
-          <input name="token" type="hidden" value={token ?? ""} />
-          <Button disabled={pending} type="submit">
-            {pending ? "ACCEPTATION" : "ACCEPTER L’INVITATION"}
-          </Button>
-          {state.message ? (
-            <p className="mt-3 text-sm text-stone-600">{state.message}</p>
+          <div>
+            <dt className="font-bold text-[var(--color-text-secondary)]">
+              Rôle proposé
+            </dt>
+            <dd>
+              {preview.proposedRole}
+              {preview.proposedSubjectKey
+                ? ` ${preview.proposedSubjectKey}`
+                : ""}
+            </dd>
+          </div>
+          {preview.maskedEmail ? (
+            <div>
+              <dt className="font-bold text-[var(--color-text-secondary)]">
+                Email réservé
+              </dt>
+              <dd>{preview.maskedEmail}</dd>
+            </div>
           ) : null}
-        </form>
-      ) : (
-        <Button asChild>
-          <Link href={`/login?next=${encodeURIComponent(nextPath)}`}>
-            Se connecter
-          </Link>
-        </Button>
-      )}
-    </section>
+        </dl>
+        {isAuthenticated ? (
+          <form action={formAction} aria-busy={pending}>
+            <VStack gap={3}>
+              <input name="token" type="hidden" value={token ?? ""} />
+              <Button
+                isDisabled={pending}
+                isLoading={pending}
+                label="Accepter l’invitation"
+                size="lg"
+                type="submit"
+                variant="primary"
+              />
+              <span aria-live="polite" className="sr-only" role="status">
+                {pending ? "Acceptation en cours." : ""}
+              </span>
+              {state.message ? (
+                <Banner
+                  status={state.ok ? "success" : "error"}
+                  title={state.message}
+                />
+              ) : null}
+            </VStack>
+          </form>
+        ) : (
+          <Button
+            href={`/login?next=${encodeURIComponent(nextPath)}`}
+            label="Se connecter"
+            size="lg"
+            variant="primary"
+          />
+        )}
+      </VStack>
+    </Card>
   );
 }

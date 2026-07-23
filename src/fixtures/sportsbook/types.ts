@@ -62,6 +62,9 @@ export interface SportsbookMarket {
   type: MarketType;
   status: MarketStatus;
   deadline: string;
+  opensAt: string;
+  closesAt: string;
+  deadlineAt: string | null;
   betCount: number;
   variationLabel: string;
   oddsVersion: number;
@@ -124,6 +127,7 @@ export interface TimelineEvent {
 }
 
 export interface LeaderboardRow {
+  userId: string;
   rank: number;
   playerName: string;
   avatarUrl?: string | null;

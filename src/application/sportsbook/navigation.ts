@@ -1,25 +1,19 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  BarChart3,
-  ClipboardList,
-  FilePlus2,
-  RadioTower,
-  Settings,
-  Trophy,
-} from "lucide-react";
+import type { SeasonMemberRole } from "@/domain/database/enums";
 
-export interface NavigationItem {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  mobile: boolean;
+export const primaryNavigation = [
+  { href: "/direct", label: "Aujourd’hui", icon: "home" },
+  { href: "/markets", label: "Marchés", icon: "chart" },
+  { href: "/report", label: "Déclarer", icon: "add" },
+  { href: "/bets", label: "Mes paris", icon: "ticket" },
+  { href: "/leaderboard", label: "Classement", icon: "ranking" },
+] as const;
+
+export type PrimaryNavigationItem = (typeof primaryNavigation)[number];
+
+export function isNavigationItemActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export const sportsbookNavigation: NavigationItem[] = [
-  { href: "/direct", label: "Direct", icon: RadioTower, mobile: true },
-  { href: "/markets", label: "Marchés", icon: BarChart3, mobile: true },
-  { href: "/report", label: "Déclarer", icon: FilePlus2, mobile: true },
-  { href: "/bets", label: "Mon ticket", icon: ClipboardList, mobile: true },
-  { href: "/leaderboard", label: "Classement", icon: Trophy, mobile: true },
-  { href: "/settings/account", label: "Compte", icon: Settings, mobile: false },
-];
+export function canSeeAdministration(roles: readonly SeasonMemberRole[]) {
+  return roles.includes("ADMIN") || roles.includes("LIVE_HOST");
+}

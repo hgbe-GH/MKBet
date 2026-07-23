@@ -8,9 +8,9 @@ Le proxy Next.js 16 rafraîchit les cookies Supabase et appelle `auth.getClaims(
 
 Les pages privées utilisent aussi `requireAuth()` dans leur layout ou dans les actions serveur. Le proxy n'est donc pas la seule barrière d'autorisation.
 
-L’adresse e-mail est l’identifiant de connexion. L’inscription exige un mot de passe de 10 à 128 caractères et sa confirmation, puis Supabase impose la confirmation de l’adresse avant l’accès privé. L’interface ne propose plus de magic link : le secours passe par `/forgot-password`, le callback Auth et `/auth/update-password`. Le callback n’accepte le changement que lorsque les claims portent l’AMR `recovery`. Après la mise à jour, l’application contrôle explicitement le résultat de la fermeture locale de la session de récupération. Elle ne redirige vers la confirmation publique whitelistée `/login?notice=password-updated` que lorsque cette fermeture réussit ; une erreur retournée ou levée produit un code applicatif générique, sans annoncer de succès ni exposer le détail Supabase.
+L’adresse e-mail est l’identifiant de connexion. L’inscription exige un mot de passe de 10 à 128 caractères et sa confirmation, puis exige une session Supabase immédiate avant l’accès privé. Une réponse sans session est fermée localement et reste générique. L’interface ne propose plus de magic link : le secours passe par `/forgot-password`, le callback Auth et `/auth/update-password`. Le callback n’accepte le changement que lorsque les claims portent l’AMR `recovery`. Après la mise à jour, l’application contrôle explicitement le résultat de la fermeture locale de la session de récupération. Elle ne redirige vers la confirmation publique whitelistée `/login?notice=password-updated` que lorsque cette fermeture réussit ; une erreur retournée ou levée produit un code applicatif générique, sans annoncer de succès ni exposer le détail Supabase.
 
-Les réponses d’inscription, de connexion et de récupération restent génériques. Elles ne révèlent ni l’existence d’une adresse, ni son état de confirmation, ni le fournisseur utilisé. Aucun mot de passe, code PKCE, jeton, lien reçu par e-mail ou détail Supabase brut n’est affiché ou journalisé.
+Les réponses d’inscription, de connexion et de récupération restent génériques. Elles ne révèlent ni l’existence d’une adresse ni le fournisseur utilisé. Aucun mot de passe, code PKCE, jeton, lien reçu par e-mail ou détail Supabase brut n’est affiché ou journalisé.
 
 ## Variables et secrets
 
@@ -22,7 +22,7 @@ Variables publiques principales :
 
 `NEXT_PUBLIC_SUPABASE_ANON_KEY` reste accepté temporairement pour le développement local, mais n'est plus la source principale. Aucune variable `SUPABASE_SERVICE_ROLE_KEY` n’est configurée dans Vercel ou requise par le parcours applicatif.
 
-Après une confirmation ou une connexion classique, `ensure_current_profile` puis `ensure_single_room_access` garantissent de façon idempotente le profil, l’adhésion, le rôle `PLAYER`, le portefeuille et l’unique crédit initial de 1 000 MKB. La récupération de mot de passe ne déclenche pas cette initialisation.
+Après une inscription avec session ou une connexion classique, `ensure_current_profile` puis `ensure_single_room_access` garantissent de façon idempotente le profil, l’adhésion, le rôle `PLAYER`, le portefeuille et l’unique crédit initial de 1 000 MKB. La récupération de mot de passe ne déclenche pas cette initialisation.
 
 ## Rôles cumulables
 

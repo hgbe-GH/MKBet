@@ -65,7 +65,7 @@ minimum_password_length = 10
 email_sent = 100
 
 [auth.email]
-enable_confirmations = true
+enable_confirmations = false
 max_frequency = "1m0s"
 otp_length = 8
 

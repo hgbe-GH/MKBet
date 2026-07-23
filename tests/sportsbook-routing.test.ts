@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { parseMarketSearchParams } from "@/application/sportsbook/market-query";
-import { sportsbookNavigation } from "@/application/sportsbook/navigation";
+import {
+  canSeeAdministration,
+  isNavigationItemActive,
+  primaryNavigation,
+} from "@/application/sportsbook/navigation";
 
 describe("sportsbook routing and permissions", () => {
   it("sanitizes market query parameters to safe defaults", () => {
@@ -35,18 +39,28 @@ describe("sportsbook routing and permissions", () => {
   });
 
   it("keeps navigation focused on the permanent Margot and Kévin room", () => {
-    expect(sportsbookNavigation.map((item) => item.href)).toEqual([
+    expect(primaryNavigation.map((item) => item.href)).toEqual([
       "/direct",
       "/markets",
       "/report",
       "/bets",
       "/leaderboard",
-      "/settings/account",
     ]);
-    expect(
-      sportsbookNavigation
-        .filter((item) => item.mobile)
-        .map((item) => item.href),
-    ).toEqual(["/direct", "/markets", "/report", "/bets", "/leaderboard"]);
+    expect(primaryNavigation.map((item) => item.label)).toEqual([
+      "Aujourd’hui",
+      "Marchés",
+      "Déclarer",
+      "Mes paris",
+      "Classement",
+    ]);
+  });
+
+  it("matches nested routes and exposes administration only to privileged roles", () => {
+    expect(isNavigationItemActive("/markets", "/markets")).toBe(true);
+    expect(isNavigationItemActive("/markets/kiss", "/markets")).toBe(true);
+    expect(isNavigationItemActive("/leaderboard", "/markets")).toBe(false);
+    expect(canSeeAdministration(["PLAYER"])).toBe(false);
+    expect(canSeeAdministration(["PLAYER", "ADMIN"])).toBe(true);
+    expect(canSeeAdministration(["LIVE_HOST"])).toBe(true);
   });
 });

@@ -1,15 +1,27 @@
 "use client";
 
+import { AlertDialog } from "@astryxdesign/core/AlertDialog";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { List } from "@astryxdesign/core/List";
+import {
+  MetadataList,
+  MetadataListItem,
+} from "@astryxdesign/core/MetadataList";
+import { ProgressBar } from "@astryxdesign/core/ProgressBar";
+import { Text } from "@astryxdesign/core/Text";
+import { useToast } from "@astryxdesign/core/Toast";
+import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 
 import { createBetQuoteAction } from "@/application/betting/create-bet-quote-action";
 import { placeBetAction } from "@/application/betting/place-bet-action";
 import type { BetQuoteResult } from "@/application/betting/types";
 import { BetSlipSelectionItem } from "@/components/sportsbook/bet-slip-selection";
 import { useBetSlip } from "@/components/sportsbook/bet-slip-context";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 function remainingSeconds(expiresAt: string): number {
   return Math.max(0, Math.ceil((Date.parse(expiresAt) - Date.now()) / 1000));
@@ -17,14 +29,15 @@ function remainingSeconds(expiresAt: string): number {
 
 export function BetSlip({
   balanceMkb,
+  onPotentialReturnChange,
   seasonId,
-  surface = "interactive",
 }: {
   balanceMkb: number;
+  onPotentialReturnChange?: (potentialReturnMkb: number | null) => void;
   seasonId: string;
-  surface?: "interactive" | "opaque";
 }) {
   const betSlip = useBetSlip();
+  const toast = useToast();
   const [stake, setStake] = useState("10");
   const [stakeRevision, setStakeRevision] = useState(0);
   const [quote, setQuote] = useState<BetQuoteResult | null>(null);
@@ -34,7 +47,10 @@ export function BetSlip({
   const [changedFromOdds, setChangedFromOdds] = useState<number | null>(null);
   const [ticketNumber, setTicketNumber] = useState<string | null>(null);
   const [displayedBalance, setDisplayedBalance] = useState(balanceMkb);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const stakeId = useId();
+  const stakeDescriptionId = `${stakeId}-description`;
   const stakeNumber = Number(stake);
   const stakeValid =
     Number.isInteger(stakeNumber) &&
@@ -52,6 +68,12 @@ export function BetSlip({
     : betSlip.selections.length > 0
       ? "selection"
       : "empty";
+  const ticketLabel =
+    betSlip.selections.length === 1
+      ? "Simple"
+      : betSlip.selections.length > 1
+        ? `Combiné ${betSlip.selections.length} sélections`
+        : "Ticket vide";
 
   useEffect(() => {
     if (!activeQuote) return;
@@ -60,6 +82,17 @@ export function BetSlip({
     }, 1_000);
     return () => window.clearInterval(timer);
   }, [activeQuote]);
+
+  useEffect(() => {
+    onPotentialReturnChange?.(
+      activeQuote && secondsLeft > 0 ? activeQuote.potentialReturnMkb : null,
+    );
+  }, [activeQuote, onPotentialReturnChange, secondsLeft]);
+
+  const announce = (message: string, type: "info" | "error" = "info") => {
+    setFeedback(message);
+    toast({ body: message, type, uniqueID: "bet-slip-feedback" });
+  };
 
   const verifyTicket = () => {
     if (!stakeValid || betSlip.selections.length === 0 || isPending) return;
@@ -71,30 +104,30 @@ export function BetSlip({
         idempotencyKey: crypto.randomUUID(),
       });
       if (!result.ok) {
-        setFeedback(result.message);
+        announce(result.message, "error");
         return;
       }
       setQuote(result.quote);
       setQuoteBasis(currentBasis);
       setSecondsLeft(remainingSeconds(result.quote.expiresAt));
-      setFeedback(
-        "Devis confirmé par MK Bet. Vérifie les cotes avant de placer.",
-      );
+      announce("Devis confirmé par MK Bet. Vérifie les cotes avant de placer.");
     });
   };
 
   const placeTicket = () => {
     if (!activeQuote || secondsLeft <= 0 || isPending) return;
+    setConfirmOpen(false);
     startTransition(async () => {
       const result = await placeBetAction({
         quoteId: activeQuote.quoteId,
         idempotencyKey: crypto.randomUUID(),
       });
       if (!result.ok) {
-        setFeedback(result.message);
+        announce(result.message, "error");
         if (result.code === "ODDS_CHANGED" || result.code === "QUOTE_EXPIRED") {
-          if (result.code === "ODDS_CHANGED")
+          if (result.code === "ODDS_CHANGED") {
             setChangedFromOdds(activeQuote.totalOdds);
+          }
           setQuote(null);
           setQuoteBasis("");
           setSecondsLeft(0);
@@ -103,7 +136,7 @@ export function BetSlip({
       }
       setDisplayedBalance(result.bet.balanceMkb);
       setTicketNumber(result.bet.ticketNumber);
-      setFeedback("Pronostic enregistré. Ta dignité est désormais engagée.");
+      announce("Pronostic enregistré. Ta dignité est désormais engagée.");
       setQuote(null);
       setQuoteBasis("");
       setChangedFromOdds(null);
@@ -112,178 +145,215 @@ export function BetSlip({
     });
   };
 
+  const actionLabel = isPending
+    ? "VÉRIFICATION…"
+    : feedback.includes("évolué")
+      ? "ACCEPTER LES NOUVELLES COTES"
+      : "VÉRIFIER LE TICKET";
+
   return (
-    <aside
-      aria-label="Ticket de pari"
-      className={cn(
-        "rounded-2xl p-4",
-        surface === "interactive"
-          ? "mk-glass-interactive mk-fallback-opaque"
-          : "mk-surface-opaque",
-      )}
-      data-ticket-step={ticketStep}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-black tracking-[0.12em] text-[var(--brand-hover)] uppercase">
-            Ticket
-          </p>
-          <h2 className="text-lg font-black">
-            {betSlip.selections.length} sélection
-            {betSlip.selections.length > 1 ? "s" : ""}
-          </h2>
-        </div>
-        <button
-          className="min-h-11 rounded-md px-2 text-xs font-bold text-[var(--text-muted)] underline-offset-4 hover:bg-white/[0.07] hover:text-white hover:underline"
-          onClick={betSlip.clearSelections}
-          type="button"
-        >
-          Vider
-        </button>
-      </div>
-
-      <p aria-live="polite" className="sr-only" role="status">
-        {feedback || betSlip.message}
-      </p>
-      {feedback || betSlip.message ? (
-        <p className="mt-3 rounded-lg bg-white/[0.07] p-2 text-sm text-[var(--text-secondary)]">
-          {feedback || betSlip.message}
-        </p>
-      ) : null}
-
-      {ticketNumber ? (
-        <p className="mt-3 rounded-md bg-emerald-50 p-3 text-sm font-bold text-emerald-900">
-          Ticket #{ticketNumber}.{" "}
-          <Link className="underline" href="/bets">
-            Voir mes paris
-          </Link>
-        </p>
-      ) : null}
-
-      {betSlip.selections.length === 0 ? (
-        <p className="mt-5 text-sm leading-6 text-[var(--text-secondary)]">
-          Tes amis prennent peut-être de mauvaises décisions pendant que ton
-          ticket reste vide.
-        </p>
-      ) : (
-        <ol className="mt-4 space-y-3">
-          {betSlip.selections.map((selection) => (
-            <BetSlipSelectionItem
-              key={`${selection.marketId}:${selection.outcomeId}`}
-              selection={selection}
+    <>
+      <Card
+        aria-label="Ticket de pari"
+        data-ticket-step={ticketStep}
+        padding={4}
+        role="complementary"
+      >
+        <VStack gap={4}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <Badge label="Ticket" variant="info" />
+              <Heading className="mt-2" level={2}>
+                {ticketLabel}
+              </Heading>
+              <Text color="secondary" type="supporting">
+                {betSlip.selections.length} sélection
+                {betSlip.selections.length > 1 ? "s" : ""}
+              </Text>
+            </div>
+            <Button
+              isDisabled={betSlip.selections.length === 0}
+              label="Vider"
+              onClick={betSlip.clearSelections}
+              variant="ghost"
             />
-          ))}
-        </ol>
-      )}
+          </div>
 
-      <div className="mt-4 space-y-2">
-        <label className="text-sm font-bold" htmlFor="stake-mkb">
-          Mise en MKB
-        </label>
-        <input
-          className="min-h-11 w-full rounded-lg border border-[var(--border)] bg-white/[0.07] px-3 text-base text-white tabular-nums"
-          id="stake-mkb"
-          inputMode="numeric"
-          min={5}
-          max={displayedBalance}
-          onChange={(event) => {
-            setStake(event.target.value);
-            setStakeRevision((revision) => revision + 1);
-          }}
-          type="number"
-          value={stake}
-        />
-        {!stakeValid ? (
-          <p className="text-sm text-[var(--negative)]">
-            {stakeNumber < 5
-              ? "Mise minimale : 5 MKB."
-              : `Solde disponible : ${displayedBalance} MKB.`}
+          <p aria-live="polite" className="sr-only" role="status">
+            {feedback || betSlip.message}
           </p>
-        ) : null}
-      </div>
+          {feedback || betSlip.message ? (
+            <Card padding={3} variant="muted">
+              <Text type="supporting">{feedback || betSlip.message}</Text>
+            </Card>
+          ) : null}
 
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-[var(--text-muted)]">Cote définitive</dt>
-          <dd className="font-black">
-            {activeQuote
-              ? activeQuote.totalOdds.toFixed(2).replace(".", ",")
-              : "À vérifier"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-[var(--text-muted)]">Retour potentiel</dt>
-          <dd className="font-black">
-            {activeQuote ? `${activeQuote.potentialReturnMkb} MKB` : "—"}
-          </dd>
-        </div>
-      </dl>
+          {ticketNumber ? (
+            <Card padding={3} variant="green">
+              <Text type="supporting">
+                Ticket #{ticketNumber}.{" "}
+                <Link className="underline" href="/bets">
+                  Voir mes paris
+                </Link>
+              </Text>
+            </Card>
+          ) : null}
 
-      {activeQuote?.correlationAdjustment ? (
-        <p className="mt-3 text-xs text-[var(--warning)]">
-          Combiné corrélé : coefficient{" "}
-          {activeQuote.correlationAdjustment.toFixed(2)} appliqué aux
-          probabilités.
-        </p>
-      ) : null}
-      {changedFromOdds !== null && activeQuote ? (
-        <p className="mt-3 rounded-md bg-amber-50 p-2 text-xs text-amber-900">
-          Ancienne cote {changedFromOdds.toFixed(2)} · nouvelle cote{" "}
-          {activeQuote.totalOdds.toFixed(2)} · nouveau retour{" "}
-          {activeQuote.potentialReturnMkb} MKB. Une nouvelle confirmation est
-          obligatoire.
-        </p>
-      ) : null}
-      {activeQuote ? (
-        <p className="mt-3 text-center text-sm font-bold" aria-live="polite">
-          Devis valable encore {secondsLeft} s
-        </p>
-      ) : null}
+          {betSlip.selections.length === 0 ? (
+            <Text as="p" color="secondary">
+              Tes amis prennent peut-être de mauvaises décisions pendant que ton
+              ticket reste vide.
+            </Text>
+          ) : (
+            <List density="compact" hasDividers>
+              {betSlip.selections.map((selection) => (
+                <BetSlipSelectionItem
+                  key={`${selection.marketId}:${selection.outcomeId}`}
+                  selection={selection}
+                />
+              ))}
+            </List>
+          )}
 
-      {activeQuote ? (
-        secondsLeft > 0 ? (
-          <Button
-            className="mt-4 w-full"
-            disabled={isPending}
-            onClick={placeTicket}
-            type="button"
-          >
-            {isPending ? "ENREGISTREMENT…" : "PLACER MON PRONOSTIC"}
-          </Button>
-        ) : (
-          <Button
-            className="mt-4 w-full"
-            disabled={isPending}
-            onClick={verifyTicket}
-            type="button"
-          >
-            ACTUALISER LES COTES
-          </Button>
-        )
-      ) : (
-        <Button
-          className="mt-4 w-full"
-          disabled={isPending || !stakeValid || betSlip.selections.length === 0}
-          onClick={verifyTicket}
-          type="button"
-        >
-          {isPending
-            ? "VÉRIFICATION…"
-            : feedback.includes("évolué")
-              ? "ACCEPTER LES NOUVELLES COTES"
-              : "VÉRIFIER LE TICKET"}
-        </Button>
-      )}
-      <details className="mt-3 text-xs leading-5 text-[var(--text-muted)]">
-        <summary className="cursor-pointer font-bold">
-          Comment le ticket est sécurisé
-        </summary>
-        <p className="mt-2">
-          Le navigateur envoie seulement les issues, la mise et une clé
-          d’idempotence. PostgreSQL fixe les cotes et débite atomiquement les
-          MKB fictifs.
-        </p>
-      </details>
-    </aside>
+          <div className="space-y-1">
+            <label className="font-semibold" htmlFor={stakeId}>
+              Mise en MKB
+            </label>
+            <input
+              aria-describedby={stakeDescriptionId}
+              className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              id={stakeId}
+              inputMode="decimal"
+              max={displayedBalance}
+              min="5"
+              onChange={(event) => {
+                setStake(event.target.value);
+                setStakeRevision((revision) => revision + 1);
+              }}
+              step="1"
+              type="number"
+              value={stake}
+            />
+            <Text
+              className={
+                stakeValid ? undefined : "text-[var(--color-text-warning)]"
+              }
+              color="secondary"
+              id={stakeDescriptionId}
+              type="supporting"
+            >
+              {stakeValid
+                ? `Mise minimale : 5 MKB · solde : ${displayedBalance} MKB`
+                : stakeNumber < 5
+                  ? "Mise minimale : 5 MKB."
+                  : `Solde disponible : ${displayedBalance} MKB.`}
+            </Text>
+          </div>
+
+          <MetadataList columns={2}>
+            <MetadataListItem label="Cote définitive">
+              {activeQuote
+                ? activeQuote.totalOdds.toFixed(2).replace(".", ",")
+                : "À vérifier"}
+            </MetadataListItem>
+            <MetadataListItem label="Retour potentiel">
+              {activeQuote ? `${activeQuote.potentialReturnMkb} MKB` : "—"}
+            </MetadataListItem>
+          </MetadataList>
+
+          {activeQuote ? (
+            <Text color="secondary" type="supporting">
+              La cote totale et le retour potentiel affichés proviennent
+              uniquement du devis actif.
+            </Text>
+          ) : null}
+
+          {activeQuote?.correlationAdjustment ? (
+            <Text
+              className="text-[var(--color-text-warning)]"
+              type="supporting"
+            >
+              PostgreSQL applique la corrélation exacte (coefficient{" "}
+              {activeQuote.correlationAdjustment.toFixed(2)}) : aucune
+              multiplication de cotes n’est calculée côté navigateur.
+            </Text>
+          ) : null}
+          {changedFromOdds !== null && activeQuote ? (
+            <Card padding={3} variant="yellow">
+              <Text type="supporting">
+                Ancienne cote {changedFromOdds.toFixed(2)} · nouvelle cote{" "}
+                {activeQuote.totalOdds.toFixed(2)} · nouveau retour{" "}
+                {activeQuote.potentialReturnMkb} MKB. Une nouvelle confirmation
+                est obligatoire.
+              </Text>
+            </Card>
+          ) : null}
+          {activeQuote ? (
+            <ProgressBar
+              formatValueLabel={(value) => `${value} s`}
+              hasValueLabel
+              label="Validité du devis"
+              max={60}
+              value={secondsLeft}
+              variant={secondsLeft > 10 ? "accent" : "warning"}
+            />
+          ) : null}
+
+          {activeQuote ? (
+            secondsLeft > 0 ? (
+              <Button
+                isDisabled={isPending}
+                isLoading={isPending}
+                label="PLACER MON PRONOSTIC"
+                onClick={() => setConfirmOpen(true)}
+                variant="primary"
+                width="100%"
+              />
+            ) : (
+              <Button
+                isDisabled={isPending}
+                isLoading={isPending}
+                label="ACTUALISER LES COTES"
+                onClick={verifyTicket}
+                variant="primary"
+                width="100%"
+              />
+            )
+          ) : (
+            <Button
+              isDisabled={
+                isPending || !stakeValid || betSlip.selections.length === 0
+              }
+              isLoading={isPending}
+              label={actionLabel}
+              onClick={verifyTicket}
+              variant="primary"
+              width="100%"
+            />
+          )}
+          <details className="text-xs leading-5 text-[var(--color-text-secondary)]">
+            <summary className="cursor-pointer font-semibold">
+              Comment le ticket est sécurisé
+            </summary>
+            <Text as="p" className="mt-2" color="secondary" type="supporting">
+              Le navigateur envoie seulement les issues, la mise et une clé
+              d’idempotence. PostgreSQL fixe les cotes et débite atomiquement
+              les MKB fictifs.
+            </Text>
+          </details>
+        </VStack>
+      </Card>
+      <AlertDialog
+        actionLabel="Confirmer le pari"
+        actionVariant="primary"
+        cancelLabel="Annuler"
+        description="La mise sera débitée atomiquement en MKB fictifs selon le devis affiché."
+        isActionLoading={isPending}
+        isOpen={confirmOpen}
+        onAction={placeTicket}
+        onOpenChange={setConfirmOpen}
+        title="Placer ce pronostic ?"
+      />
+    </>
   );
 }

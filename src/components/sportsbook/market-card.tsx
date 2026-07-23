@@ -1,115 +1,148 @@
 "use client";
 
-import Link from "next/link";
+import { Badge, type BadgeVariant } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import {
+  MetadataList,
+  MetadataListItem,
+} from "@astryxdesign/core/MetadataList";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import { useBetSlip } from "@/components/sportsbook/bet-slip-context";
-import { LiveBadge } from "@/components/sportsbook/live-badge";
 import { OddsButton } from "@/components/sportsbook/odds-button";
-import { StatusBadge } from "@/components/sportsbook/status-badge";
 import type { SportsbookMarket } from "@/fixtures/sportsbook/types";
 import { cn } from "@/lib/utils";
 
 function marketTypeLabel(type: SportsbookMarket["type"]) {
-  if (type === "BINARY") {
-    return "Binaire";
-  }
+  if (type === "BINARY") return "Binaire";
   if (type === "MULTI_OUTCOME" || type === "NEXT_ACTION") {
     return "Multi-options";
   }
-  if (type === "OVER_UNDER") {
-    return "Over / Under";
-  }
-  if (type === "EXACT_DATE" || type === "DATE_RANGE") {
-    return "Date";
-  }
+  if (type === "OVER_UNDER") return "Over / Under";
+  if (type === "EXACT_DATE" || type === "DATE_RANGE") return "Date";
   return "Combiné";
 }
 
-export function MarketCard({ market }: { market: SportsbookMarket }) {
+function statusVariant(status: SportsbookMarket["status"]): BadgeVariant {
+  if (status === "OPEN") return "success";
+  if (status === "SUSPENDED") return "warning";
+  return "neutral";
+}
+
+export function MarketCard({
+  isBettingClosed = false,
+  market,
+}: {
+  isBettingClosed?: boolean;
+  market: SportsbookMarket;
+}) {
   const betSlip = useBetSlip();
+  const deadline = new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Paris",
+  }).format(new Date(market.deadline));
 
   return (
-    <article className="mk-slide-up mk-surface-opaque rounded-2xl p-5 sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {market.isLive ? <LiveBadge /> : null}
-            <StatusBadge
-              tone={
-                market.status === "OPEN"
-                  ? "positive"
-                  : market.status === "SUSPENDED"
-                    ? "warning"
-                    : "muted"
-              }
-            >
-              {market.status}
-            </StatusBadge>
-            <StatusBadge>{marketTypeLabel(market.type)}</StatusBadge>
+    <article>
+      <Card padding={5}>
+        <VStack gap={4}>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                {market.isLive ? (
+                  <Badge label="Direct" variant="error" />
+                ) : null}
+                <Badge
+                  label={isBettingClosed ? "Mises fermées" : market.status}
+                  variant={
+                    isBettingClosed ? "neutral" : statusVariant(market.status)
+                  }
+                />
+                <Badge label={marketTypeLabel(market.type)} variant="neutral" />
+              </div>
+              <Heading level={2}>
+                <Button
+                  className="-ml-3 justify-start"
+                  href={`/markets/${market.id}`}
+                  label={market.title}
+                  variant="ghost"
+                />
+              </Heading>
+              {market.trashTitle ? (
+                <Text color="accent" display="block" type="supporting">
+                  {market.trashTitle}
+                </Text>
+              ) : null}
+            </div>
+            <MetadataList>
+              <MetadataListItem label="Volume">
+                {market.betCount > 0
+                  ? `${market.betCount} tickets`
+                  : "Volume privé"}
+              </MetadataListItem>
+              <MetadataListItem label="Clôture">
+                <time dateTime={market.deadline}>{deadline}</time>
+              </MetadataListItem>
+            </MetadataList>
           </div>
-          <h2 className="text-lg font-black tracking-[-0.025em] text-[var(--text-primary)]">
-            <Link
-              className="inline-flex min-h-11 items-center"
-              href={`/markets/${market.id}`}
-            >
-              {market.title}
-            </Link>
-          </h2>
-          {market.trashTitle ? (
-            <p className="text-xs font-bold text-[var(--brand)]">
-              {market.trashTitle}
-            </p>
+
+          <Text as="p" color="secondary">
+            {market.description}
+          </Text>
+          {market.lastAction ? (
+            <Card padding={3} variant="red">
+              <Text type="supporting">
+                Dernier signal : {market.lastAction}
+              </Text>
+            </Card>
           ) : null}
-        </div>
-        <div className="text-right text-xs text-[var(--text-muted)]">
-          <p>
-            {market.betCount > 0
-              ? `${market.betCount} tickets`
-              : "Volume privé"}
-          </p>
-          <p>{new Date(market.deadline).toLocaleString("fr-FR")}</p>
-        </div>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-        {market.description}
-      </p>
-      {market.lastAction ? (
-        <p className="mt-3 rounded-lg border border-[var(--brand)]/25 bg-[var(--brand)]/10 p-3 text-sm text-[#ffc3cd]">
-          Dernier signal : {market.lastAction}
-        </p>
-      ) : null}
-      {market.suspensionReason ? (
-        <p className="mt-3 rounded-lg border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-3 text-sm text-[#ffe0aa]">
-          Suspension : {market.suspensionReason}
-        </p>
-      ) : null}
-      <div
-        className={cn(
-          "mt-4 grid gap-2 sm:grid-cols-2",
-          market.outcomes.length > 2 && "lg:grid-cols-3",
-        )}
-      >
-        {market.outcomes.map((outcome) => (
-          <OddsButton
-            key={outcome.id}
-            handicap={outcome.handicap}
-            line={outcome.line}
-            marketId={market.id}
-            marketTitle={market.title}
-            movement={outcome.movement}
-            odds={outcome.odds}
-            oddsVersion={market.oddsVersion}
-            outcomeId={outcome.id}
-            outcomeLabel={outcome.label}
-            selected={betSlip.isSelected(market.id, outcome.id)}
-            status={outcome.status}
-          />
-        ))}
-      </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] pt-3 text-xs font-bold text-[var(--text-muted)]">
-        <span>{market.category}</span>
-        <span>{market.variationLabel}</span>
-      </div>
+          {market.suspensionReason ? (
+            <Card padding={3} variant="yellow">
+              <Text type="supporting">
+                Suspension : {market.suspensionReason}
+              </Text>
+            </Card>
+          ) : null}
+
+          <div
+            className={cn(
+              "grid gap-2 sm:grid-cols-2",
+              market.outcomes.length > 2 && "lg:grid-cols-3",
+            )}
+          >
+            {market.outcomes.map((outcome) => (
+              <OddsButton
+                key={outcome.id}
+                handicap={outcome.handicap}
+                isBettingClosed={isBettingClosed}
+                line={outcome.line}
+                marketId={market.id}
+                marketTitle={market.title}
+                movement={outcome.movement}
+                odds={outcome.odds}
+                oddsVersion={market.oddsVersion}
+                outcomeId={outcome.id}
+                outcomeLabel={outcome.label}
+                selected={betSlip.isSelected(market.id, outcome.id)}
+                status={outcome.status}
+              />
+            ))}
+          </div>
+
+          <MetadataList orientation="horizontal">
+            <MetadataListItem label="Catégorie">
+              {market.category}
+            </MetadataListItem>
+            <MetadataListItem label="Variation">
+              {market.variationLabel}
+            </MetadataListItem>
+          </MetadataList>
+        </VStack>
+      </Card>
     </article>
   );
 }

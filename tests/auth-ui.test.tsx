@@ -1,7 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { RouterContext } from "next/dist/shared/lib/router-context.shared-runtime";
-import type { NextRouter } from "next/router";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { AuthFormState } from "@/application/auth/actions";
 import { hasPasswordUpdatedNotice, parseAuthMode } from "@/app/login/page";
@@ -13,128 +11,52 @@ import { SignUpForm } from "@/components/auth/sign-up-form";
 import { InvitationPanel } from "@/components/invitations/invitation-panel";
 import { SeasonSelector } from "@/components/seasons/season-selector";
 
-function createTestRouter(): NextRouter {
-  return {
-    asPath: "/login?next=%2Fmarkets",
-    back: vi.fn(),
-    basePath: "",
-    beforePopState: vi.fn(),
-    defaultLocale: undefined,
-    domainLocales: undefined,
-    events: {
-      emit: vi.fn(),
-      off: vi.fn(),
-      on: vi.fn(),
-    },
-    forward: vi.fn(),
-    isFallback: false,
-    isLocaleDomain: false,
-    isPreview: false,
-    isReady: true,
-    locale: undefined,
-    locales: undefined,
-    pathname: "/login",
-    prefetch: vi.fn(),
-    push: vi.fn().mockResolvedValue(true),
-    query: {},
-    reload: vi.fn(),
-    replace: vi.fn().mockResolvedValue(true),
-    route: "/login",
-  };
-}
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+}));
 
 describe("auth UI", () => {
-  it("moves the shared mode indicator when client navigation starts and syncs URL props", async () => {
-    const router = createTestRouter();
+  beforeEach(() => {
+    push.mockReset();
+  });
+
+  it("moves the Astryx segmented selection when navigation starts and syncs URL props", async () => {
     const { rerender } = render(
-      <RouterContext.Provider value={router}>
-        <AuthModeSwitcher mode="login" next="/markets" />
-      </RouterContext.Provider>,
+      <AuthModeSwitcher mode="login" next="/markets" />,
     );
     const navigation = screen.getByRole("navigation", {
       name: "Choisir le mode d’accès",
     });
-    const indicator = navigation.querySelector(".mk-auth-mode-indicator");
-    const registerLink = screen.getByRole("link", {
+    const registerOption = screen.getByRole("radio", {
       name: "Créer un compte",
     });
 
     expect(navigation).toHaveAttribute("data-auth-mode", "login");
-    expect(registerLink).toHaveAttribute(
-      "href",
-      "/login?mode=register&next=%2Fmarkets",
-    );
-    fireEvent.click(registerLink);
+    expect(registerOption).toHaveAttribute("aria-checked", "false");
+    fireEvent.click(registerOption);
     expect(navigation).toHaveAttribute("data-auth-mode", "register");
-    expect(registerLink).toHaveAttribute("aria-current", "page");
-    expect(router.push).toHaveBeenCalledOnce();
+    expect(registerOption).toHaveAttribute("aria-checked", "true");
+    expect(push).toHaveBeenCalledWith("/login?mode=register&next=%2Fmarkets");
 
-    rerender(
-      <RouterContext.Provider value={router}>
-        <AuthModeSwitcher mode="register" next="/markets" />
-      </RouterContext.Provider>,
-    );
-    expect(navigation.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+    rerender(<AuthModeSwitcher mode="register" next="/markets" />);
+    expect(registerOption).toHaveAttribute("aria-checked", "true");
 
-    rerender(
-      <RouterContext.Provider value={router}>
-        <AuthModeSwitcher mode="login" next="/markets" />
-      </RouterContext.Provider>,
-    );
+    rerender(<AuthModeSwitcher mode="login" next="/markets" />);
     await waitFor(() =>
       expect(navigation).toHaveAttribute("data-auth-mode", "login"),
     );
   });
 
-  it.each([
-    ["Ctrl", { ctrlKey: true }],
-    ["Cmd", { metaKey: true }],
-    ["Shift", { shiftKey: true }],
-    ["middle button", { button: 1, which: 2 }],
-  ])("keeps the current mode on a %s click", (_label, clickInit) => {
-    const router = createTestRouter();
-    render(
-      <RouterContext.Provider value={router}>
-        <AuthModeSwitcher mode="login" next="/markets" />
-      </RouterContext.Provider>,
+  it("preserves the encoded safe next path in both mode routes", () => {
+    render(<AuthModeSwitcher mode="register" next="/direct?filtre=à voir" />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Connexion" }));
+
+    expect(push).toHaveBeenCalledWith(
+      "/login?next=%2Fdirect%3Ffiltre%3D%C3%A0%20voir",
     );
-    const navigation = screen.getByRole("navigation", {
-      name: "Choisir le mode d’accès",
-    });
-    window.addEventListener("click", (event) => event.preventDefault(), {
-      once: true,
-    });
-
-    fireEvent.click(
-      screen.getByRole("link", { name: "Créer un compte" }),
-      clickInit,
-    );
-
-    expect(navigation).toHaveAttribute("data-auth-mode", "login");
-    expect(router.push).not.toHaveBeenCalled();
-  });
-
-  it("keeps the current mode when click navigation is prevented", () => {
-    const router = createTestRouter();
-    render(
-      <RouterContext.Provider value={router}>
-        <AuthModeSwitcher mode="login" next="/markets" />
-      </RouterContext.Provider>,
-    );
-    const navigation = screen.getByRole("navigation", {
-      name: "Choisir le mode d’accès",
-    });
-    const registerLink = screen.getByRole("link", {
-      name: "Créer un compte",
-    });
-    registerLink.addEventListener("click", (event) => event.preventDefault(), {
-      once: true,
-    });
-
-    fireEvent.click(registerLink);
-
-    expect(navigation).toHaveAttribute("data-auth-mode", "login");
-    expect(router.push).not.toHaveBeenCalled();
   });
 
   it("renders the password sign-in controls without magic-link copy", () => {
@@ -143,7 +65,10 @@ describe("auth UI", () => {
     expect(
       screen.getByRole("heading", { name: "Bon retour dans la salle" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Accès membre")).toHaveClass("mk-kicker");
+    expect(screen.getByText("Accès membre")).toHaveAttribute(
+      "data-type",
+      "label",
+    );
     expect(screen.getByLabelText("Adresse e-mail")).toHaveAttribute(
       "type",
       "email",
@@ -163,9 +88,9 @@ describe("auth UI", () => {
     expect(
       screen.getByRole("link", { name: "Mot de passe oublié ?" }),
     ).toHaveAttribute("href", "/forgot-password");
-    expect(screen.getByRole("button", { name: "SE CONNECTER" })).toHaveClass(
-      "text-[#08080b]",
-    );
+    expect(
+      screen.getByRole("button", { name: "Se connecter" }),
+    ).toHaveAttribute("data-variant", "primary");
     expect(screen.getByDisplayValue("/direct")).toHaveAttribute("name", "next");
     expect(screen.queryByText(/lien d’accès/i)).not.toBeInTheDocument();
   });
@@ -194,7 +119,10 @@ describe("auth UI", () => {
     expect(
       screen.getByRole("heading", { name: "Créer mon compte" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Nouveau joueur")).toHaveClass("mk-kicker");
+    expect(screen.getByText("Nouveau joueur")).toHaveAttribute(
+      "data-type",
+      "label",
+    );
     expect(screen.getByLabelText("Nom d’affichage")).toBeInTheDocument();
     expect(screen.getByLabelText("Nom d’affichage")).toHaveAttribute(
       "maxlength",
@@ -217,8 +145,8 @@ describe("auth UI", () => {
       "128",
     );
     expect(
-      screen.getByRole("button", { name: "CRÉER MON COMPTE" }),
-    ).toHaveClass("text-[#08080b]");
+      screen.getByRole("button", { name: "Créer mon compte" }),
+    ).toHaveAttribute("data-variant", "primary");
     expect(container.innerHTML).not.toMatch(/token|secret|supabase\.co/i);
   });
 
@@ -240,7 +168,7 @@ describe("auth UI", () => {
     );
     expect(
       screen.getByRole("button", { name: "Masquer le mot de passe" }),
-    ).toHaveAttribute("aria-controls", "member-password");
+    ).toHaveAttribute("aria-controls", input.id);
     expect(input).toHaveAttribute("type", "text");
     expect(
       screen.getByRole("button", { name: "Masquer le mot de passe" }),
@@ -264,11 +192,8 @@ describe("auth UI", () => {
       name: "Afficher la confirmation du mot de passe",
     });
 
-    expect(showPassword).toHaveAttribute("aria-controls", "sign-up-password");
-    expect(showConfirmation).toHaveAttribute(
-      "aria-controls",
-      "sign-up-password-confirmation",
-    );
+    expect(showPassword).toHaveAttribute("aria-controls", password.id);
+    expect(showConfirmation).toHaveAttribute("aria-controls", confirmation.id);
 
     fireEvent.click(showConfirmation);
     expect(confirmation).toHaveAttribute("type", "text");
@@ -338,11 +263,11 @@ describe("auth UI", () => {
     );
   });
 
-  it("replaces sign-up fields with a generic confirmation notice", async () => {
-    const successAction = async (): Promise<AuthFormState> => ({
+  it("keeps sign-up fields visible when an action returns success without redirecting", async () => {
+    const successAction = vi.fn(async (): Promise<AuthFormState> => ({
       ok: true,
       message: "Compte créé. Consulte l’e-mail reçu pour confirmer ton compte.",
-    });
+    }));
 
     const { container } = render(
       <SignUpForm action={successAction} next="/direct" />,
@@ -350,13 +275,17 @@ describe("auth UI", () => {
 
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole("heading", { name: "Confirme ton adresse" }),
-      ).toBeInTheDocument(),
-    );
-    expect(screen.queryByLabelText("Adresse e-mail")).not.toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/member@example\.com|token/i);
+    await waitFor(() => expect(successAction).toHaveBeenCalledOnce());
+    expect(
+      screen.getByRole("heading", { name: "Créer mon compte" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Adresse e-mail")).toBeInTheDocument();
+    expect(screen.queryByText("Confirme ton adresse")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Compte créé. Consulte l’e-mail reçu pour confirmer ton compte.",
+      ),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the sign-in label stable while submission is pending", async () => {
@@ -371,9 +300,18 @@ describe("auth UI", () => {
     );
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
 
-    const button = await screen.findByRole("button", { name: "SE CONNECTER" });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    const button = await screen.findByRole("button", { name: "Se connecter" });
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "pending",
+      ),
+    );
     expect(button).toBeDisabled();
+    expect(screen.getByText("Connexion en cours.")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();
@@ -383,7 +321,12 @@ describe("auth UI", () => {
       code: "AUTH_INVALID_CREDENTIALS",
       message: "Connexion impossible.",
     });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "false"));
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "error",
+      ),
+    );
   });
 
   it("keeps the sign-up label stable while submission is pending", async () => {
@@ -399,10 +342,19 @@ describe("auth UI", () => {
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
 
     const button = await screen.findByRole("button", {
-      name: "CRÉER MON COMPTE",
+      name: "Créer mon compte",
     });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "pending",
+      ),
+    );
     expect(button).toBeDisabled();
+    expect(screen.getByText("Création du compte en cours.")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();
@@ -412,7 +364,12 @@ describe("auth UI", () => {
       code: "AUTH_SIGN_UP_FAILED",
       message: "Création impossible.",
     });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "false"));
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "error",
+      ),
+    );
   });
 
   it("presents only useful public context and safe mode navigation", () => {
@@ -444,16 +401,14 @@ describe("auth UI", () => {
       expect(halo).toHaveClass("hidden");
     }
 
-    expect(screen.getByRole("link", { name: "Connexion" })).toHaveAttribute(
-      "href",
-      "/login?next=%2Fmarkets",
+    expect(screen.getByRole("radio", { name: "Connexion" })).toHaveAttribute(
+      "aria-checked",
+      "false",
     );
     expect(
-      screen.getByRole("link", { name: "Créer un compte" }),
-    ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
-    expect(
-      screen.getByRole("link", { name: "Créer un compte" }),
-    ).toHaveAttribute("aria-current", "page");
+      screen.getByRole("radio", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(container.querySelector(".astryx-card")).toBeInTheDocument();
     expect(container.querySelector("img")).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(/[\w.+-]+@[\w.-]+/);
   });
@@ -495,7 +450,7 @@ describe("auth UI", () => {
     expect(screen.getByText("Saison A")).toBeInTheDocument();
     expect(screen.queryByText("raw-secret-token")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "ACCEPTER L’INVITATION" }),
+      screen.getByRole("button", { name: "Accepter l’invitation" }),
     ).toBeInTheDocument();
   });
 

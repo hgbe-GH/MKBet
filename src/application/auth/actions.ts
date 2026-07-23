@@ -23,8 +23,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type AuthFormState = ActionResult;
 
-const SIGN_UP_SUCCESS =
-  "Compte créé. Confirme ton adresse depuis l'e-mail reçu avant de te connecter.";
 const RESET_REQUEST_SUCCESS =
   "Si un compte correspond à cette adresse, un e-mail de récupération vient d'être envoyé.";
 
@@ -41,6 +39,16 @@ function configuredSiteUrl(): string {
     return getSiteUrl();
   } catch {
     throw new SupabaseConfigurationError();
+  }
+}
+
+async function safelySignOut(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+): Promise<void> {
+  try {
+    await supabase.auth.signOut();
+  } catch {
+    // The original generic failure remains the public result.
   }
 }
 
@@ -106,28 +114,40 @@ export async function signUpWithPasswordAction(
     return failure("AUTH_SIGN_UP_FAILED");
   }
 
-  try {
-    const supabase = await createServerSupabaseClient();
-    const callbackUrl = new URL("/auth/callback", configuredSiteUrl());
-    callbackUrl.searchParams.set("intent", "signup");
-    callbackUrl.searchParams.set("next", parsed.data.next);
+  let supabase: Awaited<ReturnType<typeof createServerSupabaseClient>> | null =
+    null;
 
-    await supabase.auth.signUp({
+  try {
+    supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
         data: { display_name: parsed.data.displayName },
-        emailRedirectTo: callbackUrl.toString(),
       },
     });
 
-    return { ok: true, message: SIGN_UP_SUCCESS };
+    if (error || !data.session) {
+      await safelySignOut(supabase);
+      return failure("AUTH_SIGN_UP_FAILED");
+    }
+
+    const initialization = await initializeAuthenticatedAccess(supabase);
+    if (!initialization.ok) {
+      await safelySignOut(supabase);
+      return failure("DATABASE_OPERATION_FAILED");
+    }
   } catch (error) {
     if (toSupabaseConfigurationError(error)) {
       return failure("SUPABASE_NOT_CONFIGURED");
     }
+    if (supabase) {
+      await safelySignOut(supabase);
+    }
     return failure("AUTH_SIGN_UP_FAILED");
   }
+
+  redirect(parsed.data.next);
 }
 
 export async function requestPasswordResetAction(

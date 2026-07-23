@@ -66,7 +66,7 @@ export default async function globalSetup() {
   for (const identity of identities) {
     const { data, error } = await serviceClient.auth.admin.createUser({
       email: identity.email,
-      email_confirm: true,
+      email_confirm: false,
       password: e2ePassword,
       user_metadata: { display_name: identity.displayName },
     });

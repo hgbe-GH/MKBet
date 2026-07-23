@@ -1,9 +1,17 @@
 "use client";
 
-import { useMemo, useActionState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { DateInput } from "@astryxdesign/core/DateInput";
+import { NumberInput } from "@astryxdesign/core/NumberInput";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { VStack } from "@astryxdesign/core/VStack";
+import type { ISODateString } from "@astryxdesign/core/Calendar";
+import { useCallback, useMemo, useActionState, useState } from "react";
 
 import type { SeasonFormState } from "@/application/seasons/actions";
-import { Button } from "@/components/ui/button";
+import { AuthTextInput } from "@/components/auth/auth-text-input";
 
 interface NewSeasonFormProps {
   action: (
@@ -18,73 +26,91 @@ export function NewSeasonForm({ action }: NewSeasonFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
   const nowIso = useMemo(() => new Date().toISOString(), []);
+  const [title, setTitle] = useState("");
+  const [breakupDate, setBreakupDate] = useState<ISODateString>();
+  const [description, setDescription] = useState("");
+  const [startingBalance, setStartingBalance] = useState(1000);
+  const [secretBets, setSecretBets] = useState(false);
+  const markAsRequired = useCallback((input: HTMLInputElement | null) => {
+    if (input) input.required = true;
+  }, []);
+  const status = pending
+    ? "pending"
+    : state.message
+      ? state.ok
+        ? "success"
+        : "error"
+      : "idling";
 
   return (
-    <form action={formAction} className="grid gap-5">
-      <input name="idempotencyKey" type="hidden" value={idempotencyKey} />
-      <input name="startedAt" type="hidden" value={nowIso} />
-      <div className="space-y-2">
-        <label className="text-sm font-bold" htmlFor="title">
-          Titre
-        </label>
-        <input
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
-          id="title"
-          name="title"
+    <form action={formAction} aria-busy={pending} data-status={status}>
+      <VStack gap={5}>
+        <input name="idempotencyKey" type="hidden" value={idempotencyKey} />
+        <input name="startedAt" type="hidden" value={nowIso} />
+        <input name="breakupDate" type="hidden" value={breakupDate ?? ""} />
+        <AuthTextInput
+          htmlName="title"
+          label="Titre"
+          onChange={setTitle}
           required
+          size="lg"
           type="text"
+          value={title}
+          width="100%"
         />
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-bold" htmlFor="breakupDate">
-          Date de rupture
-        </label>
-        <input
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
-          id="breakupDate"
-          name="breakupDate"
-          required
-          type="date"
+        <DateInput
+          label="Date de rupture"
+          onChange={setBreakupDate}
+          placeholder="JJ/MM/AAAA"
+          ref={markAsRequired}
+          size="lg"
+          value={breakupDate}
+          width="100%"
         />
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-bold" htmlFor="description">
-          Description
-        </label>
-        <textarea
-          className="min-h-28 w-full rounded-md border border-stone-300 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
-          id="description"
-          name="description"
+        <TextArea
+          htmlName="description"
+          label="Description"
+          onChange={setDescription}
+          rows={4}
+          value={description}
+          width="100%"
         />
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-bold" htmlFor="startingBalanceMkb">
-          Capital initial MKB
-        </label>
-        <input
-          className="min-h-12 w-full rounded-md border border-stone-300 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
-          defaultValue="1000"
-          id="startingBalanceMkb"
-          min="0"
-          name="startingBalanceMkb"
-          required
-          type="number"
+        <NumberInput
+          htmlName="startingBalanceMkb"
+          isIntegerOnly
+          label="Capital initial MKB"
+          min={0}
+          onChange={setStartingBalance}
+          ref={markAsRequired}
+          size="lg"
+          units="MKB"
+          value={startingBalance}
+          width="100%"
         />
-      </div>
-      <label className="flex items-center gap-3 text-sm font-bold">
-        <input
-          className="h-5 w-5 accent-red-900"
-          name="secretBetsUntilClose"
-          type="checkbox"
+        <CheckboxInput
+          htmlName="secretBetsUntilClose"
+          label="Paris secrets avant clôture"
+          onChange={setSecretBets}
+          value={secretBets}
         />
-        Paris secrets avant clôture
-      </label>
-      <Button disabled={pending} type="submit">
-        {pending ? "Création" : "Créer la saison"}
-      </Button>
-      {state.message ? (
-        <p className="text-sm text-stone-600">{state.message}</p>
-      ) : null}
+        <Button
+          isDisabled={pending}
+          isLoading={pending}
+          label="Créer la saison"
+          size="lg"
+          type="submit"
+          variant="primary"
+        />
+        <span aria-live="polite" className="sr-only" role="status">
+          {pending ? "Création de la saison en cours." : ""}
+        </span>
+        {state.message ? (
+          <Banner
+            status={state.ok ? "success" : "error"}
+            title={state.message}
+          />
+        ) : null}
+      </VStack>
     </form>
   );
 }

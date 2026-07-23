@@ -1,11 +1,16 @@
-import Link from "next/link";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 
 export default function Home() {
   return (
-    <div className="flex min-h-dvh flex-col text-white">
+    <div className="flex min-h-dvh flex-col">
       <SiteHeader />
       <main
         className="relative isolate flex flex-1 items-center overflow-hidden px-5 py-12 sm:px-8"
@@ -17,37 +22,40 @@ export default function Home() {
           className="absolute top-[12%] right-[-8rem] -z-10 h-80 w-80 rounded-full bg-[var(--brand)]/25 blur-3xl"
         />
         <section className="mk-enter mx-auto grid w-full max-w-6xl gap-12 py-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
-          <div>
-            <p className="mk-eyebrow">Salle privée · 7 membres</p>
-            <p className="mt-5 text-sm font-black tracking-[0.12em] text-[var(--text-secondary)] uppercase">
+          <VStack gap={5}>
+            <Badge label="Salle privée · 7 membres" variant="red" />
+            <Text color="secondary" type="label">
               Margot × Kévin
-            </p>
-            <h1 className="mt-4 max-w-4xl text-5xl leading-[0.9] font-black tracking-[-0.07em] text-balance sm:text-7xl lg:text-[6.5rem]">
+            </Text>
+            <Heading
+              className="max-w-4xl text-5xl leading-[0.9] font-black tracking-[-0.07em] text-balance sm:text-7xl lg:text-[6.5rem]"
+              level={1}
+              type="display-1"
+            >
               Tout se joue{" "}
-              <span className="text-[var(--brand)]">entre nous.</span>
-            </h1>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-[var(--text-secondary)]">
+              <span className="text-[var(--color-accent)]">entre nous.</span>
+            </Heading>
+            <Text as="p" className="max-w-xl" color="secondary" type="large">
               Une preuve, deux votes, une décision. Suis l’histoire de Margot et
               Kévin en MKB fictifs.
-            </p>
-          </div>
-          <div className="mk-glass-subtle rounded-2xl p-5 sm:p-6">
-            <p className="text-xs font-black tracking-[0.12em] text-[var(--brand-hover)] uppercase">
-              Le marché est ouvert
-            </p>
-            <p className="mt-3 text-2xl font-black tracking-[-0.04em]">
-              Entre dans la salle.
-            </p>
-            <Link
-              className="mk-primary-action mt-6 w-full"
-              href="/login?next=/direct"
-            >
-              Entrer dans la salle
-            </Link>
-            <p className="mt-4 text-xs font-bold tracking-[0.08em] text-[var(--text-muted)] uppercase">
-              100 % monnaie fictive
-            </p>
-          </div>
+            </Text>
+          </VStack>
+          <Card padding={6} variant="muted">
+            <VStack gap={4}>
+              <Badge label="Le marché est ouvert" variant="success" />
+              <Heading level={2}>Entre dans la salle.</Heading>
+              <Button
+                href="/login?next=/direct"
+                label="Entrer dans la salle"
+                size="lg"
+                variant="primary"
+                width="100%"
+              />
+              <Text color="secondary" type="supporting">
+                100 % monnaie fictive
+              </Text>
+            </VStack>
+          </Card>
         </section>
       </main>
       <SiteFooter />

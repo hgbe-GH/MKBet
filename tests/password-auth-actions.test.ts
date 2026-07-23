@@ -193,69 +193,104 @@ describe("password authentication actions", () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it("creates an account with normalized data and a safe confirmation callback", async () => {
-    const result = await signUpWithPasswordAction(
-      initialState,
-      validSignUpData(),
-    );
+  it("creates an immediately authenticated account, initializes access, and redirects safely", async () => {
+    signUp.mockResolvedValue({
+      data: { session: { access_token: "session-token" } },
+      error: null,
+    });
+
+    await expect(
+      signUpWithPasswordAction(initialState, validSignUpData()),
+    ).rejects.toThrow("NEXT_REDIRECT:/direct");
 
     expect(signUp).toHaveBeenCalledWith({
       email: "alice@example.com",
       password: "mot-de-passe-solide",
       options: {
         data: { display_name: "Alice Marchés" },
-        emailRedirectTo:
-          "https://mk-bet.vercel.app/auth/callback?intent=signup&next=%2Fdirect",
       },
     });
-    expect(result).toEqual({
-      ok: true,
-      message:
-        "Compte créé. Confirme ton adresse depuis l'e-mail reçu avant de te connecter.",
-    });
+    expect(rpc).toHaveBeenNthCalledWith(1, "ensure_current_profile");
+    expect(rpc).toHaveBeenNthCalledWith(2, "ensure_single_room_access");
+    expect(redirect).toHaveBeenCalledWith("/direct");
+    expect(getSiteUrl).not.toHaveBeenCalled();
   });
 
-  it("uses the configured site origin and sanitizes an external sign-up redirect", async () => {
+  it("sanitizes an external immediate-access redirect to the internal default", async () => {
+    signUp.mockResolvedValue({
+      data: { session: { access_token: "session-token" } },
+      error: null,
+    });
     const unsafeData = validSignUpData();
     unsafeData.set("next", "//evil.example/private");
 
-    await signUpWithPasswordAction(initialState, unsafeData);
+    await expect(
+      signUpWithPasswordAction(initialState, unsafeData),
+    ).rejects.toThrow("NEXT_REDIRECT:/direct");
 
-    expect(signUp).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({
-          emailRedirectTo:
-            "https://mk-bet.vercel.app/auth/callback?intent=signup&next=%2Fdirect",
-        }),
-      }),
-    );
-    expect(getSiteUrl).toHaveBeenCalledOnce();
+    expect(redirect).toHaveBeenCalledWith("/direct");
   });
 
-  it("returns the exact same success for new and already-registered accounts", async () => {
-    const newAccountResult = await signUpWithPasswordAction(
-      initialState,
-      validSignUpData(),
-    );
+  it("signs out and returns a generic failure when sign-up does not create a session", async () => {
     signUp.mockResolvedValue({
       data: { user: null },
       error: new Error("User already registered"),
     });
 
-    const registeredAccountResult = await signUpWithPasswordAction(
+    const result = await signUpWithPasswordAction(
       initialState,
       validSignUpData(),
     );
 
-    expect(newAccountResult).toEqual({
-      ok: true,
-      message:
-        "Compte créé. Confirme ton adresse depuis l'e-mail reçu avant de te connecter.",
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
     });
-    expect(registeredAccountResult).toEqual(newAccountResult);
-    expect(JSON.stringify(registeredAccountResult)).not.toContain(
-      "User already registered",
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(rpc).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain("User already registered");
+  });
+
+  it("signs out without initialization when sign-up returns no session or error", async () => {
+    signUp.mockResolvedValue({
+      data: { session: null, user: {} },
+      error: null,
+    });
+
+    const result = await signUpWithPasswordAction(
+      initialState,
+      validSignUpData(),
     );
+
+    expect(result).toMatchObject({
+      ok: false,
+      code: "AUTH_SIGN_UP_FAILED",
+    });
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(rpc).not.toHaveBeenCalled();
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("signs out and reports a database failure when immediate access initialization fails", async () => {
+    signUp.mockResolvedValue({
+      data: { session: { access_token: "session-token" } },
+      error: null,
+    });
+    rpc.mockResolvedValueOnce({ data: null, error: new Error("profile raw") });
+
+    const result = await signUpWithPasswordAction(
+      initialState,
+      validSignUpData(),
+    );
+
+    expect(signOut).toHaveBeenCalledOnce();
+    expect(result).toMatchObject({
+      ok: false,
+      code: "DATABASE_OPERATION_FAILED",
+    });
+    expect(JSON.stringify(result)).not.toContain("profile raw");
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it.each([
@@ -444,27 +479,24 @@ describe("password authentication actions", () => {
     },
   );
 
-  it.each([
-    ["sign-up", signUpWithPasswordAction, validSignUpData],
-    ["reset", requestPasswordResetAction, validResetData],
-  ])(
-    "maps a site URL configuration exception for %s without raw details",
-    async (_label, action, validData) => {
-      getSiteUrl.mockImplementationOnce(() => {
-        throw new Error("raw NEXT_PUBLIC_SITE_URL detail");
-      });
+  it("maps a reset site URL configuration exception without raw details", async () => {
+    getSiteUrl.mockImplementationOnce(() => {
+      throw new Error("raw NEXT_PUBLIC_SITE_URL detail");
+    });
 
-      const result = await action(initialState, validData());
+    const result = await requestPasswordResetAction(
+      initialState,
+      validResetData(),
+    );
 
-      expect(result).toMatchObject({
-        ok: false,
-        code: "SUPABASE_NOT_CONFIGURED",
-      });
-      expect(JSON.stringify(result)).not.toContain(
-        "raw NEXT_PUBLIC_SITE_URL detail",
-      );
-    },
-  );
+    expect(result).toMatchObject({
+      ok: false,
+      code: "SUPABASE_NOT_CONFIGURED",
+    });
+    expect(JSON.stringify(result)).not.toContain(
+      "raw NEXT_PUBLIC_SITE_URL detail",
+    );
+  });
 });
 
 describe("hasRecoveryAuthenticationMethod", () => {
@@ -493,7 +525,7 @@ describe("hasRecoveryAuthenticationMethod", () => {
 
 describe("initializeAuthenticatedAccess", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    rpc.mockReset();
   });
 
   it("returns the profile stage and stops when profile initialization fails", async () => {

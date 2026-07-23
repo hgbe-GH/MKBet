@@ -1,13 +1,17 @@
 "use client";
 
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
+import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, LoaderCircle } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { AuthFormState } from "@/application/auth/actions";
+import { AuthTextInput } from "@/components/auth/auth-text-input";
 import { PasswordField } from "@/components/auth/password-field";
-import { Button } from "@/components/ui/button";
-import { InlineNotice } from "@/components/ui/inline-notice";
 
 interface SignInFormProps {
   action?: AuthFormAction;
@@ -41,88 +45,86 @@ export function SignInForm({ action = inertAction, next }: SignInFormProps) {
     }
   }, [hasError, state]);
 
+  const status = pending ? "pending" : hasError ? "error" : "idling";
+
   return (
-    <form action={formAction} className="space-y-5">
-      <header className="space-y-2 pb-1">
-        <p className="mk-kicker text-xs font-black tracking-[0.16em] text-[var(--brand-hover)] uppercase">
-          Accès membre
-        </p>
-        <h1 className="max-w-[14ch] text-3xl leading-[1.02] font-black tracking-[-0.045em] text-white sm:text-4xl">
-          Bon retour dans la salle
-        </h1>
-      </header>
+    <form action={formAction} aria-busy={pending} data-status={status}>
+      <VStack gap={5}>
+        <header className="space-y-2 pb-1">
+          <Text color="secondary" type="label">
+            Accès membre
+          </Text>
+          <Heading level={1}>Bon retour dans la salle</Heading>
+        </header>
 
-      <input name="next" type="hidden" value={next} />
+        <input name="next" type="hidden" value={next} />
 
-      <div className="space-y-2">
-        <label
-          className="block text-sm font-bold text-[var(--text-primary)]"
-          htmlFor="sign-in-email"
-        >
-          Adresse e-mail
-        </label>
-        <input
-          aria-describedby={errorId}
-          aria-invalid={hasError || undefined}
+        <AuthTextInput
           autoComplete="email"
-          className="min-h-12 w-full rounded-xl border border-[var(--border-strong)] bg-black/25 px-4 text-base text-white outline-none focus-visible:border-[var(--brand-hover)] focus-visible:bg-black/35 focus-visible:ring-2 focus-visible:ring-[var(--brand-muted)]"
-          id="sign-in-email"
+          describedBy={errorId}
+          htmlName="email"
+          label="Adresse e-mail"
           maxLength={320}
-          name="email"
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={setEmail}
           ref={emailRef}
           required
+          size="lg"
           spellCheck={false}
+          status={hasError ? { type: "error" } : undefined}
           type="email"
           value={email}
+          width="100%"
         />
-      </div>
 
-      <PasswordField
-        autoComplete="current-password"
-        describedBy={errorId}
-        id="sign-in-password"
-        invalid={hasError}
-        label="Mot de passe"
-        name="password"
-        required
-      />
+        <PasswordField
+          autoComplete="current-password"
+          describedBy={errorId}
+          id="sign-in-password"
+          invalid={hasError}
+          label="Mot de passe"
+          name="password"
+          required
+        />
 
-      <div className="flex justify-end">
-        <Link
-          className="inline-flex min-h-11 items-center text-sm font-bold text-[var(--text-secondary)] underline decoration-white/25 underline-offset-4 hover:text-white"
-          href="/forgot-password"
-        >
-          Mot de passe oublié ?
-        </Link>
-      </div>
-
-      {state.message ? (
-        <div id={errorId}>
-          <InlineNotice tone={state.ok ? "success" : "error"}>
-            {state.message}
-          </InlineNotice>
+        <div className="flex justify-end">
+          <Link
+            className="text-sm underline underline-offset-4"
+            href="/forgot-password"
+          >
+            Mot de passe oublié ?
+          </Link>
         </div>
-      ) : null}
 
-      <Button
-        aria-busy={pending}
-        className="w-full text-[#08080b]"
-        disabled={pending}
-        type="submit"
-      >
-        <span>SE CONNECTER</span>
-        {pending ? (
-          <LoaderCircle
-            aria-hidden="true"
-            className="animate-spin"
-            data-pending-indicator="true"
-            size={17}
+        {state.message ? (
+          <Banner
+            id={errorId}
+            status={state.ok ? "success" : "error"}
+            title={state.message}
           />
-        ) : (
-          <ArrowRight aria-hidden="true" size={17} />
-        )}
-      </Button>
+        ) : null}
+
+        <Button
+          endContent={
+            pending ? (
+              <LoaderCircle
+                aria-hidden="true"
+                className="animate-spin"
+                data-pending-indicator="true"
+                size={17}
+              />
+            ) : undefined
+          }
+          isDisabled={pending}
+          label="Se connecter"
+          size="lg"
+          type="submit"
+          variant="primary"
+          width="100%"
+        />
+        <span aria-live="polite" className="sr-only" role="status">
+          {pending ? "Connexion en cours." : ""}
+        </span>
+      </VStack>
     </form>
   );
 }

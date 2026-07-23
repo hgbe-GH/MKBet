@@ -1,24 +1,32 @@
+import { Badge } from "@astryxdesign/core/Badge";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { VStack } from "@astryxdesign/core/VStack";
+
 import type { LeaderboardRow } from "@/fixtures/sportsbook/types";
 
 export function LeaderboardPreview({ rows }: { rows: LeaderboardRow[] }) {
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-white p-5">
-      <h2 className="text-xl font-black">Podium</h2>
-      <ol className="mt-3 grid gap-3">
-        {rows.slice(0, 3).map((row) => (
-          <li
-            className="flex items-center justify-between rounded-md bg-stone-50 p-3"
-            key={row.playerName}
-          >
-            <span className="font-black">
-              #{row.rank} {row.playerName}
-            </span>
-            <span className="text-sm font-bold text-[var(--text-secondary)]">
-              {row.capitalMkb} MKB
-            </span>
-          </li>
-        ))}
-      </ol>
+    <section aria-labelledby="leaderboard-preview-title">
+      <Card padding={5}>
+        <VStack gap={3}>
+          <Heading id="leaderboard-preview-title" level={2}>
+            Podium
+          </Heading>
+          <List density="compact" hasDividers>
+            {rows.slice(0, 3).map((row) => (
+              <ListItem
+                endContent={
+                  <Badge label={`${row.capitalMkb} MKB`} variant="neutral" />
+                }
+                key={row.userId}
+                label={`#${row.rank} ${row.playerName}`}
+              />
+            ))}
+          </List>
+        </VStack>
+      </Card>
     </section>
   );
 }

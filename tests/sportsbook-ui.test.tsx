@@ -58,6 +58,26 @@ describe("sportsbook UI components", () => {
     expect(screen.getByText("Suspendu")).toBeInTheDocument();
   });
 
+  it("prevents selecting an OPEN outcome when its market is closed by time", () => {
+    const closedMarket = {
+      ...demoMarkets[0],
+      closesAt: "2026-07-01T00:00:00.000Z",
+      status: "OPEN" as const,
+    };
+    render(
+      <BetSlipProvider>
+        <MarketCard isBettingClosed market={closedMarket} />
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+      </BetSlipProvider>,
+    );
+
+    const outcome = screen.getByRole("button", { name: /Oui, cote/i });
+    expect(outcome).toBeDisabled();
+    expect(outcome).toHaveAccessibleName(/mises fermées/i);
+    fireEvent.click(outcome);
+    expect(screen.getByText("0 sélection")).toBeInTheDocument();
+  });
+
   it("renders binary and multi-option market cards", () => {
     render(
       <BetSlipProvider>
@@ -99,28 +119,32 @@ describe("sportsbook UI components", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Non, cote/i }));
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Une seule issue peut être sélectionnée par marché.",
-    );
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) =>
+          status.textContent?.includes(
+            "Une seule issue peut être sélectionnée par marché.",
+          ),
+        ),
+    ).toBe(true);
 
     const stake = screen.getByLabelText("Mise en MKB");
     fireEvent.change(stake, { target: { value: "3" } });
     expect(screen.getByText("Mise minimale : 5 MKB.")).toBeInTheDocument();
   });
 
-  it("uses one opaque ticket surface inside the position-only mobile wrapper", () => {
-    const { container } = render(
+  it("opens the mobile ticket in an accessible dialog", () => {
+    render(
       <BetSlipProvider>
         <MobileBetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
       </BetSlipProvider>,
     );
 
-    expect(container.firstElementChild).not.toHaveClass("mk-glass-interactive");
     fireEvent.click(screen.getByRole("button", { name: /^Ouvrir le ticket/ }));
     expect(
-      screen.getByRole("complementary", { name: "Ticket de pari" }),
-    ).toHaveClass("mk-surface-opaque");
-    expect(container.querySelectorAll(".mk-glass-interactive")).toHaveLength(0);
+      screen.getByRole("dialog", { name: "Ticket de pari" }),
+    ).toBeVisible();
   });
 
   it("renders season context, roles and no admin link for regular players", () => {

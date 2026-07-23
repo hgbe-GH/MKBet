@@ -2,13 +2,17 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import { OddsButton } from "@/components/sportsbook/odds-button";
 import { SegmentedFilter } from "@/components/ui/segmented-filter";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 const styles = readFileSync(
   join(process.cwd(), "src/styles/globals.css"),
@@ -34,12 +38,8 @@ const authFormSources = [
 ].map((file) =>
   readFileSync(join(process.cwd(), "src/components/auth", file), "utf8"),
 );
-const marketsPage = readFileSync(
-  join(process.cwd(), "src/app/(protected)/markets/page.tsx"),
-  "utf8",
-);
-const buttonSource = readFileSync(
-  join(process.cwd(), "src/components/ui/button.tsx"),
+const marketFilters = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/market-filters.tsx"),
   "utf8",
 );
 const mobileBetSlip = readFileSync(
@@ -54,20 +54,8 @@ const betSlipSelection = readFileSync(
   join(process.cwd(), "src/components/sportsbook/bet-slip-selection.tsx"),
   "utf8",
 );
-const mobileNavigation = readFileSync(
-  join(process.cwd(), "src/components/sportsbook/mobile-bottom-navigation.tsx"),
-  "utf8",
-);
-const eventReportForm = readFileSync(
-  join(process.cwd(), "src/components/events/event-report-form.tsx"),
-  "utf8",
-);
-const reportPage = readFileSync(
-  join(process.cwd(), "src/app/(protected)/report/page.tsx"),
-  "utf8",
-);
-const desktopSidebar = readFileSync(
-  join(process.cwd(), "src/components/sportsbook/desktop-sidebar.tsx"),
+const appNavigation = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/app-navigation.tsx"),
   "utf8",
 );
 
@@ -140,7 +128,7 @@ describe("B3 motion contracts", () => {
     ).toHaveAttribute("data-motion", "auth-content");
     expect(
       screen.getByRole("button", { name: /Oui, cote 1,88/i }),
-    ).toHaveAttribute("data-interactive", "lift");
+    ).toHaveAttribute("aria-pressed", "false");
     expect(
       screen.getByRole("complementary", { name: "Ticket de pari" }),
     ).toHaveAttribute("data-ticket-step", "empty");
@@ -187,13 +175,14 @@ describe("B3 motion contracts", () => {
     expect(reducedMotion).toContain("transform: none");
     expect(reducedMotion).toContain("animation: none");
     expect(reducedMotion).toMatch(
-      /\.mk-auth-mode-indicator\s*\{[^}]*transition-duration:\s*0\.01ms/,
+      /\[data-motion\],[\s\S]*transition-duration:\s*0\.01ms/,
     );
   });
 
-  it("routes vote lift through the fine-pointer motion contract", () => {
+  it("uses Astryx controls for voting without utility hover transforms", () => {
     expect(voteControls).not.toContain("hover:-translate");
-    expect(voteControls.match(/data-interactive="lift"/g)).toHaveLength(2);
+    expect(voteControls).toContain("@astryxdesign/core/Button");
+    expect(voteControls).toContain("@astryxdesign/core/AlertDialog");
   });
 
   it("keeps the root loading state nocturnal and matte", () => {
@@ -203,7 +192,7 @@ describe("B3 motion contracts", () => {
   });
 
   it("declares the nocturnal browser chrome theme", () => {
-    expect(rootLayout).toContain('themeColor: "#08080b"');
+    expect(rootLayout).toContain('themeColor: "#1b1b1b"');
   });
 
   it("uses focus-visible replacements on auth fields", () => {
@@ -213,8 +202,8 @@ describe("B3 motion contracts", () => {
   });
 
   it("uses a typographic ellipsis in the market search hint", () => {
-    expect(marketsPage).not.toContain('placeholder="bisou, statut..."');
-    expect(marketsPage).toContain('placeholder="bisou, statut…"');
+    expect(marketFilters).not.toContain('placeholder="bisou, statut..."');
+    expect(marketFilters).toContain('placeholder="bisou, statut…"');
   });
 
   it("keeps brand control text AA across normal, hover and active states", () => {
@@ -232,40 +221,17 @@ describe("B3 motion contracts", () => {
     }
   });
 
-  it("keeps ticket selections on a dark surface with AA text tokens", () => {
-    const token = (name: string) =>
-      styles.match(new RegExp(`--${name}:\\s*#([0-9a-f]{6})`, "i"))?.[1];
-    const surface = token("surface");
-
-    expect(betSlipSelection).toContain("bg-[var(--surface)]");
+  it("uses Astryx ticket primitives rather than local surface classes", () => {
+    expect(betSlipSelection).toContain("@astryxdesign/core/List");
+    expect(betSlipSelection).toContain("<ListItem");
     expect(betSlipSelection).not.toMatch(/\bbg-(?:white|stone-100)\b/);
-    expect(betSlip).toContain("text-[var(--brand-hover)] uppercase");
-    expect(surface).toBeDefined();
-    for (const textToken of [
-      "text-primary",
-      "text-secondary",
-      "text-muted",
-      "brand-hover",
-    ]) {
-      const text = token(textToken);
-      expect(text).toBeDefined();
-      expect(
-        contrastRatio(text ?? "ffffff", surface ?? "000000"),
-      ).toBeGreaterThanOrEqual(4.5);
-    }
+    expect(betSlip).toContain("@astryxdesign/core/Card");
+    expect(betSlip).toContain("@astryxdesign/core/AlertDialog");
   });
 
-  it("uses the on-brand token on every bright raspberry control", () => {
-    expect(styles).toMatch(
-      /\.mk-primary-action\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
-    );
-    expect(styles).toMatch(
-      /\.mk-segment-active\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
-    );
-    expect(buttonSource).toContain("text-[var(--on-brand)]");
-    expect(voteControls).toContain("text-[var(--on-brand)]");
-    expect(mobileBetSlip).toContain("text-[var(--on-brand)]");
-    expect(eventReportForm).toContain("file:text-[var(--on-brand)]");
+  it("uses Astryx controls for bright primary actions", () => {
+    expect(mobileBetSlip).toContain("@astryxdesign/core/Button");
+    expect(mobileBetSlip).toContain("@astryxdesign/core/Dialog");
   });
 
   it("keeps fixed mobile controls inside landscape safe areas", () => {
@@ -275,28 +241,13 @@ describe("B3 motion contracts", () => {
     expect(mobileBetSlip).toContain(
       "right-[max(0.75rem,env(safe-area-inset-right))]",
     );
-    expect(mobileNavigation).toContain(
-      "left-[max(0.5rem,env(safe-area-inset-left))]",
-    );
-    expect(mobileNavigation).toContain(
-      "right-[max(0.5rem,env(safe-area-inset-right))]",
-    );
   });
 
-  it("separates dense reading surfaces from small interactive glass", () => {
-    const subtleSurface = styles.match(/\.mk-glass-subtle\s*\{([^}]*)\}/)?.[1];
-    const interactiveSurface = styles.match(
-      /\.mk-glass-interactive\s*\{([^}]*)\}/,
-    )?.[1];
-
-    expect(subtleSurface).toBeDefined();
-    expect(subtleSurface).not.toContain("backdrop-filter");
-    expect(interactiveSurface).toContain("backdrop-filter: blur(18px)");
-    expect(reportPage).toContain("mk-surface-opaque");
-    expect(desktopSidebar).not.toContain("backdrop-blur");
+  it("keeps dense navigation free of costly backdrop blur", () => {
+    expect(appNavigation).not.toContain("backdrop-blur");
   });
 
-  it("uses one shared URL-driven auth indicator and fades only its content", () => {
+  it("uses one URL-driven Astryx selector and fades only its content", () => {
     const { container } = render(
       <AuthShell mode="register" next="/markets">
         <p>Inscription</p>
@@ -307,23 +258,20 @@ describe("B3 motion contracts", () => {
       name: "Choisir le mode d’accès",
     });
     expect(navigation).toHaveAttribute("data-auth-mode", "register");
-    expect(navigation.querySelectorAll(".mk-auth-mode-indicator")).toHaveLength(
-      1,
+    expect(
+      screen.getByRole("radio", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "Connexion" })).toHaveAttribute(
+      "aria-checked",
+      "false",
     );
     expect(
       screen.getByText("Inscription").closest("[data-motion]"),
     ).toHaveAttribute("data-motion", "auth-content");
     expect(
-      screen.getByText("Inscription").closest("[data-surface]"),
-    ).toHaveAttribute("data-surface", "opaque");
+      screen.getByText("Inscription").closest(".astryx-card"),
+    ).not.toBeNull();
     expect(container.querySelector('[data-motion="enter"]')).toBeNull();
-    expect(screen.getByRole("link", { name: "Connexion" })).toHaveAttribute(
-      "href",
-      "/login?next=%2Fmarkets",
-    );
-    expect(
-      screen.getByRole("link", { name: "Créer un compte" }),
-    ).toHaveAttribute("href", "/login?mode=register&next=%2Fmarkets");
   });
 
   it("remounts only the bounded auth content when the URL mode changes", () => {
@@ -335,15 +283,9 @@ describe("B3 motion contracts", () => {
     const loginContent = screen
       .getByText("Contenu connexion")
       .closest('[data-motion="auth-content"]');
-    const indicator = document.querySelector(".mk-auth-mode-indicator");
-
-    expect(loginContent).toHaveClass("mk-auth-mode-content");
-    expect(styles).toMatch(
-      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*40rem/,
-    );
-    expect(styles).not.toMatch(
-      /\.mk-auth-mode-content\s*\{[^}]*min-block-size:\s*34rem/,
-    );
+    const selector = screen.getByRole("radiogroup", {
+      name: "Choisir le mode d’accès",
+    });
 
     rerender(
       <AuthShell mode="register">
@@ -355,7 +297,12 @@ describe("B3 motion contracts", () => {
       .getByText("Contenu inscription")
       .closest('[data-motion="auth-content"]');
     expect(registerContent).not.toBe(loginContent);
-    expect(document.querySelector(".mk-auth-mode-indicator")).toBe(indicator);
+    expect(
+      screen.getByRole("radiogroup", { name: "Choisir le mode d’accès" }),
+    ).toBe(selector);
+    expect(
+      screen.getByRole("radio", { name: "Créer un compte" }),
+    ).toHaveAttribute("aria-checked", "true");
     expect(
       screen.getByRole("navigation", { name: "Choisir le mode d’accès" }),
     ).toHaveAttribute("data-auth-mode", "register");

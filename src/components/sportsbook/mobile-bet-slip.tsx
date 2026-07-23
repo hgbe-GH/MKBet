@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { Layout, LayoutContent } from "@astryxdesign/core/Layout";
+import { useRef, useState } from "react";
 
 import { BetSlip } from "@/components/sportsbook/bet-slip";
 import { useBetSlip } from "@/components/sportsbook/bet-slip-context";
@@ -13,48 +18,86 @@ export function MobileBetSlip({
   seasonId: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [potentialReturnMkb, setPotentialReturnMkb] = useState<number | null>(
+    null,
+  );
   const triggerRef = useRef<HTMLButtonElement>(null);
   const betSlip = useBetSlip();
+  const potentialReturnSummary =
+    potentialReturnMkb === null
+      ? "Retour après devis"
+      : `Retour potentiel ${potentialReturnMkb} MKB`;
 
-  useEffect(() => {
-    if (!open) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
-    document.addEventListener("keydown", closeOnEscape);
-    return () => document.removeEventListener("keydown", closeOnEscape);
-  }, [open]);
+  const updateOpen = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      window.requestAnimationFrame(() => triggerRef.current?.focus());
+    }
+  };
 
   return (
-    <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-30 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface-raised)] shadow-[0_18px_50px_rgba(0,0,0,0.42)] lg:right-3 lg:bottom-4 lg:left-3 xl:hidden">
-      <button
-        aria-controls="mobile-bet-slip-panel"
-        aria-expanded={open}
-        className="flex min-h-12 w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-black"
-        onClick={() => setOpen((current) => !current)}
-        ref={triggerRef}
-        type="button"
+    <>
+      <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-[max(0.75rem,env(safe-area-inset-left))] z-30 lg:right-3 lg:left-3 xl:hidden">
+        <Card padding={2}>
+          <Button
+            endContent={
+              <Badge
+                label={betSlip.selections.length}
+                variant={betSlip.selections.length > 0 ? "info" : "neutral"}
+              />
+            }
+            label={`Ouvrir le ticket, ${betSlip.selections.length} sélection${
+              betSlip.selections.length > 1 ? "s" : ""
+            }, ${potentialReturnSummary.toLocaleLowerCase("fr-FR")}`}
+            onClick={() => setOpen(true)}
+            ref={triggerRef}
+            size="lg"
+            variant="secondary"
+            width="100%"
+          >
+            <span className="flex w-full items-center justify-between gap-3">
+              <span>Ouvrir le ticket</span>
+              <span className="text-xs">{potentialReturnSummary}</span>
+            </span>
+          </Button>
+        </Card>
+      </div>
+
+      <Dialog
+        aria-label="Ticket de pari"
+        isOpen={open}
+        maxHeight="calc(100dvh - 2rem)"
+        onOpenChange={updateOpen}
+        position={{ bottom: "1rem" }}
+        purpose="info"
+        width="min(34rem, calc(100vw - 2rem))"
       >
-        <span>{open ? "Fermer le ticket" : "Ouvrir le ticket"}</span>
-        <span className="rounded-md bg-[var(--brand)] px-2 py-1 text-xs text-[var(--on-brand)] tabular-nums">
-          {betSlip.selections.length}
-        </span>
-      </button>
-      {open ? (
-        <div
-          className="max-h-[calc(100dvh-10rem)] overflow-y-auto overscroll-contain border-t border-[var(--border)]"
-          data-motion="ticket"
-          id="mobile-bet-slip-panel"
-        >
-          <BetSlip
-            balanceMkb={balanceMkb}
-            seasonId={seasonId}
-            surface="opaque"
-          />
-        </div>
-      ) : null}
-    </div>
+        <Layout
+          height="auto"
+          header={
+            <DialogHeader
+              endContent={
+                <Button
+                  label="Fermer"
+                  onClick={() => updateOpen(false)}
+                  variant="ghost"
+                />
+              }
+              hasDivider
+              title="Ticket de pari"
+            />
+          }
+          content={
+            <LayoutContent isScrollable padding={0}>
+              <BetSlip
+                balanceMkb={balanceMkb}
+                onPotentialReturnChange={setPotentialReturnMkb}
+                seasonId={seasonId}
+              />
+            </LayoutContent>
+          }
+        />
+      </Dialog>
+    </>
   );
 }

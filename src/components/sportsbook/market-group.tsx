@@ -1,4 +1,6 @@
-import { EmptyState } from "@/components/states/empty-state";
+import { Heading } from "@astryxdesign/core/Heading";
+
+import { AsyncState } from "@/components/astryx/async-state";
 import { MarketCard } from "@/components/sportsbook/market-card";
 import type { SportsbookMarket } from "@/fixtures/sportsbook/types";
 
@@ -12,14 +14,22 @@ export function MarketGroup({
   emptyDescription?: string;
 }) {
   if (markets.length === 0) {
-    return <EmptyState description={emptyDescription} title="Aucun marché" />;
+    return (
+      <AsyncState
+        description={emptyDescription}
+        kind="empty"
+        title="Aucun marché"
+      />
+    );
   }
 
+  const titleId = `${title.toLocaleLowerCase("fr-FR").replaceAll(/[^a-z0-9]+/g, "-")}-title`;
+
   return (
-    <section aria-labelledby={`${title}-title`} className="space-y-3">
-      <h2 className="text-xl font-black" id={`${title}-title`}>
+    <section aria-labelledby={titleId} className="space-y-4">
+      <Heading id={titleId} level={2}>
         {title}
-      </h2>
+      </Heading>
       <div className="grid gap-4">
         {markets.map((market) => (
           <MarketCard key={market.id} market={market} />

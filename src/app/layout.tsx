@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 
+import { AstryxProviders } from "@/components/astryx/providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#08080b",
+  themeColor: "#1b1b1b",
 };
 
 interface RootLayoutProps {
@@ -23,8 +24,10 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="fr">
-      <body>{children}</body>
+    <html lang="fr" data-theme="dark">
+      <body>
+        <AstryxProviders>{children}</AstryxProviders>
+      </body>
     </html>
   );
 }

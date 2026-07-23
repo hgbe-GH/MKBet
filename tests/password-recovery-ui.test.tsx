@@ -53,10 +53,19 @@ describe("password recovery UI", () => {
 
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
     const button = await screen.findByRole("button", {
-      name: "ENVOYER L’E-MAIL",
+      name: "Envoyer l’e-mail",
     });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "pending",
+      ),
+    );
     expect(button).toBeDisabled();
+    expect(screen.getByText("Envoi de l’e-mail en cours.")).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();
@@ -141,19 +150,27 @@ describe("password recovery UI", () => {
     }
     expect(
       screen.getByRole("button", { name: "Afficher le mot de passe" }),
-    ).toHaveAttribute("aria-controls", "update-password");
+    ).toHaveAttribute("aria-controls", password.id);
     expect(
       screen.getByRole("button", {
         name: "Afficher la confirmation du mot de passe",
       }),
-    ).toHaveAttribute("aria-controls", "update-password-confirmation");
+    ).toHaveAttribute("aria-controls", confirmation.id);
 
     fireEvent.submit(container.querySelector("form") as HTMLFormElement);
     const button = await screen.findByRole("button", {
-      name: "MODIFIER LE MOT DE PASSE",
+      name: "Modifier le mot de passe",
     });
-    await waitFor(() => expect(button).toHaveAttribute("aria-busy", "true"));
+    await waitFor(() =>
+      expect(container.querySelector("form")).toHaveAttribute(
+        "data-status",
+        "pending",
+      ),
+    );
     expect(button).toBeDisabled();
+    expect(
+      screen.getByText("Modification du mot de passe en cours."),
+    ).toHaveAttribute("aria-live", "polite");
     expect(
       button.querySelector('[data-pending-indicator="true"]'),
     ).not.toBeNull();

@@ -51,6 +51,9 @@ export const demoMarkets: SportsbookMarket[] = [
     type: "BINARY",
     status: "OPEN",
     deadline: "2026-07-14T22:00:00.000Z",
+    opensAt: "2026-07-01T00:00:00.000Z",
+    closesAt: "2026-07-14T22:00:00.000Z",
+    deadlineAt: "2026-07-14T22:00:00.000Z",
     betCount: 18,
     variationLabel: "+12 % depuis la dernière soirée",
     oddsVersion: 4,
@@ -97,6 +100,9 @@ export const demoMarkets: SportsbookMarket[] = [
     type: "BINARY",
     status: "OPEN",
     deadline: "2026-08-01T08:00:00.000Z",
+    opensAt: "2026-07-01T00:00:00.000Z",
+    closesAt: "2026-08-01T08:00:00.000Z",
+    deadlineAt: "2026-08-01T08:00:00.000Z",
     betCount: 23,
     variationLabel: "Cote sous surveillance",
     oddsVersion: 7,
@@ -144,6 +150,9 @@ export const demoMarkets: SportsbookMarket[] = [
     type: "NEXT_ACTION",
     status: "OPEN",
     deadline: "2026-07-20T23:59:00.000Z",
+    opensAt: "2026-07-01T00:00:00.000Z",
+    closesAt: "2026-07-20T23:59:00.000Z",
+    deadlineAt: "2026-07-20T23:59:00.000Z",
     betCount: 31,
     variationLabel: "Flux live actif",
     oddsVersion: 5,
@@ -203,6 +212,9 @@ export const demoMarkets: SportsbookMarket[] = [
     type: "BINARY",
     status: "SUSPENDED",
     deadline: "2026-09-01T20:00:00.000Z",
+    opensAt: "2026-07-01T00:00:00.000Z",
+    closesAt: "2026-09-01T20:00:00.000Z",
+    deadlineAt: "2026-09-01T20:00:00.000Z",
     betCount: 12,
     variationLabel: "Suspendu",
     oddsVersion: 3,
@@ -368,6 +380,7 @@ export const demoTimeline: TimelineEvent[] = [
 
 export const demoLeaderboard: LeaderboardRow[] = [
   {
+    userId: "demo-emma",
     rank: 1,
     playerName: "Emma",
     capitalMkb: 1540,
@@ -377,6 +390,7 @@ export const demoLeaderboard: LeaderboardRow[] = [
     badge: "Oracle du malaise",
   },
   {
+    userId: "demo-david",
     rank: 2,
     playerName: "David",
     capitalMkb: 1315,
@@ -386,6 +400,7 @@ export const demoLeaderboard: LeaderboardRow[] = [
     badge: "Gestion prudentielle",
   },
   {
+    userId: "demo-chloe",
     rank: 3,
     playerName: "Chloé",
     capitalMkb: 1180,

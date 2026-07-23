@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { SegmentedControl } from "@astryxdesign/core/SegmentedControl";
+import { SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-import { cn } from "@/lib/utils";
 
 export type AuthMode = "login" | "register";
 
@@ -19,6 +19,7 @@ export function AuthModeSwitcher({
   mode: AuthMode;
   next: string;
 }) {
+  const router = useRouter();
   const [selection, setSelection] = useState({
     activeMode: mode,
     serverMode: mode,
@@ -30,35 +31,22 @@ export function AuthModeSwitcher({
     selection.serverMode === mode ? selection.activeMode : mode;
 
   return (
-    <nav
-      aria-label="Choisir le mode d’accès"
-      className="relative grid grid-cols-2 gap-1 rounded-xl border border-white/10 bg-black/25 p-1"
-      data-auth-mode={activeMode}
-    >
-      <span aria-hidden="true" className="mk-auth-mode-indicator" />
-      {(["login", "register"] as const).map((itemMode) => {
-        const isActive = itemMode === activeMode;
-        const label = itemMode === "login" ? "Connexion" : "Créer un compte";
-
-        return (
-          <Link
-            aria-current={isActive ? "page" : undefined}
-            className={cn(
-              "mk-auth-mode relative z-10 inline-flex min-h-11 items-center justify-center rounded-lg px-3 text-sm font-black",
-              isActive
-                ? "text-white"
-                : "text-[var(--text-muted)] hover:bg-white/6 hover:text-white",
-            )}
-            href={modeHref(itemMode, next)}
-            key={itemMode}
-            onNavigate={() =>
-              setSelection({ activeMode: itemMode, serverMode: mode })
-            }
-          >
-            {label}
-          </Link>
-        );
-      })}
+    <nav aria-label="Choisir le mode d’accès" data-auth-mode={activeMode}>
+      <SegmentedControl
+        label="Choisir le mode d’accès"
+        layout="fill"
+        onChange={(value) => {
+          const nextMode: AuthMode =
+            value === "register" ? "register" : "login";
+          setSelection({ activeMode: nextMode, serverMode: mode });
+          router.push(modeHref(nextMode, next));
+        }}
+        size="lg"
+        value={activeMode}
+      >
+        <SegmentedControlItem label="Connexion" value="login" />
+        <SegmentedControlItem label="Créer un compte" value="register" />
+      </SegmentedControl>
     </nav>
   );
 }
