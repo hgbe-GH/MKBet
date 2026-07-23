@@ -22,6 +22,7 @@ interface OddsButtonProps {
   movement: OddsMovement;
   line?: number;
   handicap?: string;
+  isBettingClosed?: boolean;
 }
 
 function formatOdds(odds: number) {
@@ -56,10 +57,11 @@ export function OddsButton({
   movement,
   line,
   handicap,
+  isBettingClosed = false,
 }: OddsButtonProps) {
   const betSlip = useOptionalBetSlip();
   const suspended = status === "SUSPENDED";
-  const disabled = status !== "OPEN";
+  const disabled = status !== "OPEN" || isBettingClosed;
   const isSelected = betSlip
     ? betSlip.isSelected(marketId, outcomeId)
     : selected;
@@ -77,11 +79,13 @@ export function OddsButton({
     .filter(Boolean)
     .join(", ");
   const accessibleLabel = `${outcomeLabel}, cote ${formatOdds(odds)}, ${
-    suspended
-      ? "suspendu"
-      : status === "OPEN"
-        ? "marché ouvert"
-        : "marché fermé"
+    isBettingClosed
+      ? "mises fermées"
+      : suspended
+        ? "suspendu"
+        : status === "OPEN"
+          ? "marché ouvert"
+          : "marché fermé"
   }, ${movementText(movement)}${detail ? `, ${detail}` : ""}`;
   const movementLabel =
     movement === "UP"
@@ -98,7 +102,11 @@ export function OddsButton({
       data-outcome-id={outcomeId}
       endContent={
         <span className="flex items-center gap-1 text-xs">
-          {suspended ? (
+          {isBettingClosed ? (
+            <>
+              <Lock aria-hidden="true" className="h-4 w-4" /> Mises fermées
+            </>
+          ) : suspended ? (
             <>
               <Lock aria-hidden="true" className="h-4 w-4" /> Suspendu
             </>

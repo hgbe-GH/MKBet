@@ -108,6 +108,7 @@ export function MarketCalendarControls({
             <option value="STATUS">Statut</option>
             <option value="CONFLICT">Conflits</option>
             <option value="LONG_TERM">Long terme</option>
+            <option value="LIVE_SPECIAL">Live spécial</option>
           </select>
         </label>
         <label className="grid gap-1 font-semibold">

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import DirectPage from "@/app/(protected)/direct/page";
 import MarketsPage from "@/app/(protected)/markets/page";
 import MarketCalendarPage from "@/app/(protected)/markets/calendar/page";
+import MarketDetailPage from "@/app/(protected)/markets/[marketId]/page";
 import LeaderboardPage from "@/app/(protected)/leaderboard/page";
 import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
@@ -12,7 +13,10 @@ import {
   demoMarkets,
 } from "@/fixtures/sportsbook/demo-data";
 import { listEventReports } from "@/data/supabase/events/repository";
-import { listSeasonMarkets } from "@/data/supabase/markets/market-repository";
+import {
+  getSeasonMarket,
+  listSeasonMarkets,
+} from "@/data/supabase/markets/market-repository";
 
 vi.mock("@/application/sportsbook/require-season", () => ({
   requireSportsbookSeason: vi.fn(async () => adminSeasonContext),
@@ -190,6 +194,9 @@ describe("sportsbook pages", () => {
       "/markets/calendar?week=2026-07-20&category=CONTACT&status=OPEN",
     );
     expect(screen.getByLabelText("Catégorie")).toHaveValue("CONTACT");
+    expect(screen.getByRole("option", { name: "Live spécial" })).toHaveValue(
+      "LIVE_SPECIAL",
+    );
     expect(screen.getByLabelText("Statut")).toHaveValue("OPEN");
     expect(screen.getByDisplayValue("2026-07-13")).toHaveAttribute(
       "name",
@@ -207,7 +214,9 @@ describe("sportsbook pages", () => {
       "Fermeture des mises",
       "Échéance du fait",
     ]) {
-      const dateValue = screen.getByText(label).parentElement?.querySelector("dd");
+      const dateValue = screen
+        .getByText(label)
+        .parentElement?.querySelector("dd");
       expect(dateValue).toHaveTextContent(/UTC$/);
     }
     expect(
@@ -237,6 +246,24 @@ describe("sportsbook pages", () => {
 
     expect(screen.getByText("Fermeture des mises")).toBeVisible();
     expect(screen.queryByText("Échéance du fait")).not.toBeInTheDocument();
+  });
+
+  it("disables detail selections when an OPEN market has passed its close time", async () => {
+    vi.mocked(getSeasonMarket).mockResolvedValueOnce({
+      ...demoMarkets[0],
+      closesAt: "2026-07-01T00:00:00.000Z",
+      status: "OPEN",
+    });
+
+    render(
+      <BetSlipProvider>
+        {await MarketDetailPage({
+          params: Promise.resolve({ marketId: demoMarkets[0].id }),
+        })}
+      </BetSlipProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: /Oui, cote/i })).toBeDisabled();
   });
 
   it("renders a mobile-friendly podium and ranking list", async () => {

@@ -58,6 +58,26 @@ describe("sportsbook UI components", () => {
     expect(screen.getByText("Suspendu")).toBeInTheDocument();
   });
 
+  it("prevents selecting an OPEN outcome when its market is closed by time", () => {
+    const closedMarket = {
+      ...demoMarkets[0],
+      closesAt: "2026-07-01T00:00:00.000Z",
+      status: "OPEN" as const,
+    };
+    render(
+      <BetSlipProvider>
+        <MarketCard isBettingClosed market={closedMarket} />
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+      </BetSlipProvider>,
+    );
+
+    const outcome = screen.getByRole("button", { name: /Oui, cote/i });
+    expect(outcome).toBeDisabled();
+    expect(outcome).toHaveAccessibleName(/mises fermées/i);
+    fireEvent.click(outcome);
+    expect(screen.getByText("0 sélection")).toBeInTheDocument();
+  });
+
   it("renders binary and multi-option market cards", () => {
     render(
       <BetSlipProvider>

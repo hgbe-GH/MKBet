@@ -32,7 +32,13 @@ function statusVariant(status: SportsbookMarket["status"]): BadgeVariant {
   return "neutral";
 }
 
-export function MarketCard({ market }: { market: SportsbookMarket }) {
+export function MarketCard({
+  isBettingClosed = false,
+  market,
+}: {
+  isBettingClosed?: boolean;
+  market: SportsbookMarket;
+}) {
   const betSlip = useBetSlip();
   const deadline = new Intl.DateTimeFormat("fr-FR", {
     dateStyle: "medium",
@@ -51,8 +57,10 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
                   <Badge label="Direct" variant="error" />
                 ) : null}
                 <Badge
-                  label={market.status}
-                  variant={statusVariant(market.status)}
+                  label={isBettingClosed ? "Mises fermées" : market.status}
+                  variant={
+                    isBettingClosed ? "neutral" : statusVariant(market.status)
+                  }
                 />
                 <Badge label={marketTypeLabel(market.type)} variant="neutral" />
               </div>
@@ -110,6 +118,7 @@ export function MarketCard({ market }: { market: SportsbookMarket }) {
               <OddsButton
                 key={outcome.id}
                 handicap={outcome.handicap}
+                isBettingClosed={isBettingClosed}
                 line={outcome.line}
                 marketId={market.id}
                 marketTitle={market.title}

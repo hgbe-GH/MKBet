@@ -30,6 +30,8 @@ export default async function MarketDetailPage({
 
   if (!market) notFound();
 
+  const isBettingClosed = Date.parse(market.closesAt) <= new Date().getTime();
+
   const oddsValues = market.history.map((point) => point.odds);
   const minimumOdds = oddsValues.length ? Math.min(...oddsValues) : 0;
   const maximumOdds = oddsValues.length ? Math.max(...oddsValues) : 0;
@@ -60,7 +62,7 @@ export default async function MarketDetailPage({
         eyebrow="Fiche marché"
         title={market.title}
       />
-      <MarketCard market={market} />
+      <MarketCard isBettingClosed={isBettingClosed} market={market} />
       <section aria-labelledby="odds-history-title">
         <Card padding={5}>
           <VStack gap={4}>
