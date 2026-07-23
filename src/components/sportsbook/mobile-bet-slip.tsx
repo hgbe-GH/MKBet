@@ -18,8 +18,15 @@ export function MobileBetSlip({
   seasonId: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [potentialReturnMkb, setPotentialReturnMkb] = useState<number | null>(
+    null,
+  );
   const triggerRef = useRef<HTMLButtonElement>(null);
   const betSlip = useBetSlip();
+  const potentialReturnSummary =
+    potentialReturnMkb === null
+      ? "Retour après devis"
+      : `Retour potentiel ${potentialReturnMkb} MKB`;
 
   const updateOpen = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -41,7 +48,7 @@ export function MobileBetSlip({
             }
             label={`Ouvrir le ticket, ${betSlip.selections.length} sélection${
               betSlip.selections.length > 1 ? "s" : ""
-            }, retour après devis`}
+            }, ${potentialReturnSummary.toLocaleLowerCase("fr-FR")}`}
             onClick={() => setOpen(true)}
             ref={triggerRef}
             size="lg"
@@ -50,7 +57,7 @@ export function MobileBetSlip({
           >
             <span className="flex w-full items-center justify-between gap-3">
               <span>Ouvrir le ticket</span>
-              <span className="text-xs">Retour après devis</span>
+              <span className="text-xs">{potentialReturnSummary}</span>
             </span>
           </Button>
         </Card>
@@ -84,6 +91,7 @@ export function MobileBetSlip({
             <LayoutContent isScrollable padding={0}>
               <BetSlip
                 balanceMkb={balanceMkb}
+                onPotentialReturnChange={setPotentialReturnMkb}
                 seasonId={seasonId}
                 surface="opaque"
               />

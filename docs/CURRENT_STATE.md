@@ -37,7 +37,7 @@ Les RPC sensibles utilisent `SECURITY DEFINER`, `search_path = ''`, `auth.uid()`
 - Playwright couvre aussi l’inscription par mot de passe, la confirmation Mailpit via callback PKCE, la déconnexion/reconnexion, les erreurs non énumérantes, la récupération, la confirmation publique du changement de mot de passe et le nettoyage de la session recovery. Le parcours vérifie ensuite que l’ancien mot de passe échoue et que le nouveau réussit. Les identités Supabase locales créées par ces parcours et par les fixtures globales sont supprimées après chaque exécution.
 - Axe contrôle les pages privées principales et la navigation clavier ; la matrice responsive couvre les largeurs mobiles, tablette et desktop.
 
-- `pnpm test` : 274 tests réussis dans 47 fichiers.
+- `pnpm test` : 275 tests réussis dans 47 fichiers.
 - `pnpm test:e2e` : 31 parcours réussis et 3 skips de projet attendus sur 34 cas desktop/mobile.
 - `db:reset`, génération des types sans différence après formatage, lint PostgreSQL et les cinq scénarios SQL RLS, betting, lives, médias et salle unique : 5 sur 5 réussis.
 - `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm build` avec Supabase arrêté et sans variables Supabase, puis `pnpm install --frozen-lockfile` : succès.

@@ -30,10 +30,12 @@ function remainingSeconds(expiresAt: string): number {
 
 export function BetSlip({
   balanceMkb,
+  onPotentialReturnChange,
   seasonId,
   surface = "interactive",
 }: {
   balanceMkb: number;
+  onPotentialReturnChange?: (potentialReturnMkb: number | null) => void;
   seasonId: string;
   surface?: "interactive" | "opaque";
 }) {
@@ -76,6 +78,10 @@ export function BetSlip({
     }, 1_000);
     return () => window.clearInterval(timer);
   }, [activeQuote]);
+
+  useEffect(() => {
+    onPotentialReturnChange?.(activeQuote?.potentialReturnMkb ?? null);
+  }, [activeQuote?.potentialReturnMkb, onPotentialReturnChange]);
 
   const announce = (message: string, type: "info" | "error" = "info") => {
     setFeedback(message);
