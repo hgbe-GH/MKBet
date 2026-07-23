@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createBetQuoteAction } from "@/application/betting/create-bet-quote-action";
@@ -14,6 +20,7 @@ const createQuoteMock = vi.mocked(createBetQuoteAction);
 
 describe("Astryx sportsbook interactions", () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     createQuoteMock.mockResolvedValue({
       ok: true,
       quote: {
@@ -110,5 +117,65 @@ describe("Astryx sportsbook interactions", () => {
         screen.getByRole("button", { name: /retour potentiel 18 MKB/i }),
       ).toBeInTheDocument(),
     );
+  });
+
+  it("clears the quoted return from the persistent trigger at expiry", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-07-23T12:00:00.000Z"));
+    createQuoteMock.mockResolvedValue({
+      ok: true,
+      quote: {
+        quoteId: "10000000-0000-4000-8000-000000000002",
+        betType: "SINGLE",
+        stakeMkb: 10,
+        totalOdds: 1.88,
+        potentialReturnMkb: 18,
+        expiresAt: new Date(Date.now() + 1_000).toISOString(),
+        correlationAdjustment: null,
+        legs: [],
+      },
+    });
+
+    try {
+      render(
+        <BetSlipProvider>
+          <OddsButton
+            marketId="market"
+            outcomeId="yes"
+            outcomeLabel="Oui"
+            odds={1.88}
+            oddsVersion={4}
+            selected={false}
+            status="OPEN"
+            movement="UP"
+          />
+          <MobileBetSlip balanceMkb={1000} seasonId="season" />
+        </BetSlipProvider>,
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: /Oui, cote 1,88/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /Ouvrir le ticket/i }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }),
+      );
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(createQuoteMock).toHaveBeenCalledTimes(1);
+      expect(
+        screen.getByRole("button", { name: /retour potentiel 18 MKB/i }),
+      ).toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(1_000));
+
+      expect(
+        screen.getByRole("button", { name: /retour après devis/i }),
+      ).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

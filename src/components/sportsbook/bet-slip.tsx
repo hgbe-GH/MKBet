@@ -80,8 +80,10 @@ export function BetSlip({
   }, [activeQuote]);
 
   useEffect(() => {
-    onPotentialReturnChange?.(activeQuote?.potentialReturnMkb ?? null);
-  }, [activeQuote?.potentialReturnMkb, onPotentialReturnChange]);
+    onPotentialReturnChange?.(
+      activeQuote && secondsLeft > 0 ? activeQuote.potentialReturnMkb : null,
+    );
+  }, [activeQuote, onPotentialReturnChange, secondsLeft]);
 
   const announce = (message: string, type: "info" | "error" = "info") => {
     setFeedback(message);
