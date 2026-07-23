@@ -130,4 +130,56 @@ describe("transactional bet slip", () => {
       screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }),
     ).toBeInTheDocument();
   });
+
+  it("explains singles, accumulator legs, and the authoritative correlated quote", async () => {
+    createQuoteMock.mockResolvedValueOnce({
+      ok: true,
+      quote: {
+        quoteId: "10000000-0000-4000-8000-000000000001",
+        betType: "ACCUMULATOR",
+        stakeMkb: 10,
+        totalOdds: 3.2,
+        potentialReturnMkb: 32,
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+        correlationAdjustment: 0.75,
+        legs: [],
+      },
+    });
+    render(
+      <BetSlipProvider>
+        <MarketCard market={demoMarkets[0]} />
+        <MarketCard market={demoMarkets[1]} />
+        <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
+      </BetSlipProvider>,
+    );
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Oui, cote/i })[0]!);
+    fireEvent.click(screen.getAllByRole("button", { name: /Oui, cote/i })[1]!);
+    expect(screen.getByText("Combiné 2 sélections")).toBeVisible();
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+      demoMarkets[0].title,
+    );
+    expect(screen.getAllByRole("listitem")[1]).toHaveTextContent(
+      demoMarkets[1].title,
+    );
+    expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute(
+      "type",
+      "number",
+    );
+    expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute("min", "5");
+    expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute("step", "1");
+
+    fireEvent.click(screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }));
+    expect(
+      await screen.findByText(
+        /cote totale et le retour potentiel affichés proviennent uniquement du devis actif/i,
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/PostgreSQL applique la corrélation exacte/i),
+    ).toBeVisible();
+    expect(
+      screen.queryByText(/multiplication naïve côté navigateur/i),
+    ).toBeNull();
+  });
 });

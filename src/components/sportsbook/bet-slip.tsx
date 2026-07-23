@@ -12,7 +12,6 @@ import {
 } from "@astryxdesign/core/MetadataList";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Text } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { useToast } from "@astryxdesign/core/Toast";
 import { VStack } from "@astryxdesign/core/VStack";
 import Link from "next/link";
@@ -32,14 +31,11 @@ export function BetSlip({
   balanceMkb,
   onPotentialReturnChange,
   seasonId,
-  surface = "interactive",
 }: {
   balanceMkb: number;
   onPotentialReturnChange?: (potentialReturnMkb: number | null) => void;
   seasonId: string;
-  surface?: "interactive" | "opaque";
 }) {
-  void surface;
   const betSlip = useBetSlip();
   const toast = useToast();
   const [stake, setStake] = useState("10");
@@ -70,6 +66,12 @@ export function BetSlip({
     : betSlip.selections.length > 0
       ? "selection"
       : "empty";
+  const ticketLabel =
+    betSlip.selections.length === 1
+      ? "Simple"
+      : betSlip.selections.length > 1
+        ? `Combiné ${betSlip.selections.length} sélections`
+        : "Ticket vide";
 
   useEffect(() => {
     if (!activeQuote) return;
@@ -160,9 +162,12 @@ export function BetSlip({
             <div>
               <Badge label="Ticket" variant="info" />
               <Heading className="mt-2" level={2}>
+                {ticketLabel}
+              </Heading>
+              <Text color="secondary" type="supporting">
                 {betSlip.selections.length} sélection
                 {betSlip.selections.length > 1 ? "s" : ""}
-              </Heading>
+              </Text>
             </div>
             <Button
               isDisabled={betSlip.selections.length === 0}
@@ -208,27 +213,39 @@ export function BetSlip({
             </List>
           )}
 
-          <TextInput
-            description={`Mise minimale : 5 MKB · solde : ${displayedBalance} MKB`}
-            label="Mise en MKB"
-            onChange={(value) => {
-              setStake(value);
-              setStakeRevision((revision) => revision + 1);
-            }}
-            status={
-              stakeValid
-                ? undefined
-                : {
-                    type: "error",
-                    message:
-                      stakeNumber < 5
-                        ? "Mise minimale : 5 MKB."
-                        : `Solde disponible : ${displayedBalance} MKB.`,
-                  }
-            }
-            value={stake}
-            width="100%"
-          />
+          <div className="space-y-1">
+            <label className="font-semibold" htmlFor="bet-stake">
+              Mise en MKB
+            </label>
+            <input
+              aria-describedby="bet-stake-description"
+              className="w-full rounded-md border border-[var(--color-border)] bg-transparent px-3 py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              id="bet-stake"
+              inputMode="decimal"
+              min="5"
+              onChange={(event) => {
+                setStake(event.target.value);
+                setStakeRevision((revision) => revision + 1);
+              }}
+              step="1"
+              type="number"
+              value={stake}
+            />
+            <Text
+              className={
+                stakeValid ? undefined : "text-[var(--color-text-warning)]"
+              }
+              color="secondary"
+              id="bet-stake-description"
+              type="supporting"
+            >
+              {stakeValid
+                ? `Mise minimale : 5 MKB · solde : ${displayedBalance} MKB`
+                : stakeNumber < 5
+                  ? "Mise minimale : 5 MKB."
+                  : `Solde disponible : ${displayedBalance} MKB.`}
+            </Text>
+          </div>
 
           <MetadataList columns={2}>
             <MetadataListItem label="Cote définitive">
@@ -241,14 +258,21 @@ export function BetSlip({
             </MetadataListItem>
           </MetadataList>
 
+          {activeQuote ? (
+            <Text color="secondary" type="supporting">
+              La cote totale et le retour potentiel affichés proviennent
+              uniquement du devis actif.
+            </Text>
+          ) : null}
+
           {activeQuote?.correlationAdjustment ? (
             <Text
               className="text-[var(--color-text-warning)]"
               type="supporting"
             >
-              Combiné corrélé : coefficient{" "}
-              {activeQuote.correlationAdjustment.toFixed(2)} appliqué aux
-              probabilités.
+              PostgreSQL applique la corrélation exacte (coefficient{" "}
+              {activeQuote.correlationAdjustment.toFixed(2)}) : aucune
+              multiplication de cotes n’est calculée côté navigateur.
             </Text>
           ) : null}
           {changedFromOdds !== null && activeQuote ? (

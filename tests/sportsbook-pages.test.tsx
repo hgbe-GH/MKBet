@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import DirectPage from "@/app/(protected)/direct/page";
 import MarketsPage from "@/app/(protected)/markets/page";
+import MarketCalendarPage from "@/app/(protected)/markets/calendar/page";
 import LeaderboardPage from "@/app/(protected)/leaderboard/page";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import {
@@ -156,6 +157,47 @@ describe("sportsbook pages", () => {
     expect(
       screen.queryByText("Données de démonstration"),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Voir le calendrier des marchés" }),
+    ).toHaveAttribute("href", "/markets/calendar");
+  });
+
+  it("renders the market calendar with week controls and closed market dates", async () => {
+    render(
+      await MarketCalendarPage({
+        searchParams: Promise.resolve({
+          week: "2026-07-13",
+          category: "CONTACT",
+          status: "OPEN",
+        }),
+      }),
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Calendrier des marchés" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Semaine précédente.*6 juillet/i }),
+    ).toHaveAttribute(
+      "href",
+      "/markets/calendar?week=2026-07-06&category=CONTACT&status=OPEN",
+    );
+    expect(
+      screen.getByRole("link", { name: /Semaine suivante.*20 juillet/i }),
+    ).toHaveAttribute(
+      "href",
+      "/markets/calendar?week=2026-07-20&category=CONTACT&status=OPEN",
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: /14 juillet 2026/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Ouverture")).toBeVisible();
+    expect(screen.getByText("Fermeture des mises")).toBeVisible();
+    expect(screen.getByText("Échéance du fait")).toBeVisible();
+    expect(screen.getByText("Mises fermées")).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: /Un bisou avant J\+30/i }),
+    ).toHaveAttribute("href", `/markets/${demoMarkets[0].id}`);
   });
 
   it("renders a mobile-friendly podium and ranking list", async () => {

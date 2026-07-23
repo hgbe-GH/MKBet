@@ -5,6 +5,7 @@ import { CategoryTabs } from "@/components/sportsbook/category-tabs";
 import { MarketFilters } from "@/components/sportsbook/market-filters";
 import { MarketGroup } from "@/components/sportsbook/market-group";
 import { listSeasonMarkets } from "@/data/supabase/markets/market-repository";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,15 @@ export default async function MarketsPage({ searchParams }: MarketsPageProps) {
   return (
     <div className="space-y-6">
       <PageHeading
+        action={
+          <Link
+            aria-label="Voir le calendrier des marchés"
+            className="rounded-md px-3 py-2 font-semibold underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            href="/markets/calendar"
+          >
+            Calendrier
+          </Link>
+        }
         description={`Les cotes officielles de ${season.title}. Le devis PostgreSQL reste l’autorité avant confirmation.`}
         eyebrow="Salle privée"
         title="Marchés"

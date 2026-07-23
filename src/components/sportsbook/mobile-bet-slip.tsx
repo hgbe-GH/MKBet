@@ -93,7 +93,6 @@ export function MobileBetSlip({
                 balanceMkb={balanceMkb}
                 onPotentialReturnChange={setPotentialReturnMkb}
                 seasonId={seasonId}
-                surface="opaque"
               />
             </LayoutContent>
           }
