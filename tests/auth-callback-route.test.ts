@@ -6,11 +6,13 @@ const {
   exchangeCodeForSession,
   getClaims,
   initializeAuthenticatedAccess,
+  verifyOtp,
 } = vi.hoisted(() => ({
   createServerSupabaseClient: vi.fn(),
   exchangeCodeForSession: vi.fn(),
   getClaims: vi.fn(),
   initializeAuthenticatedAccess: vi.fn(),
+  verifyOtp: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -30,9 +32,10 @@ describe("GET /auth/callback", () => {
     vi.clearAllMocks();
     consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     createServerSupabaseClient.mockResolvedValue({
-      auth: { exchangeCodeForSession, getClaims },
+      auth: { exchangeCodeForSession, getClaims, verifyOtp },
     });
     exchangeCodeForSession.mockResolvedValue({ error: null });
+    verifyOtp.mockResolvedValue({ error: null });
     getClaims.mockResolvedValue({
       data: { claims: { amr: ["password"] } },
       error: null,
@@ -60,6 +63,28 @@ describe("GET /auth/callback", () => {
       "https://mk-bet.vercel.app/auth/update-password",
     );
     expect(initializeAuthenticatedAccess).not.toHaveBeenCalled();
+  });
+
+  it("accepts a recovery token hash when Supabase sends a token link", async () => {
+    getClaims.mockResolvedValue({
+      data: { claims: { amr: [{ method: "recovery" }] } },
+      error: null,
+    });
+
+    const response = await GET(
+      new NextRequest(
+        "https://mk-bet.vercel.app/auth/callback?token_hash=recovery-token&type=recovery",
+      ),
+    );
+
+    expect(verifyOtp).toHaveBeenCalledWith({
+      token_hash: "recovery-token",
+      type: "recovery",
+    });
+    expect(exchangeCodeForSession).not.toHaveBeenCalled();
+    expect(response.headers.get("location")).toBe(
+      "https://mk-bet.vercel.app/auth/update-password",
+    );
   });
 
   it.each(["", "&intent=forged"])(

@@ -24,19 +24,26 @@ function redirectToAuthError(
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const tokenHash = requestUrl.searchParams.get("token_hash");
+  const tokenType = requestUrl.searchParams.get("type");
   const intent = requestUrl.searchParams.get("intent");
   const next = sanitizeInternalRedirectPath(
     requestUrl.searchParams.get("next"),
   );
 
-  if (!code) {
+  if (!code && !(tokenHash && tokenType === "recovery")) {
     return redirectToAuthError(request, "missing_code");
   }
 
   let supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>;
   try {
     supabase = await createServerSupabaseClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = code
+      ? await supabase.auth.exchangeCodeForSession(code)
+      : await supabase.auth.verifyOtp({
+          token_hash: tokenHash!,
+          type: "recovery",
+        });
 
     if (error) {
       return redirectToAuthError(request, "exchange");
