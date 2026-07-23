@@ -1,9 +1,15 @@
-import Link from "next/link";
+"use client";
+
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@astryxdesign/core/SegmentedControl";
+import { useState } from "react";
 
 import type {
   MarketCategoryFilter,
-  MarketStatusFilter,
   MarketSort,
+  MarketStatusFilter,
 } from "@/fixtures/sportsbook/types";
 
 const categories: Array<{ label: string; value: MarketCategoryFilter }> = [
@@ -28,36 +34,55 @@ export function CategoryTabs({
   sort: MarketSort;
   q: string;
 }) {
-  return (
-    <nav
-      aria-label="Catégories de marchés"
-      className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0"
-    >
-      {categories.map((category) => {
-        const active = category.value === activeCategory;
-        const params = new URLSearchParams();
-        params.set("category", category.value);
-        params.set("status", status);
-        params.set("sort", sort);
-        if (q) {
-          params.set("q", q);
-        }
+  const [selection, setSelection] = useState({
+    activeCategory,
+    serverCategory: activeCategory,
+  });
+  if (selection.serverCategory !== activeCategory) {
+    setSelection({ activeCategory, serverCategory: activeCategory });
+  }
+  const selectedCategory =
+    selection.serverCategory === activeCategory
+      ? selection.activeCategory
+      : activeCategory;
 
-        return (
-          <Link
-            aria-current={active ? "page" : undefined}
-            className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm font-bold ${
-              active
-                ? "border-[var(--brand)] bg-[var(--brand-muted)] text-[var(--brand-hover)]"
-                : "border-[var(--border)] bg-white/[0.06] text-[var(--text-secondary)] hover:bg-white/[0.1] hover:text-white"
-            }`}
-            href={`/markets?${params.toString()}`}
-            key={category.value}
-          >
-            {category.label}
-          </Link>
-        );
-      })}
-    </nav>
+  return (
+    <div
+      aria-label="Catégories de marchés"
+      className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0"
+      role="navigation"
+    >
+      <div className="min-w-max">
+        <SegmentedControl
+          label="Catégories de marchés"
+          onChange={(value) => {
+            const category = categories.some((item) => item.value === value)
+              ? (value as MarketCategoryFilter)
+              : "ALL";
+            setSelection({
+              activeCategory: category,
+              serverCategory: activeCategory,
+            });
+            const params = new URLSearchParams({
+              category,
+              status,
+              sort,
+            });
+            if (q) params.set("q", q);
+            window.location.assign(`/markets?${params.toString()}`);
+          }}
+          size="lg"
+          value={selectedCategory}
+        >
+          {categories.map((category) => (
+            <SegmentedControlItem
+              key={category.value}
+              label={category.label}
+              value={category.value}
+            />
+          ))}
+        </SegmentedControl>
+      </div>
+    </div>
   );
 }

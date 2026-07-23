@@ -73,9 +73,11 @@ describe("transactional bet slip", () => {
     fireEvent.click(screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }));
 
     await waitFor(() => expect(createQuoteMock).toHaveBeenCalledTimes(1));
-    expect(
-      await screen.findByRole("button", { name: "PLACER MON PRONOSTIC" }),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "PLACER MON PRONOSTIC" }),
+      ).toBeEnabled(),
+    );
     expect(
       screen.getByRole("complementary", { name: "Ticket de pari" }),
     ).toHaveAttribute("data-ticket-step", "quote");
@@ -86,9 +88,19 @@ describe("transactional bet slip", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "PLACER MON PRONOSTIC" }),
     );
+    expect(
+      screen.getByRole("alertdialog", { name: "Placer ce pronostic ?" }),
+    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Confirmer le pari" }));
     await waitFor(() => expect(placeBetMock).toHaveBeenCalledTimes(1));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Pronostic enregistré",
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("status")
+          .some((status) =>
+            status.textContent?.includes("Pronostic enregistré"),
+          ),
+      ).toBe(true),
     );
     expect(screen.getByText("0 sélection")).toBeInTheDocument();
     expect(

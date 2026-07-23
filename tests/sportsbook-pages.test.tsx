@@ -150,7 +150,7 @@ describe("sportsbook pages", () => {
       </BetSlipProvider>,
     );
     expect(
-      screen.getByRole("heading", { level: 1, name: "Tableau des cotes" }),
+      screen.getByRole("heading", { level: 1, name: "Marchés" }),
     ).toBeInTheDocument();
     expect(screen.getByDisplayValue("lit")).toBeInTheDocument();
     expect(

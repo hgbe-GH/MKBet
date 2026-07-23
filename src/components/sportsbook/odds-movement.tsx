@@ -1,3 +1,4 @@
+import { Badge } from "@astryxdesign/core/Badge";
 import { ArrowDown, ArrowRight, ArrowUp } from "lucide-react";
 
 import type { OddsMovement as OddsMovementValue } from "@/fixtures/sportsbook/types";
@@ -5,21 +6,27 @@ import type { OddsMovement as OddsMovementValue } from "@/fixtures/sportsbook/ty
 export function OddsMovement({ movement }: { movement: OddsMovementValue }) {
   if (movement === "UP") {
     return (
-      <span className="inline-flex items-center gap-1 text-[var(--positive)]">
-        <ArrowUp aria-hidden="true" className="h-3 w-3" /> En hausse
-      </span>
+      <Badge
+        icon={<ArrowUp aria-hidden="true" className="h-3 w-3" />}
+        label="En hausse"
+        variant="success"
+      />
     );
   }
   if (movement === "DOWN") {
     return (
-      <span className="inline-flex items-center gap-1 text-[var(--negative)]">
-        <ArrowDown aria-hidden="true" className="h-3 w-3" /> En baisse
-      </span>
+      <Badge
+        icon={<ArrowDown aria-hidden="true" className="h-3 w-3" />}
+        label="En baisse"
+        variant="error"
+      />
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[var(--text-muted)]">
-      <ArrowRight aria-hidden="true" className="h-3 w-3" /> Stable
-    </span>
+    <Badge
+      icon={<ArrowRight aria-hidden="true" className="h-3 w-3" />}
+      label="Stable"
+      variant="neutral"
+    />
   );
 }

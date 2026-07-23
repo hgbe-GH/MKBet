@@ -99,34 +99,32 @@ describe("sportsbook UI components", () => {
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Non, cote/i }));
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Une seule issue peut être sélectionnée par marché.",
-    );
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) =>
+          status.textContent?.includes(
+            "Une seule issue peut être sélectionnée par marché.",
+          ),
+        ),
+    ).toBe(true);
 
     const stake = screen.getByLabelText("Mise en MKB");
     fireEvent.change(stake, { target: { value: "3" } });
     expect(screen.getByText("Mise minimale : 5 MKB.")).toBeInTheDocument();
   });
 
-  it("uses one opaque ticket surface inside the position-only mobile wrapper", () => {
-    const { container } = render(
+  it("opens the mobile ticket in an accessible dialog", () => {
+    render(
       <BetSlipProvider>
         <MobileBetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
       </BetSlipProvider>,
     );
 
-    expect(container.firstElementChild).not.toHaveClass("mk-glass-interactive");
-    expect(container.firstElementChild).toHaveClass(
-      "bottom-[max(0.75rem,env(safe-area-inset-bottom))]",
-    );
-    expect(container.firstElementChild).not.toHaveClass(
-      "bottom-[calc(5.5rem+env(safe-area-inset-bottom))]",
-    );
     fireEvent.click(screen.getByRole("button", { name: /^Ouvrir le ticket/ }));
     expect(
-      screen.getByRole("complementary", { name: "Ticket de pari" }),
-    ).toHaveClass("mk-surface-opaque");
-    expect(container.querySelectorAll(".mk-glass-interactive")).toHaveLength(0);
+      screen.getByRole("dialog", { name: "Ticket de pari" }),
+    ).toBeVisible();
   });
 
   it("renders season context, roles and no admin link for regular players", () => {

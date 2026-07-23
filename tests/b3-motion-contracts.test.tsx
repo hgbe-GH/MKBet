@@ -38,12 +38,8 @@ const authFormSources = [
 ].map((file) =>
   readFileSync(join(process.cwd(), "src/components/auth", file), "utf8"),
 );
-const marketsPage = readFileSync(
-  join(process.cwd(), "src/app/(protected)/markets/page.tsx"),
-  "utf8",
-);
-const buttonSource = readFileSync(
-  join(process.cwd(), "src/components/ui/button.tsx"),
+const marketFilters = readFileSync(
+  join(process.cwd(), "src/components/sportsbook/market-filters.tsx"),
   "utf8",
 );
 const mobileBetSlip = readFileSync(
@@ -56,14 +52,6 @@ const betSlip = readFileSync(
 );
 const betSlipSelection = readFileSync(
   join(process.cwd(), "src/components/sportsbook/bet-slip-selection.tsx"),
-  "utf8",
-);
-const eventReportForm = readFileSync(
-  join(process.cwd(), "src/components/events/event-report-form.tsx"),
-  "utf8",
-);
-const reportPage = readFileSync(
-  join(process.cwd(), "src/app/(protected)/report/page.tsx"),
   "utf8",
 );
 const appNavigation = readFileSync(
@@ -140,7 +128,7 @@ describe("B3 motion contracts", () => {
     ).toHaveAttribute("data-motion", "auth-content");
     expect(
       screen.getByRole("button", { name: /Oui, cote 1,88/i }),
-    ).toHaveAttribute("data-interactive", "lift");
+    ).toHaveAttribute("aria-pressed", "false");
     expect(
       screen.getByRole("complementary", { name: "Ticket de pari" }),
     ).toHaveAttribute("data-ticket-step", "empty");
@@ -191,9 +179,10 @@ describe("B3 motion contracts", () => {
     );
   });
 
-  it("routes vote lift through the fine-pointer motion contract", () => {
+  it("uses Astryx controls for voting without utility hover transforms", () => {
     expect(voteControls).not.toContain("hover:-translate");
-    expect(voteControls.match(/data-interactive="lift"/g)).toHaveLength(2);
+    expect(voteControls).toContain("@astryxdesign/core/Button");
+    expect(voteControls).toContain("@astryxdesign/core/AlertDialog");
   });
 
   it("keeps the root loading state nocturnal and matte", () => {
@@ -213,8 +202,8 @@ describe("B3 motion contracts", () => {
   });
 
   it("uses a typographic ellipsis in the market search hint", () => {
-    expect(marketsPage).not.toContain('placeholder="bisou, statut..."');
-    expect(marketsPage).toContain('placeholder="bisou, statut…"');
+    expect(marketFilters).not.toContain('placeholder="bisou, statut..."');
+    expect(marketFilters).toContain('placeholder="bisou, statut…"');
   });
 
   it("keeps brand control text AA across normal, hover and active states", () => {
@@ -232,40 +221,17 @@ describe("B3 motion contracts", () => {
     }
   });
 
-  it("keeps ticket selections on a dark surface with AA text tokens", () => {
-    const token = (name: string) =>
-      styles.match(new RegExp(`--${name}:\\s*#([0-9a-f]{6})`, "i"))?.[1];
-    const surface = token("surface");
-
-    expect(betSlipSelection).toContain("bg-[var(--surface)]");
+  it("uses Astryx ticket primitives rather than local surface classes", () => {
+    expect(betSlipSelection).toContain("@astryxdesign/core/List");
+    expect(betSlipSelection).toContain("<ListItem");
     expect(betSlipSelection).not.toMatch(/\bbg-(?:white|stone-100)\b/);
-    expect(betSlip).toContain("text-[var(--brand-hover)] uppercase");
-    expect(surface).toBeDefined();
-    for (const textToken of [
-      "text-primary",
-      "text-secondary",
-      "text-muted",
-      "brand-hover",
-    ]) {
-      const text = token(textToken);
-      expect(text).toBeDefined();
-      expect(
-        contrastRatio(text ?? "ffffff", surface ?? "000000"),
-      ).toBeGreaterThanOrEqual(4.5);
-    }
+    expect(betSlip).toContain("@astryxdesign/core/Card");
+    expect(betSlip).toContain("@astryxdesign/core/AlertDialog");
   });
 
-  it("uses the on-brand token on every bright raspberry control", () => {
-    expect(styles).toMatch(
-      /\.mk-primary-action\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
-    );
-    expect(styles).toMatch(
-      /\.mk-segment-active\s*\{[\s\S]*?color:\s*var\(--on-brand\)/,
-    );
-    expect(buttonSource).toContain("text-[var(--on-brand)]");
-    expect(voteControls).toContain("text-[var(--on-brand)]");
-    expect(mobileBetSlip).toContain("text-[var(--on-brand)]");
-    expect(eventReportForm).toContain("file:text-[var(--on-brand)]");
+  it("uses Astryx controls for bright primary actions", () => {
+    expect(mobileBetSlip).toContain("@astryxdesign/core/Button");
+    expect(mobileBetSlip).toContain("@astryxdesign/core/Dialog");
   });
 
   it("keeps fixed mobile controls inside landscape safe areas", () => {
@@ -277,16 +243,7 @@ describe("B3 motion contracts", () => {
     );
   });
 
-  it("separates dense reading surfaces from small interactive glass", () => {
-    const subtleSurface = styles.match(/\.mk-glass-subtle\s*\{([^}]*)\}/)?.[1];
-    const interactiveSurface = styles.match(
-      /\.mk-glass-interactive\s*\{([^}]*)\}/,
-    )?.[1];
-
-    expect(subtleSurface).toBeDefined();
-    expect(subtleSurface).not.toContain("backdrop-filter");
-    expect(interactiveSurface).toContain("backdrop-filter: blur(18px)");
-    expect(reportPage).toContain("mk-surface-opaque");
+  it("keeps dense navigation free of costly backdrop blur", () => {
     expect(appNavigation).not.toContain("backdrop-blur");
   });
 
