@@ -202,7 +202,14 @@ describe("sportsbook pages", () => {
     expect(screen.getByText("Fermeture des mises")).toBeVisible();
     expect(screen.getByText("Échéance du fait")).toBeVisible();
     expect(screen.getByText("Mises fermées")).toBeVisible();
-    expect(screen.getAllByText(/UTC/).length).toBeGreaterThan(0);
+    for (const label of [
+      "Ouverture",
+      "Fermeture des mises",
+      "Échéance du fait",
+    ]) {
+      const dateValue = screen.getByText(label).parentElement?.querySelector("dd");
+      expect(dateValue).toHaveTextContent(/UTC$/);
+    }
     expect(
       screen.getByRole("link", { name: /Un bisou avant J\+30/i }),
     ).toHaveAttribute("href", `/markets/${demoMarkets[0].id}`);
