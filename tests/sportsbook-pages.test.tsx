@@ -5,6 +5,7 @@ import DirectPage from "@/app/(protected)/direct/page";
 import MarketsPage from "@/app/(protected)/markets/page";
 import MarketCalendarPage from "@/app/(protected)/markets/calendar/page";
 import LeaderboardPage from "@/app/(protected)/leaderboard/page";
+import { requireSportsbookSeason } from "@/application/sportsbook/require-season";
 import { BetSlipProvider } from "@/components/sportsbook/bet-slip-context";
 import {
   adminSeasonContext,
@@ -198,6 +199,30 @@ describe("sportsbook pages", () => {
     expect(
       screen.getByRole("link", { name: /Un bisou avant J\+30/i }),
     ).toHaveAttribute("href", `/markets/${demoMarkets[0].id}`);
+    expect(requireSportsbookSeason).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(listSeasonMarkets)).toHaveBeenCalledWith(
+      adminSeasonContext.id,
+      { category: "CONTACT", status: "OPEN", sort: "deadline", q: "" },
+    );
+  });
+
+  it("uses close as the only operational date when a calendar market has no deadline", async () => {
+    vi.mocked(listSeasonMarkets).mockResolvedValueOnce([
+      { ...demoMarkets[0], deadlineAt: null },
+    ]);
+
+    render(
+      await MarketCalendarPage({
+        searchParams: Promise.resolve({
+          week: "2026-07-13",
+          category: "CONTACT",
+          status: "OPEN",
+        }),
+      }),
+    );
+
+    expect(screen.getByText("Fermeture des mises")).toBeVisible();
+    expect(screen.queryByText("Échéance du fait")).not.toBeInTheDocument();
   });
 
   it("renders a mobile-friendly podium and ranking list", async () => {

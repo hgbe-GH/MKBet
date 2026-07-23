@@ -20,6 +20,16 @@ vi.mock("@/application/betting/place-bet-action", () => ({
 
 const createQuoteMock = vi.mocked(createBetQuoteAction);
 const placeBetMock = vi.mocked(placeBetAction);
+const thirdOpenMarket = {
+  ...demoMarkets[0],
+  id: "market-third-open",
+  title: "Troisième marché ouvert",
+  outcomes: demoMarkets[0].outcomes.map((outcome) => ({
+    ...outcome,
+    id: `market-third-open-${outcome.code.toLowerCase()}`,
+    marketId: "market-third-open",
+  })),
+};
 
 describe("transactional bet slip", () => {
   beforeEach(() => {
@@ -67,6 +77,7 @@ describe("transactional bet slip", () => {
       </BetSlipProvider>,
     );
     fireEvent.click(screen.getByRole("button", { name: /Oui, cote/i }));
+    expect(screen.getByText("Simple")).toBeVisible();
     expect(
       screen.getByRole("complementary", { name: "Ticket de pari" }),
     ).toHaveAttribute("data-ticket-step", "selection");
@@ -149,6 +160,7 @@ describe("transactional bet slip", () => {
       <BetSlipProvider>
         <MarketCard market={demoMarkets[0]} />
         <MarketCard market={demoMarkets[1]} />
+        <MarketCard market={thirdOpenMarket} />
         <BetSlip balanceMkb={1200} seasonId={demoSeasonContext.id} />
       </BetSlipProvider>,
     );
@@ -167,7 +179,11 @@ describe("transactional bet slip", () => {
       "number",
     );
     expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute("min", "5");
+    expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute("max", "1200");
     expect(screen.getByLabelText("Mise en MKB")).toHaveAttribute("step", "1");
+
+    fireEvent.click(screen.getAllByRole("button", { name: /Oui, cote/i })[2]!);
+    expect(screen.getByText("Combiné 3 sélections")).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "VÉRIFIER LE TICKET" }));
     expect(
